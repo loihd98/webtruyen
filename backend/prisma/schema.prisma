@@ -1,0 +1,217 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum StoryType {
+  TEXT
+  AUDIO
+}
+
+enum StoryStatus {
+  DRAFT
+  PUBLISHED
+  HIDDEN
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String?  // Null for OAuth users
+  name         String
+  avatar       String?
+  role         Role     @default(USER)
+  
+  // OAuth fields
+  googleId     String?  @unique
+  facebookId   String?  @unique
+  
+  // Timestamps
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relations
+  stories      Story[]
+  comments     Comment[]
+  bookmarks    Bookmark[]
+  analytics    Analytics[]
+  unlockedChapters Chapter[] @relation("ChapterUnlocks")
+  
+  @@map("users")
+}
+
+model Genre {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  
+  // Relations
+  stories   Story[]
+  
+  @@map("genres")
+}
+
+model AffiliateLink {
+  id        String   @id @default(cuid())
+  provider  String   // "Google Drive", "Fshare", etc.
+  targetUrl String
+  label     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  stories   Story[]
+  analytics Analytics[]
+  
+  @@map("affiliate_links")
+}
+
+model Story {
+  id           String      @id @default(cuid())
+  slug         String      @unique
+  title        String
+  description  String?
+  thumbnailUrl String?
+  type         StoryType
+  status       StoryStatus @default(PUBLISHED)
+  viewCount    Int         @default(0)
+  
+  // Author relationship
+  authorId     String
+  author       User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  // Affiliate relationship
+  affiliateId  String?
+  affiliate    AffiliateLink? @relation(fields: [affiliateId], references: [id], onDelete: SetNull)
+  
+  // Genres relationship (many-to-many)
+  genres       Genre[]
+  
+  // Timestamps
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  
+  // Relations
+  chapters     Chapter[]
+  bookmarks    Bookmark[]
+  analytics    Analytics[]
+  
+  @@map("stories")
+}
+
+model Chapter {
+  id       String  @id @default(cuid())
+  number   Int
+  title    String
+  content  String? // For text stories
+  audioUrl String? // For audio stories, URL to MP3 file
+  isLocked Boolean @default(false)
+  
+  // Story relationship
+  storyId  String
+  story    Story   @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  
+  // Users who unlocked this chapter
+  unlockedBy User[] @relation("ChapterUnlocks")
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  comments  Comment[]
+  bookmarks Bookmark[]
+  
+  @@unique([storyId, number])
+  @@map("chapters")
+}
+
+model Comment {
+  id         String   @id @default(cuid())
+  content    String
+  isApproved Boolean  @default(false)
+  
+  // User relationship
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Chapter relationship
+  chapterId  String
+  chapter    Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  
+  // Parent comment for threading
+  parentId   String?
+  parent     Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies    Comment[] @relation("CommentReplies")
+  
+  // Timestamps
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  @@map("comments")
+}
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  
+  // User relationship
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Story relationship (optional - can bookmark story or specific chapter)
+  storyId   String?
+  story     Story?   @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  
+  // Chapter relationship (optional)
+  chapterId String?
+  chapter   Chapter? @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, storyId, chapterId])
+  @@map("bookmarks")
+}
+
+model Analytics {
+  id        String   @id @default(cuid())
+  
+  // Event tracking
+  event     String   // "affiliate_click", "page_view", "chapter_unlock"
+  
+  // User (optional, can be anonymous)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  // Story context (optional)
+  storyId   String?
+  story     Story?   @relation(fields: [storyId], references: [id], onDelete: SetNull)
+  
+  // Affiliate context (optional)
+  affiliateId String?
+  affiliate   AffiliateLink? @relation(fields: [affiliateId], references: [id], onDelete: SetNull)
+  
+  // Request metadata
+  ip        String?
+  userAgent String?
+  referer   String?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  
+  @@map("analytics")
+}
