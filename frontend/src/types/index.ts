@@ -2,9 +2,13 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: "USER" | "ADMIN";
+  username?: string;
+  displayName?: string;
+  role: "USER" | "ADMIN" | "PREMIUM";
+  status?: "ACTIVE" | "INACTIVE" | "BANNED";
   avatar?: string;
   createdAt: string;
+  lastLoginAt?: string;
   _count?: {
     bookmarks: number;
     comments: number;

@@ -24,6 +24,7 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     loginStart: (state) => {
+      alert("loginStart");
       state.isLoading = true;
       state.error = null;
     },

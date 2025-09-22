@@ -56,9 +56,13 @@ const LoginPage: React.FC = () => {
 
     try {
       const result = await dispatch(loginUser(formData));
+      console.log(result);
 
-      if (loginUser.fulfilled.match(result)) {
-        router.push("/");
+      if (loginUser.fulfilled.match(result) && result.payload) {
+        // Role-based redirect
+        const user = result.payload.user;
+        const redirectPath = user?.role === 'ADMIN' ? '/admin' : '/';
+        router.push(redirectPath);
       } else {
         setErrors({
           general: (result.payload as string) || "Đăng nhập thất bại",

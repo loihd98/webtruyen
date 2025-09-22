@@ -2,6 +2,19 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { AuthState, User, AuthResponse } from "../../types";
 import { authAPI } from "../../utils/api";
 
+// Helper function for role-based redirect
+export const getRedirectPath = (user: User | null): string => {
+  if (!user) return '/';
+  
+  switch (user.role) {
+    case 'ADMIN':
+      return '/admin';
+    case 'USER':
+    default:
+      return '/';
+  }
+};
+
 // Async thunks
 export const loginUser = createAsyncThunk(
   "auth/login",
@@ -11,6 +24,8 @@ export const loginUser = createAsyncThunk(
   ) => {
     try {
       const response = await authAPI.login(email, password);
+      console.log(response);
+
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || "Login failed");

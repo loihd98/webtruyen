@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { store } from "../store";
 import { setTokenHandlers } from "../utils/api";
 import { clearAuth, refreshToken } from "../store/slices/authSlice";
+import { LanguageProvider } from "../contexts/LanguageContext";
 
 export default function ClientProvider({
   children,
@@ -39,5 +40,11 @@ export default function ClientProvider({
     );
   }, []);
 
-  return <Provider store={store}>{children}</Provider>;
+  return (
+    <Provider store={store}>
+      <LanguageProvider>
+        {children}
+      </LanguageProvider>
+    </Provider>
+  );
 }
