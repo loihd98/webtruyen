@@ -46,7 +46,6 @@ model User {
   stories      Story[]
   comments     Comment[]
   bookmarks    Bookmark[]
-  analytics    Analytics[]
   unlockedChapters Chapter[] @relation("ChapterUnlocks")
   
   @@map("users")
@@ -75,7 +74,6 @@ model AffiliateLink {
   
   // Relations
   stories   Story[]
-  analytics Analytics[]
   
   @@map("affiliate_links")
 }
@@ -108,7 +106,6 @@ model Story {
   // Relations
   chapters     Chapter[]
   bookmarks    Bookmark[]
-  analytics    Analytics[]
   
   @@map("stories")
 }
@@ -185,33 +182,4 @@ model Bookmark {
   
   @@unique([userId, storyId, chapterId])
   @@map("bookmarks")
-}
-
-model Analytics {
-  id        String   @id @default(cuid())
-  
-  // Event tracking
-  event     String   // "affiliate_click", "page_view", "chapter_unlock"
-  
-  // User (optional, can be anonymous)
-  userId    String?
-  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  
-  // Story context (optional)
-  storyId   String?
-  story     Story?   @relation(fields: [storyId], references: [id], onDelete: SetNull)
-  
-  // Affiliate context (optional)
-  affiliateId String?
-  affiliate   AffiliateLink? @relation(fields: [affiliateId], references: [id], onDelete: SetNull)
-  
-  // Request metadata
-  ip        String?
-  userAgent String?
-  referer   String?
-  
-  // Timestamps
-  createdAt DateTime @default(now())
-  
-  @@map("analytics")
 }

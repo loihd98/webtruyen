@@ -1023,6 +1023,299 @@ class AdminController {
       });
     }
   }
+
+  // Sample data creation for development
+  async createSampleData(req, res) {
+    try {
+      // Create sample genres
+      const genres = await Promise.all([
+        prisma.genre.upsert({
+          where: { slug: "tien-hiep" },
+          update: {},
+          create: {
+            name: "Tiên Hiệp",
+            slug: "tien-hiep",
+          },
+        }),
+        prisma.genre.upsert({
+          where: { slug: "huyen-huyen" },
+          update: {},
+          create: {
+            name: "Huyền Huyễn",
+            slug: "huyen-huyen",
+          },
+        }),
+        prisma.genre.upsert({
+          where: { slug: "do-thi" },
+          update: {},
+          create: {
+            name: "Đô Thị",
+            slug: "do-thi",
+          },
+        }),
+        prisma.genre.upsert({
+          where: { slug: "ngon-tinh" },
+          update: {},
+          create: {
+            name: "Ngôn Tình",
+            slug: "ngon-tinh",
+          },
+        }),
+      ]);
+
+      // Sample stories data
+      const sampleStories = [
+        {
+          title: "Đấu Phá Thương Khung",
+          slug: "dau-pha-thuong-khung",
+          description: "Đây là một thế giới thuộc về Đấu Khí, không hề có ma pháp hoa tiếu diệm lệ, chỉ có đấu khí cương mãnh phồn thịnh! Tại đây, muốn trở thành nhà cường giả hơn người, phải tu luyện...",
+          thumbnailUrl: "https://img.dtruyen.com/uploads/images/dau-pha-thuong-khung.jpg",
+          type: "TEXT",
+          status: "PUBLISHED",
+          viewCount: 15420,
+          genres: [0, 1], // Will be replaced with actual IDs
+        },
+        {
+          title: "Tu La Võ Thần",
+          slug: "tu-la-vo-than",
+          description: "Tiếc thay thiên địa chi gian tu la chi đạo, nhị thập niên tiền nhất trường đại chiến, tu la môn diệt, từ đó thần châu đại địa tái vô tu la...",
+          thumbnailUrl: "https://img.dtruyen.com/uploads/images/tu-la-vo-than.jpg",
+          type: "AUDIO",
+          status: "PUBLISHED",
+          viewCount: 8930,
+          genres: [0],
+        },
+        {
+          title: "Ngạo Thế Cửu Trùng Thiên",
+          slug: "ngao-the-cuu-trung-thien",
+          description: "Cười ngạo giang hồ, ai địch được ta? Thiên địa vô cực, ta tâm vô biên! Tỷ kiếm tại tay, vấn thiên hạ anh hùng ai là địch thủ?",
+          thumbnailUrl: "https://img.dtruyen.com/uploads/images/ngao-the-cuu-trung-thien.jpg",
+          type: "TEXT",
+          status: "PUBLISHED",
+          viewCount: 12560,
+          genres: [0, 1],
+        },
+        {
+          title: "Thần Y Độc Phi",
+          slug: "than-y-doc-phi",
+          description: "Cô là thiên tài y học của thế kỷ 21, nhất đại độc nữ vương, một khi xuyên qua trở thành tướng phủ cô nữ...",
+          thumbnailUrl: "https://img.dtruyen.com/uploads/images/than-y-doc-phi.jpg",
+          type: "TEXT",
+          status: "PUBLISHED",
+          viewCount: 9870,
+          genres: [3],
+        },
+        {
+          title: "Audio: Bách Luyện Thành Thần",
+          slug: "audio-bach-luyen-thanh-than",
+          description: "Thiếu niên mang theo lò luyện đan dược cổ xưa và tiểu long nữ bé bỏng phiêu lưu đại lục. Bách luyện thành thần, bách chiến thành vương!",
+          thumbnailUrl: "https://img.dtruyen.com/uploads/images/bach-luyen-thanh-than.jpg",
+          type: "AUDIO",
+          status: "PUBLISHED",
+          viewCount: 11230,
+          genres: [0, 1],
+        },
+      ];
+
+      // Create sample user/author
+      const sampleAuthor = await prisma.user.upsert({
+        where: { email: "author@example.com" },
+        update: {},
+        create: {
+          email: "author@example.com",
+          name: "Tác Giả Mẫu",
+          password: "$2b$12$dummy.hash.for.sample.author",
+          role: "USER",
+        },
+      });
+
+      // Create stories
+      const createdStories = [];
+      for (const storyData of sampleStories) {
+        const story = await prisma.story.upsert({
+          where: { slug: storyData.slug },
+          update: {
+            title: storyData.title,
+            description: storyData.description,
+            thumbnailUrl: storyData.thumbnailUrl,
+            viewCount: storyData.viewCount,
+          },
+          create: {
+            title: storyData.title,
+            slug: storyData.slug,
+            description: storyData.description,
+            thumbnailUrl: storyData.thumbnailUrl,
+            type: storyData.type,
+            status: storyData.status,
+            viewCount: storyData.viewCount,
+            authorId: sampleAuthor.id,
+          },
+        });
+
+        // Connect genres
+        await prisma.story.update({
+          where: { id: story.id },
+          data: {
+            genres: {
+              connect: storyData.genres.map(index => ({ id: genres[index].id })),
+            },
+          },
+        });
+
+        createdStories.push(story);
+      }
+
+      // Create sample chapters for each story
+      for (const story of createdStories) {
+        const chapterCount = Math.floor(Math.random() * 20) + 5;
+        
+        for (let i = 1; i <= chapterCount; i++) {
+          const chapterData = {
+            number: i,
+            title: `Chương ${i}: ${this.generateChapterTitle()}`,
+            storyId: story.id,
+            isLocked: i > 3,
+          };
+
+          if (story.type === "TEXT") {
+            chapterData.content = this.generateSampleTextContent(story.title, i);
+          } else if (story.type === "AUDIO") {
+            chapterData.audioUrl = `https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3`;
+            chapterData.content = this.generateSampleTextContent(story.title, i);
+          }
+
+          await prisma.chapter.upsert({
+            where: {
+              storyId_number: {
+                storyId: story.id,
+                number: i,
+              },
+            },
+            update: chapterData,
+            create: chapterData,
+          });
+        }
+      }
+
+      res.json({
+        message: "Đã tạo dữ liệu mẫu thành công",
+        data: {
+          genres: genres.length,
+          stories: createdStories.length,
+          chaptersPerStory: "5-25 chương",
+        },
+      });
+    } catch (error) {
+      console.error("Create sample data error:", error);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Có lỗi xảy ra khi tạo dữ liệu mẫu",
+      });
+    }
+  }
+
+  generateChapterTitle() {
+    const titles = [
+      "Khởi đầu hành trình",
+      "Gặp gỡ sư phụ",
+      "Bước đầu tu luyện", 
+      "Thử thách đầu tiên",
+      "Đột phá cảnh giới",
+      "Gặp gỡ người bạn",
+      "Kẻ thù xuất hiện",
+      "Cuộc chiến sinh tử",
+      "Nhận được bảo vật",
+      "Phát hiện bí mật",
+      "Rời khỏi quê hương",
+      "Bước vào tông môn",
+      "Thi đấu nội môn",
+      "Nhiệm vụ khó khăn",
+      "Nguy hiểm rình rập",
+      "Cứu người trong nguy",
+      "Báo thù ân oán",
+      "Tình duyên đầu đời",
+      "Chia ly đau khổ",
+      "Trở về mạnh mẽ",
+    ];
+    return titles[Math.floor(Math.random() * titles.length)];
+  }
+
+  generateSampleTextContent(storyTitle, chapterNumber) {
+    const sampleParagraphs = [
+      "Trời đang dần tối, mây đen giăng phủ khắp bầu trời. Gió lạnh thổi qua, mang theo hương vị của một cơn mưa sắp đến.",
+      "Trong căn phòng nhỏ, ánh sáng đèn dầu le lói tạo ra những bóng đen dài trên tường. Không khí tĩnh lặng đến kỳ lạ.",
+      "Tiếng bước chân vang vọng trong hành lang dài, từng bước một, chậm rãi và đều đặn. Ai đó đang tiến đến gần.",
+      "Anh ta ngước nhìn lên bầu trời đầy sao, trong lòng dâng lên biết bao cảm xúc. Quá khứ như ùa về trong từng kỷ niệm.",
+      "Cô gái trẻ đứng bên cửa sổ, mắt nhìn ra xa xăm. Ngoài kia, thành phố đang dần thức giấc trong ánh bình minh.",
+      "Trong khu rừng sâu, tiếng lá khô xào xạc dưới chân. Những tia nắng le lói xuyên qua tán lá tạo nên khung cảnh huyền ảo.",
+      "Căn phòng rộng lớn với những giá sách cao vút. Mùi giấy cũ và mực khô tạo nên một không gian yên bình, thích hợp cho việc đọc sách.",
+      "Tiếng chuông từ xa vang lên, báo hiệu một ngày mới bắt đầu. Cuộc sống lại tiếp tục với những kỳ vọng và hy vọng mới.",
+    ];
+
+    const content = [];
+    const paragraphCount = Math.floor(Math.random() * 8) + 5;
+    
+    for (let i = 0; i < paragraphCount; i++) {
+      content.push(sampleParagraphs[Math.floor(Math.random() * sampleParagraphs.length)]);
+    }
+
+    return `# ${storyTitle} - Chương ${chapterNumber}\n\n${content.join('\n\n')}\n\n*Tiếp tục đọc để khám phá những diễn biến hấp dẫn tiếp theo...*`;
+  }
+
+  async getAnalytics(req, res) {
+    try {
+      const { period = '7d' } = req.query;
+      
+      let dateFilter;
+      switch (period) {
+        case '1d':
+          dateFilter = new Date(Date.now() - 24 * 60 * 60 * 1000);
+          break;
+        case '7d':
+          dateFilter = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+          break;
+        case '30d':
+          dateFilter = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+          break;
+        default:
+          dateFilter = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      }
+
+      const [userGrowth, storyGrowth, topStories, recentComments] = await Promise.all([
+        prisma.user.count({ where: { createdAt: { gte: dateFilter } } }),
+        prisma.story.count({ where: { createdAt: { gte: dateFilter } } }),
+        prisma.story.findMany({
+          take: 10,
+          orderBy: { viewCount: 'desc' },
+          include: {
+            author: { select: { name: true } },
+            _count: { select: { chapters: true, bookmarks: true } }
+          }
+        }),
+        prisma.comment.count({ where: { createdAt: { gte: dateFilter } } }),
+      ]);
+
+      res.json({
+        period,
+        data: {
+          growth: { users: userGrowth, stories: storyGrowth, comments: recentComments },
+          topStories,
+          systemHealth: {
+            totalStorage: '2.5GB',
+            activeUsers: await prisma.user.count({ where: { role: 'USER' } }),
+            serverUptime: '99.9%',
+            responseTime: '150ms'
+          }
+        }
+      });
+    } catch (error) {
+      console.error("Get analytics error:", error);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Có lỗi xảy ra khi lấy dữ liệu phân tích",
+      });
+    }
+  }
 }
 
 module.exports = new AdminController();

@@ -41,4 +41,8 @@ router.post("/affiliate-links", adminController.createAffiliateLink);
 router.patch("/affiliate-links/:id", adminController.updateAffiliateLink);
 router.delete("/affiliate-links/:id", adminController.deleteAffiliateLink);
 
+// Sample data and analytics
+router.post("/sample-data", adminController.createSampleData);
+router.get("/analytics", adminController.getAnalytics);
+
 module.exports = router;
