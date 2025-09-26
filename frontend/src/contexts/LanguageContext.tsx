@@ -186,13 +186,17 @@ const translations: Record<Language, TranslationKeys> = {
     "admin.settings.site_description": "Mô tả website",
     "admin.settings.contact_email": "Email liên hệ",
     "admin.settings.enable_registration": "Cho phép đăng ký",
-    "admin.settings.enable_registration_desc": "Người dùng có thể tạo tài khoản mới",
+    "admin.settings.enable_registration_desc":
+      "Người dùng có thể tạo tài khoản mới",
     "admin.settings.enable_comments": "Cho phép bình luận",
-    "admin.settings.enable_comments_desc": "Người dùng có thể bình luận trên truyện",
+    "admin.settings.enable_comments_desc":
+      "Người dùng có thể bình luận trên truyện",
     "admin.settings.enable_bookmarks": "Cho phép đánh dấu",
-    "admin.settings.enable_bookmarks_desc": "Người dùng có thể đánh dấu truyện yêu thích",
+    "admin.settings.enable_bookmarks_desc":
+      "Người dùng có thể đánh dấu truyện yêu thích",
     "admin.settings.maintenance_mode": "Chế độ bảo trì",
-    "admin.settings.maintenance_mode_desc": "Website sẽ hiển thị trang bảo trì cho người dùng",
+    "admin.settings.maintenance_mode_desc":
+      "Website sẽ hiển thị trang bảo trì cho người dùng",
     "admin.settings.meta_title": "Tiêu đề meta",
     "admin.settings.meta_description": "Mô tả meta",
     "admin.settings.keywords": "Từ khóa SEO",

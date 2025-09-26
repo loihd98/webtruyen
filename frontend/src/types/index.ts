@@ -275,7 +275,7 @@ export interface UnlockState {
 
 export interface UIState {
   sidebarOpen: boolean;
-  theme: "light" | "dark";
+  theme: "light" | "dark" | undefined;
   audioPlayerOpen: boolean;
   currentAudio?: {
     chapterId: string;

@@ -14,11 +14,20 @@ interface UserStats {
 const AdminUserManager: React.FC = () => {
   const { t } = useLanguage();
   const [users, setUsers] = useState<User[]>([]);
-  const [stats, setStats] = useState<UserStats>({ totalUsers: 0, activeUsers: 0, newUsers: 0, premiumUsers: 0 });
+  const [stats, setStats] = useState<UserStats>({
+    totalUsers: 0,
+    activeUsers: 0,
+    newUsers: 0,
+    premiumUsers: 0,
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterRole, setFilterRole] = useState<"ALL" | "USER" | "PREMIUM" | "ADMIN">("ALL");
-  const [filterStatus, setFilterStatus] = useState<"ALL" | "ACTIVE" | "INACTIVE" | "BANNED">("ALL");
+  const [filterRole, setFilterRole] = useState<
+    "ALL" | "USER" | "PREMIUM" | "ADMIN"
+  >("ALL");
+  const [filterStatus, setFilterStatus] = useState<
+    "ALL" | "ACTIVE" | "INACTIVE" | "BANNED"
+  >("ALL");
   const [showUserModal, setShowUserModal] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
@@ -48,8 +57,8 @@ const AdminUserManager: React.FC = () => {
               stories: 5,
               bookmarks: 23,
               comments: 45,
-              unlockedChapters: 0
-            }
+              unlockedChapters: 0,
+            },
           },
           {
             id: "2",
@@ -66,8 +75,8 @@ const AdminUserManager: React.FC = () => {
               stories: 0,
               bookmarks: 156,
               comments: 89,
-              unlockedChapters: 25
-            }
+              unlockedChapters: 25,
+            },
           },
           {
             id: "3",
@@ -84,8 +93,8 @@ const AdminUserManager: React.FC = () => {
               stories: 0,
               bookmarks: 12,
               comments: 5,
-              unlockedChapters: 2
-            }
+              unlockedChapters: 2,
+            },
           },
           {
             id: "4",
@@ -101,8 +110,8 @@ const AdminUserManager: React.FC = () => {
               stories: 0,
               bookmarks: 3,
               comments: 1,
-              unlockedChapters: 0
-            }
+              unlockedChapters: 0,
+            },
           },
           {
             id: "5",
@@ -118,9 +127,9 @@ const AdminUserManager: React.FC = () => {
               stories: 0,
               bookmarks: 0,
               comments: 0,
-              unlockedChapters: 0
-            }
-          }
+              unlockedChapters: 0,
+            },
+          },
         ];
         setUsers(mockUsers);
         setIsLoading(false);
@@ -137,48 +146,73 @@ const AdminUserManager: React.FC = () => {
       totalUsers: 12567,
       activeUsers: 8934,
       newUsers: 234,
-      premiumUsers: 1456
+      premiumUsers: 1456,
     });
   };
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = (user.username || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (user.displayName && user.displayName.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredUsers = users.filter((user) => {
+    const matchesSearch =
+      (user.username || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (user.displayName &&
+        user.displayName.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesRole = filterRole === "ALL" || user.role === filterRole;
-    const matchesStatus = filterStatus === "ALL" || user.status === filterStatus;
-    
+    const matchesStatus =
+      filterStatus === "ALL" || user.status === filterStatus;
+
     return matchesSearch && matchesRole && matchesStatus;
   });
 
-  const handleStatusChange = async (userId: string, newStatus: "ACTIVE" | "INACTIVE" | "BANNED") => {
-    setUsers(prev => prev.map(user => 
-      user.id === userId ? { ...user, status: newStatus } : user
-    ));
+  const handleStatusChange = async (
+    userId: string,
+    newStatus: "ACTIVE" | "INACTIVE" | "BANNED"
+  ) => {
+    setUsers((prev) =>
+      prev.map((user) =>
+        user.id === userId ? { ...user, status: newStatus } : user
+      )
+    );
   };
 
-  const handleRoleChange = async (userId: string, newRole: "USER" | "PREMIUM" | "ADMIN") => {
-    setUsers(prev => prev.map(user => 
-      user.id === userId ? { ...user, role: newRole } : user
-    ));
+  const handleRoleChange = async (
+    userId: string,
+    newRole: "USER" | "PREMIUM" | "ADMIN"
+  ) => {
+    setUsers((prev) =>
+      prev.map((user) =>
+        user.id === userId ? { ...user, role: newRole } : user
+      )
+    );
   };
 
   const handleDeleteUser = async (userId: string) => {
     if (window.confirm(t("admin.users.confirm_delete"))) {
-      setUsers(prev => prev.filter(user => user.id !== userId));
+      setUsers((prev) => prev.filter((user) => user.id !== userId));
     }
   };
 
   const getRoleBadge = (role: string) => {
     const roleConfig = {
-      ADMIN: { color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200", text: "👑 " + t("admin.users.role_admin") },
-      PREMIUM: { color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200", text: "⭐ " + t("admin.users.role_premium") },
-      USER: { color: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200", text: "👤 " + t("admin.users.role_user") },
+      ADMIN: {
+        color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+        text: "👑 " + t("admin.users.role_admin"),
+      },
+      PREMIUM: {
+        color:
+          "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+        text: "⭐ " + t("admin.users.role_premium"),
+      },
+      USER: {
+        color: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200",
+        text: "👤 " + t("admin.users.role_user"),
+      },
     };
-    
+
     const config = roleConfig[role as keyof typeof roleConfig];
     return (
-      <span className={`px-2 py-1 text-xs font-medium rounded-full ${config.color}`}>
+      <span
+        className={`px-2 py-1 text-xs font-medium rounded-full ${config.color}`}
+      >
         {config.text}
       </span>
     );
@@ -186,14 +220,27 @@ const AdminUserManager: React.FC = () => {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      ACTIVE: { color: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200", text: "🟢 " + t("admin.users.status_active") },
-      INACTIVE: { color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200", text: "⏸️ " + t("admin.users.status_inactive") },
-      BANNED: { color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200", text: "🚫 " + t("admin.users.status_banned") },
+      ACTIVE: {
+        color:
+          "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+        text: "🟢 " + t("admin.users.status_active"),
+      },
+      INACTIVE: {
+        color:
+          "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+        text: "⏸️ " + t("admin.users.status_inactive"),
+      },
+      BANNED: {
+        color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+        text: "🚫 " + t("admin.users.status_banned"),
+      },
     };
-    
+
     const config = statusConfig[status as keyof typeof statusConfig];
     return (
-      <span className={`px-2 py-1 text-xs font-medium rounded-full ${config.color}`}>
+      <span
+        className={`px-2 py-1 text-xs font-medium rounded-full ${config.color}`}
+      >
         {config.text}
       </span>
     );
@@ -204,7 +251,10 @@ const AdminUserManager: React.FC = () => {
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <div
+              key={i}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+            >
               <div className="animate-pulse">
                 <div className="h-8 bg-gray-300 dark:bg-gray-600 rounded w-3/4 mb-2"></div>
                 <div className="h-6 bg-gray-300 dark:bg-gray-600 rounded w-1/2"></div>
@@ -217,7 +267,10 @@ const AdminUserManager: React.FC = () => {
             <div className="h-8 bg-gray-300 dark:bg-gray-600 rounded w-1/4"></div>
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="h-16 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                <div
+                  key={i}
+                  className="h-16 bg-gray-300 dark:bg-gray-600 rounded"
+                ></div>
               ))}
             </div>
           </div>
@@ -234,8 +287,12 @@ const AdminUserManager: React.FC = () => {
           <div className="flex items-center">
             <div className="text-3xl mr-4">👥</div>
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t("admin.users.total_users")}</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalUsers.toLocaleString()}</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                {t("admin.users.total_users")}
+              </p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {stats.totalUsers.toLocaleString()}
+              </p>
             </div>
           </div>
         </div>
@@ -244,8 +301,12 @@ const AdminUserManager: React.FC = () => {
           <div className="flex items-center">
             <div className="text-3xl mr-4">🟢</div>
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t("admin.users.active_users")}</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.activeUsers.toLocaleString()}</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                {t("admin.users.active_users")}
+              </p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {stats.activeUsers.toLocaleString()}
+              </p>
             </div>
           </div>
         </div>
@@ -254,8 +315,12 @@ const AdminUserManager: React.FC = () => {
           <div className="flex items-center">
             <div className="text-3xl mr-4">🆕</div>
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t("admin.users.new_users")}</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.newUsers.toLocaleString()}</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                {t("admin.users.new_users")}
+              </p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {stats.newUsers.toLocaleString()}
+              </p>
             </div>
           </div>
         </div>
@@ -264,8 +329,12 @@ const AdminUserManager: React.FC = () => {
           <div className="flex items-center">
             <div className="text-3xl mr-4">⭐</div>
             <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t("admin.users.premium_users")}</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.premiumUsers.toLocaleString()}</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                {t("admin.users.premium_users")}
+              </p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {stats.premiumUsers.toLocaleString()}
+              </p>
             </div>
           </div>
         </div>
@@ -302,7 +371,7 @@ const AdminUserManager: React.FC = () => {
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {t("admin.users.role")}
@@ -330,7 +399,9 @@ const AdminUserManager: React.FC = () => {
               >
                 <option value="ALL">{t("admin.users.all_statuses")}</option>
                 <option value="ACTIVE">{t("admin.users.status_active")}</option>
-                <option value="INACTIVE">{t("admin.users.status_inactive")}</option>
+                <option value="INACTIVE">
+                  {t("admin.users.status_inactive")}
+                </option>
                 <option value="BANNED">{t("admin.users.status_banned")}</option>
               </select>
             </div>
@@ -375,11 +446,19 @@ const AdminUserManager: React.FC = () => {
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                <tr
+                  key={user.id}
+                  className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <img
-                        src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username || user.name)}&background=random`}
+                        src={
+                          user.avatar ||
+                          `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                            user.username || user.name
+                          )}&background=random`
+                        }
                         alt={user.username || user.name}
                         className="h-10 w-10 rounded-full object-cover"
                       />
@@ -397,7 +476,9 @@ const AdminUserManager: React.FC = () => {
                     {getRoleBadge(user.role)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {user.status ? getStatusBadge(user.status) : (
+                    {user.status ? (
+                      getStatusBadge(user.status)
+                    ) : (
                       <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200">
                         Unknown
                       </span>
@@ -405,9 +486,13 @@ const AdminUserManager: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                     <div className="space-y-1">
-                      <div>📅 {new Date(user.createdAt).toLocaleDateString()}</div>
+                      <div>
+                        📅 {new Date(user.createdAt).toLocaleDateString()}
+                      </div>
                       {user.lastLoginAt && (
-                        <div>🕐 {new Date(user.lastLoginAt).toLocaleDateString()}</div>
+                        <div>
+                          🕐 {new Date(user.lastLoginAt).toLocaleDateString()}
+                        </div>
                       )}
                     </div>
                   </td>
@@ -428,7 +513,12 @@ const AdminUserManager: React.FC = () => {
                       </button>
                       <select
                         value={user.status || "ACTIVE"}
-                        onChange={(e) => handleStatusChange(user.id, e.target.value as "ACTIVE" | "INACTIVE" | "BANNED")}
+                        onChange={(e) =>
+                          handleStatusChange(
+                            user.id,
+                            e.target.value as "ACTIVE" | "INACTIVE" | "BANNED"
+                          )
+                        }
                         className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white"
                       >
                         <option value="ACTIVE">Active</option>
@@ -453,7 +543,9 @@ const AdminUserManager: React.FC = () => {
           <div className="text-center py-12">
             <div className="text-gray-400 text-4xl mb-4">👥</div>
             <p className="text-gray-500 dark:text-gray-400">
-              {searchTerm ? t("admin.users.no_results") : t("admin.users.no_users")}
+              {searchTerm
+                ? t("admin.users.no_results")
+                : t("admin.users.no_users")}
             </p>
           </div>
         )}

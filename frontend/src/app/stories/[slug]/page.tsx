@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { notFound } from 'next/navigation';
+import React from "react";
+import { notFound } from "next/navigation";
 
 interface StoryPageProps {
   params: {
@@ -19,7 +19,7 @@ export default function StoryPage({ params }: StoryPageProps) {
         <div className="max-w-4xl mx-auto">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              {slug.replace(/-/g, ' ')}
+              {slug.replace(/-/g, " ")}
             </h1>
             <div className="mt-6 text-gray-700 dark:text-gray-300">
               <p>Story details and chapters will be loaded here...</p>

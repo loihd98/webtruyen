@@ -25,41 +25,95 @@ const EnhancedStoriesClient: React.FC<EnhancedStoriesClientProps> = ({
   const { t } = useLanguage();
   const router = useRouter();
   const urlSearchParams = useSearchParams();
-  
+
   // State
   const [stories, setStories] = useState<Story[]>(initialStories);
   const [pagination, setPagination] = useState(initialPagination);
   const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  
+
   // Filter states
-  const [searchQuery, setSearchQuery] = useState((searchParams.search as string) || "");
+  const [searchQuery, setSearchQuery] = useState(
+    (searchParams.search as string) || ""
+  );
   const [selectedType, setSelectedType] = useState<"TEXT" | "AUDIO" | "">(
     (searchParams.type as "TEXT" | "AUDIO") || ""
   );
   const [selectedGenres, setSelectedGenres] = useState<string[]>(
     searchParams.genres ? (searchParams.genres as string).split(",") : []
   );
-  const [selectedStatus, setSelectedStatus] = useState<"PUBLISHED" | "DRAFT" | "">(
-    (searchParams.status as "PUBLISHED" | "DRAFT") || ""
-  );
-  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "popular" | "title" | "views">(
-    (searchParams.sort as any) || "newest"
-  );
+  const [selectedStatus, setSelectedStatus] = useState<
+    "PUBLISHED" | "DRAFT" | ""
+  >((searchParams.status as "PUBLISHED" | "DRAFT") || "");
+  const [sortBy, setSortBy] = useState<
+    "newest" | "oldest" | "popular" | "title" | "views"
+  >((searchParams.sort as any) || "newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [minChapters, setMinChapters] = useState<string>(searchParams.minChapters as string || "");
-  const [authorSearch, setAuthorSearch] = useState<string>(searchParams.author as string || "");
+  const [minChapters, setMinChapters] = useState<string>(
+    (searchParams.minChapters as string) || ""
+  );
+  const [authorSearch, setAuthorSearch] = useState<string>(
+    (searchParams.author as string) || ""
+  );
 
   // Mock genres data - replace with actual API call
   const [genres] = useState<Genre[]>([
-    { id: "1", name: "Tu Tiên", slug: "tu-tien", createdAt: "", _count: { stories: 234 } },
-    { id: "2", name: "Kiếm Hiệp", slug: "kiem-hiep", createdAt: "", _count: { stories: 189 } },
-    { id: "3", name: "Đô Thị", slug: "do-thi", createdAt: "", _count: { stories: 156 } },
-    { id: "4", name: "Huyền Huyễn", slug: "huyen-huyen", createdAt: "", _count: { stories: 298 } },
-    { id: "5", name: "Dị Giới", slug: "di-gioi", createdAt: "", _count: { stories: 167 } },
-    { id: "6", name: "Khoa Huyễn", slug: "khoa-huyen", createdAt: "", _count: { stories: 89 } },
-    { id: "7", name: "Võng Du", slug: "vong-du", createdAt: "", _count: { stories: 123 } },
-    { id: "8", name: "Lịch Sử", slug: "lich-su", createdAt: "", _count: { stories: 78 } },
+    {
+      id: "1",
+      name: "Tu Tiên",
+      slug: "tu-tien",
+      createdAt: "",
+      _count: { stories: 234 },
+    },
+    {
+      id: "2",
+      name: "Kiếm Hiệp",
+      slug: "kiem-hiep",
+      createdAt: "",
+      _count: { stories: 189 },
+    },
+    {
+      id: "3",
+      name: "Đô Thị",
+      slug: "do-thi",
+      createdAt: "",
+      _count: { stories: 156 },
+    },
+    {
+      id: "4",
+      name: "Huyền Huyễn",
+      slug: "huyen-huyen",
+      createdAt: "",
+      _count: { stories: 298 },
+    },
+    {
+      id: "5",
+      name: "Dị Giới",
+      slug: "di-gioi",
+      createdAt: "",
+      _count: { stories: 167 },
+    },
+    {
+      id: "6",
+      name: "Khoa Huyễn",
+      slug: "khoa-huyen",
+      createdAt: "",
+      _count: { stories: 89 },
+    },
+    {
+      id: "7",
+      name: "Võng Du",
+      slug: "vong-du",
+      createdAt: "",
+      _count: { stories: 123 },
+    },
+    {
+      id: "8",
+      name: "Lịch Sử",
+      slug: "lich-su",
+      createdAt: "",
+      _count: { stories: 78 },
+    },
   ]);
 
   const currentPage = Number(searchParams.page) || 1;
@@ -72,19 +126,28 @@ const EnhancedStoriesClient: React.FC<EnhancedStoriesClientProps> = ({
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, selectedType, selectedGenres, selectedStatus, sortBy, minChapters, authorSearch]);
+  }, [
+    searchQuery,
+    selectedType,
+    selectedGenres,
+    selectedStatus,
+    sortBy,
+    minChapters,
+    authorSearch,
+  ]);
 
   const handleFilterChange = () => {
     const params = new URLSearchParams();
-    
+
     if (searchQuery.trim()) params.set("search", searchQuery.trim());
     if (selectedType) params.set("type", selectedType);
-    if (selectedGenres.length > 0) params.set("genres", selectedGenres.join(","));
+    if (selectedGenres.length > 0)
+      params.set("genres", selectedGenres.join(","));
     if (selectedStatus) params.set("status", selectedStatus);
     if (sortBy !== "newest") params.set("sort", sortBy);
     if (minChapters) params.set("minChapters", minChapters);
     if (authorSearch.trim()) params.set("author", authorSearch.trim());
-    
+
     params.set("page", "1");
 
     const queryString = params.toString();
@@ -92,9 +155,9 @@ const EnhancedStoriesClient: React.FC<EnhancedStoriesClientProps> = ({
   };
 
   const handleGenreToggle = (genreSlug: string) => {
-    setSelectedGenres(prev => 
+    setSelectedGenres((prev) =>
       prev.includes(genreSlug)
-        ? prev.filter(g => g !== genreSlug)
+        ? prev.filter((g) => g !== genreSlug)
         : [...prev, genreSlug]
     );
   };
@@ -138,10 +201,12 @@ const EnhancedStoriesClient: React.FC<EnhancedStoriesClientProps> = ({
               {t("stories.title")}
             </h2>
             <p className="text-gray-600 dark:text-gray-400">
-              {t("stories.total_found")}: <span className="font-semibold">{pagination.total}</span> {t("stories.stories")}
+              {t("stories.total_found")}:{" "}
+              <span className="font-semibold">{pagination.total}</span>{" "}
+              {t("stories.stories")}
             </p>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             {/* View Mode Toggle */}
             <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
@@ -153,7 +218,11 @@ const EnhancedStoriesClient: React.FC<EnhancedStoriesClientProps> = ({
                     : "text-gray-500 dark:text-gray-400"
                 }`}
               >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <svg
+                  className="w-5 h-5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
                   <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                 </svg>
               </button>
@@ -165,8 +234,16 @@ const EnhancedStoriesClient: React.FC<EnhancedStoriesClientProps> = ({
                     : "text-gray-500 dark:text-gray-400"
                 }`}
               >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+                <svg
+                  className="w-5 h-5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                    clipRule="evenodd"
+                  />
                 </svg>
               </button>
             </div>
@@ -177,7 +254,11 @@ const EnhancedStoriesClient: React.FC<EnhancedStoriesClientProps> = ({
               className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
+                <path
+                  fillRule="evenodd"
+                  d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z"
+                  clipRule="evenodd"
+                />
               </svg>
               <span>{t("stories.filters")}</span>
               {getActiveFiltersCount() > 0 && (
@@ -303,7 +384,8 @@ const EnhancedStoriesClient: React.FC<EnhancedStoriesClientProps> = ({
           {/* Genres Filter */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-              {t("stories.genres")} ({selectedGenres.length} {t("stories.selected")})
+              {t("stories.genres")} ({selectedGenres.length}{" "}
+              {t("stories.selected")})
             </label>
             <div className="flex flex-wrap gap-2">
               {genres.map((genre) => (
@@ -363,7 +445,10 @@ const EnhancedStoriesClient: React.FC<EnhancedStoriesClientProps> = ({
                     className="flex items-center space-x-4 p-4 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                   >
                     <img
-                      src={story.thumbnailUrl || "https://via.placeholder.com/80x120?text=No+Image"}
+                      src={
+                        story.thumbnailUrl ||
+                        "https://via.placeholder.com/80x120?text=No+Image"
+                      }
                       alt={story.title}
                       className="w-16 h-24 object-cover rounded"
                     />
@@ -380,11 +465,13 @@ const EnhancedStoriesClient: React.FC<EnhancedStoriesClientProps> = ({
                         <span>{story.author?.name}</span>
                         <span>👁️ {story.viewCount.toLocaleString()}</span>
                         <span>📖 {story._count?.chapters || 0}</span>
-                        <span className={`px-2 py-1 rounded text-xs ${
-                          story.type === "AUDIO" 
-                            ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
-                            : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                        }`}>
+                        <span
+                          className={`px-2 py-1 rounded text-xs ${
+                            story.type === "AUDIO"
+                              ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                              : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                          }`}
+                        >
                           {story.type === "AUDIO" ? "🎧 Audio" : "📖 Text"}
                         </span>
                       </div>
@@ -404,11 +491,11 @@ const EnhancedStoriesClient: React.FC<EnhancedStoriesClientProps> = ({
                 >
                   ← {t("common.previous")}
                 </button>
-                
+
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                   const page = i + Math.max(1, currentPage - 2);
                   if (page > totalPages) return null;
-                  
+
                   return (
                     <button
                       key={page}
@@ -423,7 +510,7 @@ const EnhancedStoriesClient: React.FC<EnhancedStoriesClientProps> = ({
                     </button>
                   );
                 })}
-                
+
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}

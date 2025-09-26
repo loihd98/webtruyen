@@ -61,7 +61,7 @@ const LoginPage: React.FC = () => {
       if (loginUser.fulfilled.match(result) && result.payload) {
         // Role-based redirect
         const user = result.payload.user;
-        const redirectPath = user?.role === 'ADMIN' ? '/admin' : '/';
+        const redirectPath = user?.role === "ADMIN" ? "/admin" : "/";
         router.push(redirectPath);
       } else {
         setErrors({

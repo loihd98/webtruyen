@@ -28,16 +28,6 @@ const LayoutContent: React.FC<LayoutContentProps> = ({ children }) => {
     }
   }, [theme]);
 
-  // Load theme from localStorage on mount
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
-    if (savedTheme) {
-      dispatch(setTheme(savedTheme));
-    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      dispatch(setTheme("dark"));
-    }
-  }, [dispatch]);
-
   return (
     <div
       className={`min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200 ${theme}`}
@@ -45,9 +35,7 @@ const LayoutContent: React.FC<LayoutContentProps> = ({ children }) => {
       <Navbar />
 
       <main className="flex-1">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {children}
-        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">{children}</div>
       </main>
 
       <Footer />

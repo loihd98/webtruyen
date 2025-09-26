@@ -29,6 +29,8 @@ COPY src ./src/
 # Create uploads directory
 RUN mkdir -p uploads/audio
 
+RUN mkdir -p uploads/image
+
 # Expose port
 EXPOSE 5000
 

@@ -6,10 +6,10 @@ import { useRouter } from "next/navigation";
 import { RootState } from "../../store";
 import { toggleSidebar, toggleTheme } from "../../store/slices/uiSlice";
 import { logoutUser } from "../../store/slices/authSlice";
-import { useLanguage } from "../../contexts/LanguageContext";
 import LanguageSelector from "./LanguageSelector";
 import Link from "next/link";
 import { AppDispatch } from "../../store";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Navbar: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -122,13 +122,13 @@ const Navbar: React.FC = () => {
               href="/"
               className="flex-shrink-0 flex items-center ml-4 md:ml-0"
             >
-              <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+              <div className="hidden md:block text-xl font-bold text-blue-600 dark:text-blue-400">
                 📚 Web Truyện
               </div>
             </Link>
 
             {/* Desktop navigation */}
-            <div className="hidden md:ml-10 md:flex md:space-x-8">
+            <div className="hidden lg:ml-10 lg:flex lg:space-x-8">
               <Link
                 href="/"
                 className="text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
@@ -157,12 +157,12 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Search bar - Desktop */}
-          <div className="hidden md:flex flex-1 justify-center item-center px-2 lg:ml-6 lg:justify-end">
-            <div className="max-w-lg w-full lg:max-w-xs">
+          <div className=" flex flex-1 justify-center item-center px-2 lg:ml-6 lg:justify-end ">
+            <div className="max-w-lg w-full lg:max-w-xs flex items-center">
               <label htmlFor="search" className="sr-only">
                 Tìm kiếm
               </label>
-              <form onSubmit={handleSearch} className="relative">
+              <form onSubmit={handleSearch} className="relative sm:w-full">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <svg
                     className={`h-5 w-5 transition-colors duration-200 ${
@@ -190,7 +190,7 @@ const Navbar: React.FC = () => {
                   onKeyDown={handleSearchKeyDown}
                   className="block w-full pl-10 pr-12 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-200"
                   placeholder={t("nav.search.placeholder")}
-                  type="search"
+                  // type="search"
                 />
                 {searchQuery && (
                   <button
@@ -235,30 +235,8 @@ const Navbar: React.FC = () => {
             </div>
           </div>
 
-          {/* Mobile Search Icon */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={() => setIsSearchFocused(!isSearchFocused)}
-              className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-colors duration-200"
-            >
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </button>
-          </div>
-
           {/* Right side - Desktop */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden lg:flex items-center space-x-4">
             {/* Language selector */}
             <LanguageSelector />
 

@@ -1,7 +1,9 @@
+// app/layout.tsx (RootLayout - server component)
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../../styles/globals.css";
 import ClientProvider from "./providers";
+import ThemeProvider from "@/components/layout/ThemeProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,7 +20,9 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body className={inter.className}>
-        <ClientProvider>{children}</ClientProvider>
+        <ClientProvider>
+          <ThemeProvider>{children}</ThemeProvider>
+        </ClientProvider>
       </body>
     </html>
   );

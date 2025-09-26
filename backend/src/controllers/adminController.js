@@ -1068,8 +1068,10 @@ class AdminController {
         {
           title: "Đấu Phá Thương Khung",
           slug: "dau-pha-thuong-khung",
-          description: "Đây là một thế giới thuộc về Đấu Khí, không hề có ma pháp hoa tiếu diệm lệ, chỉ có đấu khí cương mãnh phồn thịnh! Tại đây, muốn trở thành nhà cường giả hơn người, phải tu luyện...",
-          thumbnailUrl: "https://img.dtruyen.com/uploads/images/dau-pha-thuong-khung.jpg",
+          description:
+            "Đây là một thế giới thuộc về Đấu Khí, không hề có ma pháp hoa tiếu diệm lệ, chỉ có đấu khí cương mãnh phồn thịnh! Tại đây, muốn trở thành nhà cường giả hơn người, phải tu luyện...",
+          thumbnailUrl:
+            "https://img.dtruyen.com/uploads/images/dau-pha-thuong-khung.jpg",
           type: "TEXT",
           status: "PUBLISHED",
           viewCount: 15420,
@@ -1078,8 +1080,10 @@ class AdminController {
         {
           title: "Tu La Võ Thần",
           slug: "tu-la-vo-than",
-          description: "Tiếc thay thiên địa chi gian tu la chi đạo, nhị thập niên tiền nhất trường đại chiến, tu la môn diệt, từ đó thần châu đại địa tái vô tu la...",
-          thumbnailUrl: "https://img.dtruyen.com/uploads/images/tu-la-vo-than.jpg",
+          description:
+            "Tiếc thay thiên địa chi gian tu la chi đạo, nhị thập niên tiền nhất trường đại chiến, tu la môn diệt, từ đó thần châu đại địa tái vô tu la...",
+          thumbnailUrl:
+            "https://img.dtruyen.com/uploads/images/tu-la-vo-than.jpg",
           type: "AUDIO",
           status: "PUBLISHED",
           viewCount: 8930,
@@ -1088,8 +1092,10 @@ class AdminController {
         {
           title: "Ngạo Thế Cửu Trùng Thiên",
           slug: "ngao-the-cuu-trung-thien",
-          description: "Cười ngạo giang hồ, ai địch được ta? Thiên địa vô cực, ta tâm vô biên! Tỷ kiếm tại tay, vấn thiên hạ anh hùng ai là địch thủ?",
-          thumbnailUrl: "https://img.dtruyen.com/uploads/images/ngao-the-cuu-trung-thien.jpg",
+          description:
+            "Cười ngạo giang hồ, ai địch được ta? Thiên địa vô cực, ta tâm vô biên! Tỷ kiếm tại tay, vấn thiên hạ anh hùng ai là địch thủ?",
+          thumbnailUrl:
+            "https://img.dtruyen.com/uploads/images/ngao-the-cuu-trung-thien.jpg",
           type: "TEXT",
           status: "PUBLISHED",
           viewCount: 12560,
@@ -1098,8 +1104,10 @@ class AdminController {
         {
           title: "Thần Y Độc Phi",
           slug: "than-y-doc-phi",
-          description: "Cô là thiên tài y học của thế kỷ 21, nhất đại độc nữ vương, một khi xuyên qua trở thành tướng phủ cô nữ...",
-          thumbnailUrl: "https://img.dtruyen.com/uploads/images/than-y-doc-phi.jpg",
+          description:
+            "Cô là thiên tài y học của thế kỷ 21, nhất đại độc nữ vương, một khi xuyên qua trở thành tướng phủ cô nữ...",
+          thumbnailUrl:
+            "https://img.dtruyen.com/uploads/images/than-y-doc-phi.jpg",
           type: "TEXT",
           status: "PUBLISHED",
           viewCount: 9870,
@@ -1108,8 +1116,10 @@ class AdminController {
         {
           title: "Audio: Bách Luyện Thành Thần",
           slug: "audio-bach-luyen-thanh-than",
-          description: "Thiếu niên mang theo lò luyện đan dược cổ xưa và tiểu long nữ bé bỏng phiêu lưu đại lục. Bách luyện thành thần, bách chiến thành vương!",
-          thumbnailUrl: "https://img.dtruyen.com/uploads/images/bach-luyen-thanh-than.jpg",
+          description:
+            "Thiếu niên mang theo lò luyện đan dược cổ xưa và tiểu long nữ bé bỏng phiêu lưu đại lục. Bách luyện thành thần, bách chiến thành vương!",
+          thumbnailUrl:
+            "https://img.dtruyen.com/uploads/images/bach-luyen-thanh-than.jpg",
           type: "AUDIO",
           status: "PUBLISHED",
           viewCount: 11230,
@@ -1157,7 +1167,9 @@ class AdminController {
           where: { id: story.id },
           data: {
             genres: {
-              connect: storyData.genres.map(index => ({ id: genres[index].id })),
+              connect: storyData.genres.map((index) => ({
+                id: genres[index].id,
+              })),
             },
           },
         });
@@ -1168,7 +1180,7 @@ class AdminController {
       // Create sample chapters for each story
       for (const story of createdStories) {
         const chapterCount = Math.floor(Math.random() * 20) + 5;
-        
+
         for (let i = 1; i <= chapterCount; i++) {
           const chapterData = {
             number: i,
@@ -1178,10 +1190,16 @@ class AdminController {
           };
 
           if (story.type === "TEXT") {
-            chapterData.content = this.generateSampleTextContent(story.title, i);
+            chapterData.content = this.generateSampleTextContent(
+              story.title,
+              i
+            );
           } else if (story.type === "AUDIO") {
             chapterData.audioUrl = `https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3`;
-            chapterData.content = this.generateSampleTextContent(story.title, i);
+            chapterData.content = this.generateSampleTextContent(
+              story.title,
+              i
+            );
           }
 
           await prisma.chapter.upsert({
@@ -1218,7 +1236,7 @@ class AdminController {
     const titles = [
       "Khởi đầu hành trình",
       "Gặp gỡ sư phụ",
-      "Bước đầu tu luyện", 
+      "Bước đầu tu luyện",
       "Thử thách đầu tiên",
       "Đột phá cảnh giới",
       "Gặp gỡ người bạn",
@@ -1254,59 +1272,68 @@ class AdminController {
 
     const content = [];
     const paragraphCount = Math.floor(Math.random() * 8) + 5;
-    
+
     for (let i = 0; i < paragraphCount; i++) {
-      content.push(sampleParagraphs[Math.floor(Math.random() * sampleParagraphs.length)]);
+      content.push(
+        sampleParagraphs[Math.floor(Math.random() * sampleParagraphs.length)]
+      );
     }
 
-    return `# ${storyTitle} - Chương ${chapterNumber}\n\n${content.join('\n\n')}\n\n*Tiếp tục đọc để khám phá những diễn biến hấp dẫn tiếp theo...*`;
+    return `# ${storyTitle} - Chương ${chapterNumber}\n\n${content.join(
+      "\n\n"
+    )}\n\n*Tiếp tục đọc để khám phá những diễn biến hấp dẫn tiếp theo...*`;
   }
 
   async getAnalytics(req, res) {
     try {
-      const { period = '7d' } = req.query;
-      
+      const { period = "7d" } = req.query;
+
       let dateFilter;
       switch (period) {
-        case '1d':
+        case "1d":
           dateFilter = new Date(Date.now() - 24 * 60 * 60 * 1000);
           break;
-        case '7d':
+        case "7d":
           dateFilter = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
           break;
-        case '30d':
+        case "30d":
           dateFilter = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
           break;
         default:
           dateFilter = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
       }
 
-      const [userGrowth, storyGrowth, topStories, recentComments] = await Promise.all([
-        prisma.user.count({ where: { createdAt: { gte: dateFilter } } }),
-        prisma.story.count({ where: { createdAt: { gte: dateFilter } } }),
-        prisma.story.findMany({
-          take: 10,
-          orderBy: { viewCount: 'desc' },
-          include: {
-            author: { select: { name: true } },
-            _count: { select: { chapters: true, bookmarks: true } }
-          }
-        }),
-        prisma.comment.count({ where: { createdAt: { gte: dateFilter } } }),
-      ]);
+      const [userGrowth, storyGrowth, topStories, recentComments] =
+        await Promise.all([
+          prisma.user.count({ where: { createdAt: { gte: dateFilter } } }),
+          prisma.story.count({ where: { createdAt: { gte: dateFilter } } }),
+          prisma.story.findMany({
+            take: 10,
+            orderBy: { viewCount: "desc" },
+            include: {
+              author: { select: { name: true } },
+              _count: { select: { chapters: true, bookmarks: true } },
+            },
+          }),
+          prisma.comment.count({ where: { createdAt: { gte: dateFilter } } }),
+        ]);
 
       res.json({
         period,
         data: {
-          growth: { users: userGrowth, stories: storyGrowth, comments: recentComments },
+          growth: {
+            users: userGrowth,
+            stories: storyGrowth,
+            comments: recentComments,
+          },
           topStories,
           systemHealth: {
-            totalStorage: '2.5GB',
-            activeUsers: await prisma.user.count({ where: { role: 'USER' } }),
-            serverUptime: '99.9%',
-            responseTime: '150ms'
-          }
-        }
+            totalStorage: "2.5GB",
+            activeUsers: await prisma.user.count({ where: { role: "USER" } }),
+            serverUptime: "99.9%",
+            responseTime: "150ms",
+          },
+        },
       });
     } catch (error) {
       console.error("Get analytics error:", error);

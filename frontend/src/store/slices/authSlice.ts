@@ -4,14 +4,14 @@ import { authAPI } from "../../utils/api";
 
 // Helper function for role-based redirect
 export const getRedirectPath = (user: User | null): string => {
-  if (!user) return '/';
-  
+  if (!user) return "/";
+
   switch (user.role) {
-    case 'ADMIN':
-      return '/admin';
-    case 'USER':
+    case "ADMIN":
+      return "/admin";
+    case "USER":
     default:
-      return '/';
+      return "/";
   }
 };
 

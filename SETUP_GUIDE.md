@@ -10,12 +10,14 @@
 ## 🚀 Quick Start
 
 ### 1. Clone Repository
+
 ```bash
 git clone https://github.com/loihd98/webtruyen.git
 cd webtruyen
 ```
 
 ### 2. Setup Environment Variables
+
 Đảm bảo file `.env` ở thư mục gốc có các biến môi trường sau:
 
 ```env
@@ -81,6 +83,8 @@ node src/scripts/seed.js
 npm run dev
 ```
 
+docker-compose exec backend sh // run in backend
+
 ### 4. Setup Frontend
 
 ```bash
@@ -96,16 +100,19 @@ npm run dev
 ## 🐳 Chạy với Docker
 
 ### 1. Khởi động tất cả services
+
 ```bash
 docker-compose up -d
 ```
 
 ### 2. Seed database (sau khi containers đã chạy)
+
 ```bash
 docker-compose exec backend node src/scripts/seed.js
 ```
 
 ### 3. Dừng services
+
 ```bash
 docker-compose down
 ```
@@ -115,10 +122,12 @@ docker-compose down
 Sau khi chạy script seed, bạn sẽ có:
 
 ### 👤 Tài Khoản Demo
+
 - **Admin**: `admin@webtruyen.com` / `admin123456`
 - **User**: `user@example.com` / `user123456`
 
 ### 📚 Dữ Liệu Mẫu
+
 - 4 truyện (2 TEXT, 2 AUDIO)
 - 10 thể loại
 - Các chương với nội dung
@@ -128,12 +137,14 @@ Sau khi chạy script seed, bạn sẽ có:
 ## 🎯 Tính Năng Chính
 
 ### 🔐 Authentication & Authorization
+
 - Đăng nhập/Đăng ký
 - Role-based access control (USER, ADMIN)
 - JWT token authentication
 - Avatar upload và display
 
 ### 📖 Story Management
+
 - Text stories với rich content
 - Audio stories với player
 - Chapter management
@@ -141,6 +152,7 @@ Sau khi chạy script seed, bạn sẽ có:
 - Comment system
 
 ### 🎛️ Admin Dashboard
+
 - Responsive design
 - User management
 - Story management (CRUD)
@@ -149,6 +161,7 @@ Sau khi chạy script seed, bạn sẽ có:
 - Analytics dashboard
 
 ### 🔍 Advanced Features
+
 - Multi-language support (VI, EN, ZH, KO, JA)
 - Advanced story filtering
 - Search functionality
@@ -184,6 +197,7 @@ web_truyen/
 ## 🛠️ Scripts Hữu Ích
 
 ### Backend
+
 ```bash
 # Development
 npm run dev                 # Khởi động dev server
@@ -197,6 +211,7 @@ npx prisma db push         # Push schema changes
 ```
 
 ### Frontend
+
 ```bash
 # Development
 npm run dev                # Khởi động dev server
@@ -208,6 +223,7 @@ npm run lint              # Check linting errors
 ## 🔧 Troubleshooting
 
 ### Database Connection Issues
+
 ```bash
 # Kiểm tra PostgreSQL đang chạy
 psql -h localhost -U postgres -d web_truyen_dev
@@ -219,6 +235,7 @@ node src/scripts/seed.js
 ```
 
 ### Docker Issues
+
 ```bash
 # Restart Docker services
 docker-compose down
@@ -230,6 +247,7 @@ docker-compose logs frontend
 ```
 
 ### Build Errors
+
 ```bash
 # Clear cache và reinstall
 rm -rf node_modules package-lock.json
@@ -242,6 +260,7 @@ npm run type-check
 ## 🎨 UI/UX Features
 
 ### Admin Dashboard
+
 - ✅ Responsive sidebar navigation
 - ✅ Statistics cards với real-time data
 - ✅ Story management với thumbnails
@@ -250,6 +269,7 @@ npm run type-check
 - ✅ System settings với tabbed interface
 
 ### User Interface
+
 - ✅ Navbar với avatar dropdown
 - ✅ Advanced story filtering
 - ✅ Audio player controls
@@ -260,6 +280,7 @@ npm run type-check
 ## 📱 Mobile Responsive
 
 Dự án được thiết kế hoàn toàn responsive:
+
 - Mobile-first approach
 - Touch-friendly controls
 - Optimized layouts cho tablet và mobile
@@ -268,12 +289,14 @@ Dự án được thiết kế hoàn toàn responsive:
 ## 🌐 Deployment
 
 ### Production Environment
+
 1. Update `.env` với production values
 2. Setup SSL certificates
 3. Configure Nginx reverse proxy
 4. Setup CI/CD pipeline
 
 ### Environment Variables cho Production
+
 - Thay đổi JWT secrets
 - Cập nhật database credentials
 - Configure OAuth applications
@@ -283,6 +306,7 @@ Dự án được thiết kế hoàn toàn responsive:
 ## 📞 Hỗ Trợ
 
 Nếu gặp vấn đề:
+
 1. Kiểm tra logs trong terminal
 2. Xem browser console cho errors
 3. Kiểm tra database connection

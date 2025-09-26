@@ -25,11 +25,11 @@ const AdminMediaUpload: React.FC = () => {
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      
+
       // Simulate upload progress
       for (let progress = 0; progress <= 100; progress += 10) {
         setUploadProgress(progress);
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       }
 
       // Create mock uploaded file
@@ -37,27 +37,30 @@ const AdminMediaUpload: React.FC = () => {
         id: Date.now().toString() + i,
         name: file.name,
         url: URL.createObjectURL(file),
-        type: file.type.startsWith('image/') ? 'image' : 'audio',
+        type: file.type.startsWith("image/") ? "image" : "audio",
         size: file.size,
         uploadedAt: new Date(),
       };
 
-      setUploadedFiles(prev => [...prev, uploadedFile]);
+      setUploadedFiles((prev) => [...prev, uploadedFile]);
     }
 
     setIsUploading(false);
     setUploadProgress(0);
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setDragActive(false);
 
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleFiles(e.dataTransfer.files);
-    }
-  }, [handleFiles]);
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleFiles(e.dataTransfer.files);
+      }
+    },
+    [handleFiles]
+  );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -78,7 +81,7 @@ const AdminMediaUpload: React.FC = () => {
   };
 
   const deleteFile = (id: string) => {
-    setUploadedFiles(prev => prev.filter(file => file.id !== id));
+    setUploadedFiles((prev) => prev.filter((file) => file.id !== id));
   };
 
   const copyUrl = (url: string) => {
@@ -88,11 +91,11 @@ const AdminMediaUpload: React.FC = () => {
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   return (
@@ -120,9 +123,7 @@ const AdminMediaUpload: React.FC = () => {
             onDragLeave={handleDragLeave}
           >
             <div className="space-y-4">
-              <div className="text-4xl">
-                📁
-              </div>
+              <div className="text-4xl">📁</div>
               <div>
                 <p className="text-lg font-medium text-gray-900 dark:text-white">
                   {t("admin.media.drag_drop")}
@@ -197,7 +198,7 @@ const AdminMediaUpload: React.FC = () => {
                   key={file.id}
                   className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 hover:shadow-md transition-shadow"
                 >
-                  {file.type === 'image' ? (
+                  {file.type === "image" ? (
                     <img
                       src={file.url}
                       alt={file.name}
@@ -214,7 +215,8 @@ const AdminMediaUpload: React.FC = () => {
                       {file.name}
                     </h4>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {formatFileSize(file.size)} • {file.uploadedAt.toLocaleDateString()}
+                      {formatFileSize(file.size)} •{" "}
+                      {file.uploadedAt.toLocaleDateString()}
                     </p>
 
                     <div className="flex items-center space-x-2">

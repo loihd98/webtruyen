@@ -41,17 +41,52 @@ const AdminStats: React.FC = () => {
           totalViews: 324567,
           totalChapters: 15623,
           recentStories: [
-            { id: 1, title: "Đấu Phá Thương Khung", author: "Thiên Tàm Thổ Đậu", createdAt: "2025-09-22" },
-            { id: 2, title: "Tiên Nghịch", author: "Nhĩ Căn", createdAt: "2025-09-21" },
-            { id: 3, title: "Hoàn Mỹ Thế Giới", author: "Thần Đông", createdAt: "2025-09-20" },
+            {
+              id: 1,
+              title: "Đấu Phá Thương Khung",
+              author: "Thiên Tàm Thổ Đậu",
+              createdAt: "2025-09-22",
+            },
+            {
+              id: 2,
+              title: "Tiên Nghịch",
+              author: "Nhĩ Căn",
+              createdAt: "2025-09-21",
+            },
+            {
+              id: 3,
+              title: "Hoàn Mỹ Thế Giới",
+              author: "Thần Đông",
+              createdAt: "2025-09-20",
+            },
           ],
           recentUsers: [
-            { id: 1, name: "Nguyễn Văn A", email: "user1@example.com", createdAt: "2025-09-22" },
-            { id: 2, name: "Trần Thị B", email: "user2@example.com", createdAt: "2025-09-21" },
-            { id: 3, name: "Lê Văn C", email: "user3@example.com", createdAt: "2025-09-20" },
+            {
+              id: 1,
+              name: "Nguyễn Văn A",
+              email: "user1@example.com",
+              createdAt: "2025-09-22",
+            },
+            {
+              id: 2,
+              name: "Trần Thị B",
+              email: "user2@example.com",
+              createdAt: "2025-09-21",
+            },
+            {
+              id: 3,
+              name: "Lê Văn C",
+              email: "user3@example.com",
+              createdAt: "2025-09-20",
+            },
           ],
           popularStories: [
-            { id: 1, title: "Đấu Phá Thương Khung", views: 45234, bookmarks: 3421 },
+            {
+              id: 1,
+              title: "Đấu Phá Thương Khung",
+              views: 45234,
+              bookmarks: 3421,
+            },
             { id: 2, title: "Tiên Nghịch", views: 38945, bookmarks: 2876 },
             { id: 3, title: "Hoàn Mỹ Thế Giới", views: 32156, bookmarks: 2543 },
           ],
@@ -100,7 +135,10 @@ const AdminStats: React.FC = () => {
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {Array.from({ length: 4 }).map((_, index) => (
-            <div key={index} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 animate-pulse">
+            <div
+              key={index}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 animate-pulse"
+            >
               <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded mb-2"></div>
               <div className="h-8 bg-gray-300 dark:bg-gray-600 rounded mb-2"></div>
               <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-1/2"></div>
@@ -116,7 +154,10 @@ const AdminStats: React.FC = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statCards.map((card, index) => (
-          <div key={index} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+          <div
+            key={index}
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700"
+          >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -129,7 +170,9 @@ const AdminStats: React.FC = () => {
                   {card.change} {t("admin.stats.from_last_month")}
                 </p>
               </div>
-              <div className={`p-3 rounded-full ${card.color} text-white text-xl`}>
+              <div
+                className={`p-3 rounded-full ${card.color} text-white text-xl`}
+              >
                 {card.icon}
               </div>
             </div>
@@ -149,7 +192,10 @@ const AdminStats: React.FC = () => {
           <div className="p-6">
             <div className="space-y-4">
               {stats.recentStories.map((story) => (
-                <div key={story.id} className="flex items-center justify-between">
+                <div
+                  key={story.id}
+                  className="flex items-center justify-between"
+                >
                   <div>
                     <h4 className="text-sm font-medium text-gray-900 dark:text-white">
                       {story.title}
@@ -177,7 +223,10 @@ const AdminStats: React.FC = () => {
           <div className="p-6">
             <div className="space-y-4">
               {stats.recentUsers.map((user) => (
-                <div key={user.id} className="flex items-center justify-between">
+                <div
+                  key={user.id}
+                  className="flex items-center justify-between"
+                >
                   <div>
                     <h4 className="text-sm font-medium text-gray-900 dark:text-white">
                       {user.name}

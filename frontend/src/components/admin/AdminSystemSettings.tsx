@@ -44,18 +44,21 @@ const AdminSystemSettings: React.FC = () => {
       facebook: "",
       twitter: "",
       youtube: "",
-      discord: ""
+      discord: "",
     },
     seoSettings: {
       metaTitle: "Web Truyện - Đọc truyện online miễn phí",
-      metaDescription: "Đọc truyện online miễn phí với hàng ngàn đầu truyện hay nhất",
-      keywords: ["truyện", "đọc truyện", "truyện online", "light novel"]
-    }
+      metaDescription:
+        "Đọc truyện online miễn phí với hàng ngàn đầu truyện hay nhất",
+      keywords: ["truyện", "đọc truyện", "truyện online", "light novel"],
+    },
   });
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<"general" | "features" | "social" | "seo" | "advanced">("general");
+  const [activeTab, setActiveTab] = useState<
+    "general" | "features" | "social" | "seo" | "advanced"
+  >("general");
 
   useEffect(() => {
     fetchSettings();
@@ -91,39 +94,43 @@ const AdminSystemSettings: React.FC = () => {
 
   const handleFileTypeAdd = (newType: string) => {
     if (newType && !settings.allowedFileTypes.includes(newType)) {
-      setSettings(prev => ({
+      setSettings((prev) => ({
         ...prev,
-        allowedFileTypes: [...prev.allowedFileTypes, newType]
+        allowedFileTypes: [...prev.allowedFileTypes, newType],
       }));
     }
   };
 
   const handleFileTypeRemove = (typeToRemove: string) => {
-    setSettings(prev => ({
+    setSettings((prev) => ({
       ...prev,
-      allowedFileTypes: prev.allowedFileTypes.filter(type => type !== typeToRemove)
+      allowedFileTypes: prev.allowedFileTypes.filter(
+        (type) => type !== typeToRemove
+      ),
     }));
   };
 
   const handleKeywordAdd = (newKeyword: string) => {
     if (newKeyword && !settings.seoSettings.keywords.includes(newKeyword)) {
-      setSettings(prev => ({
+      setSettings((prev) => ({
         ...prev,
         seoSettings: {
           ...prev.seoSettings,
-          keywords: [...prev.seoSettings.keywords, newKeyword]
-        }
+          keywords: [...prev.seoSettings.keywords, newKeyword],
+        },
       }));
     }
   };
 
   const handleKeywordRemove = (keywordToRemove: string) => {
-    setSettings(prev => ({
+    setSettings((prev) => ({
       ...prev,
       seoSettings: {
         ...prev.seoSettings,
-        keywords: prev.seoSettings.keywords.filter(keyword => keyword !== keywordToRemove)
-      }
+        keywords: prev.seoSettings.keywords.filter(
+          (keyword) => keyword !== keywordToRemove
+        ),
+      },
     }));
   };
 
@@ -135,7 +142,10 @@ const AdminSystemSettings: React.FC = () => {
             <div className="h-8 bg-gray-300 dark:bg-gray-600 rounded w-1/4"></div>
             <div className="space-y-3">
               {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="h-10 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                <div
+                  key={i}
+                  className="h-10 bg-gray-300 dark:bg-gray-600 rounded"
+                ></div>
               ))}
             </div>
           </div>
@@ -158,7 +168,9 @@ const AdminSystemSettings: React.FC = () => {
               disabled={isSaving}
               className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-6 py-2 rounded-lg font-medium transition-colors"
             >
-              {isSaving ? "💾 " + t("admin.settings.saving") : "💾 " + t("admin.settings.save")}
+              {isSaving
+                ? "💾 " + t("admin.settings.saving")
+                : "💾 " + t("admin.settings.save")}
             </button>
           </div>
         </div>
@@ -167,11 +179,23 @@ const AdminSystemSettings: React.FC = () => {
         <div className="p-6">
           <div className="flex space-x-4 border-b border-gray-200 dark:border-gray-700">
             {[
-              { key: "general", label: t("admin.settings.general"), icon: "⚙️" },
-              { key: "features", label: t("admin.settings.features"), icon: "🔧" },
+              {
+                key: "general",
+                label: t("admin.settings.general"),
+                icon: "⚙️",
+              },
+              {
+                key: "features",
+                label: t("admin.settings.features"),
+                icon: "🔧",
+              },
               { key: "social", label: t("admin.settings.social"), icon: "🌐" },
               { key: "seo", label: t("admin.settings.seo"), icon: "🔍" },
-              { key: "advanced", label: t("admin.settings.advanced"), icon: "🚀" }
+              {
+                key: "advanced",
+                label: t("admin.settings.advanced"),
+                icon: "🚀",
+              },
             ].map((tab) => (
               <button
                 key={tab.key}
@@ -194,8 +218,10 @@ const AdminSystemSettings: React.FC = () => {
         {/* General Settings */}
         {activeTab === "general" && (
           <div className="space-y-6">
-            <h4 className="text-lg font-semibold text-gray-900 dark:text-white">{t("admin.settings.general")}</h4>
-            
+            <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {t("admin.settings.general")}
+            </h4>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -204,11 +230,16 @@ const AdminSystemSettings: React.FC = () => {
                 <input
                   type="text"
                   value={settings.siteName}
-                  onChange={(e) => setSettings(prev => ({ ...prev, siteName: e.target.value }))}
+                  onChange={(e) =>
+                    setSettings((prev) => ({
+                      ...prev,
+                      siteName: e.target.value,
+                    }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {t("admin.settings.contact_email")}
@@ -216,7 +247,12 @@ const AdminSystemSettings: React.FC = () => {
                 <input
                   type="email"
                   value={settings.contactEmail}
-                  onChange={(e) => setSettings(prev => ({ ...prev, contactEmail: e.target.value }))}
+                  onChange={(e) =>
+                    setSettings((prev) => ({
+                      ...prev,
+                      contactEmail: e.target.value,
+                    }))
+                  }
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 />
               </div>
@@ -228,7 +264,12 @@ const AdminSystemSettings: React.FC = () => {
               </label>
               <textarea
                 value={settings.siteDescription}
-                onChange={(e) => setSettings(prev => ({ ...prev, siteDescription: e.target.value }))}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    siteDescription: e.target.value,
+                  }))
+                }
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
               />
@@ -239,25 +280,57 @@ const AdminSystemSettings: React.FC = () => {
         {/* Features Settings */}
         {activeTab === "features" && (
           <div className="space-y-6">
-            <h4 className="text-lg font-semibold text-gray-900 dark:text-white">{t("admin.settings.features")}</h4>
-            
+            <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {t("admin.settings.features")}
+            </h4>
+
             <div className="space-y-4">
               {[
-                { key: "enableRegistration", label: t("admin.settings.enable_registration"), desc: t("admin.settings.enable_registration_desc") },
-                { key: "enableComments", label: t("admin.settings.enable_comments"), desc: t("admin.settings.enable_comments_desc") },
-                { key: "enableBookmarks", label: t("admin.settings.enable_bookmarks"), desc: t("admin.settings.enable_bookmarks_desc") },
-                { key: "maintenanceMode", label: t("admin.settings.maintenance_mode"), desc: t("admin.settings.maintenance_mode_desc") }
+                {
+                  key: "enableRegistration",
+                  label: t("admin.settings.enable_registration"),
+                  desc: t("admin.settings.enable_registration_desc"),
+                },
+                {
+                  key: "enableComments",
+                  label: t("admin.settings.enable_comments"),
+                  desc: t("admin.settings.enable_comments_desc"),
+                },
+                {
+                  key: "enableBookmarks",
+                  label: t("admin.settings.enable_bookmarks"),
+                  desc: t("admin.settings.enable_bookmarks_desc"),
+                },
+                {
+                  key: "maintenanceMode",
+                  label: t("admin.settings.maintenance_mode"),
+                  desc: t("admin.settings.maintenance_mode_desc"),
+                },
               ].map((feature) => (
-                <div key={feature.key} className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-600 rounded-lg">
+                <div
+                  key={feature.key}
+                  className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-600 rounded-lg"
+                >
                   <div>
-                    <h5 className="font-medium text-gray-900 dark:text-white">{feature.label}</h5>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{feature.desc}</p>
+                    <h5 className="font-medium text-gray-900 dark:text-white">
+                      {feature.label}
+                    </h5>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {feature.desc}
+                    </p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={settings[feature.key as keyof SystemSettings] as boolean}
-                      onChange={(e) => setSettings(prev => ({ ...prev, [feature.key]: e.target.checked }))}
+                      checked={
+                        settings[feature.key as keyof SystemSettings] as boolean
+                      }
+                      onChange={(e) =>
+                        setSettings((prev) => ({
+                          ...prev,
+                          [feature.key]: e.target.checked,
+                        }))
+                      }
                       className="sr-only peer"
                     />
                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
@@ -271,8 +344,10 @@ const AdminSystemSettings: React.FC = () => {
         {/* Social Media Settings */}
         {activeTab === "social" && (
           <div className="space-y-6">
-            <h4 className="text-lg font-semibold text-gray-900 dark:text-white">{t("admin.settings.social")}</h4>
-            
+            <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {t("admin.settings.social")}
+            </h4>
+
             <div className="space-y-4">
               {Object.entries(settings.socialMedia).map(([platform, url]) => (
                 <div key={platform}>
@@ -282,10 +357,15 @@ const AdminSystemSettings: React.FC = () => {
                   <input
                     type="url"
                     value={url}
-                    onChange={(e) => setSettings(prev => ({
-                      ...prev,
-                      socialMedia: { ...prev.socialMedia, [platform]: e.target.value }
-                    }))}
+                    onChange={(e) =>
+                      setSettings((prev) => ({
+                        ...prev,
+                        socialMedia: {
+                          ...prev.socialMedia,
+                          [platform]: e.target.value,
+                        },
+                      }))
+                    }
                     placeholder={`https://${platform}.com/your-page`}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                   />
@@ -298,8 +378,10 @@ const AdminSystemSettings: React.FC = () => {
         {/* SEO Settings */}
         {activeTab === "seo" && (
           <div className="space-y-6">
-            <h4 className="text-lg font-semibold text-gray-900 dark:text-white">{t("admin.settings.seo")}</h4>
-            
+            <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {t("admin.settings.seo")}
+            </h4>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {t("admin.settings.meta_title")}
@@ -307,10 +389,15 @@ const AdminSystemSettings: React.FC = () => {
               <input
                 type="text"
                 value={settings.seoSettings.metaTitle}
-                onChange={(e) => setSettings(prev => ({
-                  ...prev,
-                  seoSettings: { ...prev.seoSettings, metaTitle: e.target.value }
-                }))}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    seoSettings: {
+                      ...prev.seoSettings,
+                      metaTitle: e.target.value,
+                    },
+                  }))
+                }
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
               />
             </div>
@@ -321,10 +408,15 @@ const AdminSystemSettings: React.FC = () => {
               </label>
               <textarea
                 value={settings.seoSettings.metaDescription}
-                onChange={(e) => setSettings(prev => ({
-                  ...prev,
-                  seoSettings: { ...prev.seoSettings, metaDescription: e.target.value }
-                }))}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    seoSettings: {
+                      ...prev.seoSettings,
+                      metaDescription: e.target.value,
+                    },
+                  }))
+                }
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
               />
@@ -370,8 +462,10 @@ const AdminSystemSettings: React.FC = () => {
         {/* Advanced Settings */}
         {activeTab === "advanced" && (
           <div className="space-y-6">
-            <h4 className="text-lg font-semibold text-gray-900 dark:text-white">{t("admin.settings.advanced")}</h4>
-            
+            <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {t("admin.settings.advanced")}
+            </h4>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {t("admin.settings.max_file_size")} (MB)
@@ -379,7 +473,12 @@ const AdminSystemSettings: React.FC = () => {
               <input
                 type="number"
                 value={settings.maxFileSize}
-                onChange={(e) => setSettings(prev => ({ ...prev, maxFileSize: parseInt(e.target.value) || 0 }))}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    maxFileSize: parseInt(e.target.value) || 0,
+                  }))
+                }
                 min="1"
                 max="100"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
@@ -412,7 +511,9 @@ const AdminSystemSettings: React.FC = () => {
                   placeholder={t("admin.settings.add_file_type")}
                   onKeyPress={(e) => {
                     if (e.key === "Enter" && e.currentTarget.value.trim()) {
-                      handleFileTypeAdd(e.currentTarget.value.trim().replace(".", ""));
+                      handleFileTypeAdd(
+                        e.currentTarget.value.trim().replace(".", "")
+                      );
                       e.currentTarget.value = "";
                     }
                   }}
@@ -428,7 +529,12 @@ const AdminSystemSettings: React.FC = () => {
               <input
                 type="text"
                 value={settings.analyticsId}
-                onChange={(e) => setSettings(prev => ({ ...prev, analyticsId: e.target.value }))}
+                onChange={(e) =>
+                  setSettings((prev) => ({
+                    ...prev,
+                    analyticsId: e.target.value,
+                  }))
+                }
                 placeholder="G-XXXXXXXXXX"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
               />

@@ -56,18 +56,29 @@ export default async function GenresPage() {
   // Add default descriptions for genres if not provided by API
   const getGenreDescription = (genreName: string) => {
     const descriptions: { [key: string]: string } = {
-      "Tiên Hiệp": "Tu tiên, tu chân, tu thần, các câu chuyện về việc tu luyện để trở thành tiên nhân.",
-      "Đô Thị": "Câu chuyện hiện đại, đời sống thành thị, tình yêu và sự nghiệp trong xã hội hiện tại.",
-      "Huyền Huyễn": "Thế giới kỳ ảo, phép thuật, ma pháp và những cuộc phiêu lưu không tưởng.",
-      "Kiếm Hiệp": "Võ lâm, giang hồ, kiếm pháp và những câu chuyện anh hùng hào kiệt.",
-      "Ngôn Tình": "Tình yêu lãng mạn, câu chuyện tình cảm ngọt ngào và cảm động.",
-      "Quan Trường": "Chính trị, quyền lực, đấu tranh trong triều đình và quan trường.",
-      "Lịch Sử": "Dựa trên sự kiện lịch sử, nhân vật lịch sử và bối cảnh thời đại xưa.",
-      "Khoa Huyễn": "Tương lai, công nghệ, vũ trụ và những câu chuyện viễn tưởng.",
+      "Tiên Hiệp":
+        "Tu tiên, tu chân, tu thần, các câu chuyện về việc tu luyện để trở thành tiên nhân.",
+      "Đô Thị":
+        "Câu chuyện hiện đại, đời sống thành thị, tình yêu và sự nghiệp trong xã hội hiện tại.",
+      "Huyền Huyễn":
+        "Thế giới kỳ ảo, phép thuật, ma pháp và những cuộc phiêu lưu không tưởng.",
+      "Kiếm Hiệp":
+        "Võ lâm, giang hồ, kiếm pháp và những câu chuyện anh hùng hào kiệt.",
+      "Ngôn Tình":
+        "Tình yêu lãng mạn, câu chuyện tình cảm ngọt ngào và cảm động.",
+      "Quan Trường":
+        "Chính trị, quyền lực, đấu tranh trong triều đình và quan trường.",
+      "Lịch Sử":
+        "Dựa trên sự kiện lịch sử, nhân vật lịch sử và bối cảnh thời đại xưa.",
+      "Khoa Huyễn":
+        "Tương lai, công nghệ, vũ trụ và những câu chuyện viễn tưởng.",
       "Trinh Thám": "Phá án, điều tra, bí ẩn và những câu chuyện hồi hộp.",
       "Võng Du": "Game online, thế giới ảo và những cuộc phiêu lưu trong game.",
     };
-    return descriptions[genreName] || "Khám phá những câu chuyện thú vị trong thể loại này.";
+    return (
+      descriptions[genreName] ||
+      "Khám phá những câu chuyện thú vị trong thể loại này."
+    );
   };
 
   return (

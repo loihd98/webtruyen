@@ -12,7 +12,9 @@ const AdminStoryManager: React.FC = () => {
   const [editingStory, setEditingStory] = useState<Story | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<"ALL" | "TEXT" | "AUDIO">("ALL");
-  const [filterStatus, setFilterStatus] = useState<"ALL" | "PUBLISHED" | "DRAFT" | "HIDDEN">("ALL");
+  const [filterStatus, setFilterStatus] = useState<
+    "ALL" | "PUBLISHED" | "DRAFT" | "HIDDEN"
+  >("ALL");
 
   useEffect(() => {
     fetchStories();
@@ -39,12 +41,12 @@ const AdminStoryManager: React.FC = () => {
             author: {
               id: "author1",
               name: "Thiên Tàm Thổ Đậu",
-              avatar: "https://via.placeholder.com/100x100?text=TTTĐ"
+              avatar: "https://via.placeholder.com/100x100?text=TTTĐ",
             },
             _count: {
               chapters: 1200,
-              bookmarks: 3421
-            }
+              bookmarks: 3421,
+            },
           },
           {
             id: "2",
@@ -64,8 +66,8 @@ const AdminStoryManager: React.FC = () => {
             },
             _count: {
               chapters: 890,
-              bookmarks: 2876
-            }
+              bookmarks: 2876,
+            },
           },
           {
             id: "3",
@@ -85,9 +87,9 @@ const AdminStoryManager: React.FC = () => {
             },
             _count: {
               chapters: 456,
-              bookmarks: 1234
-            }
-          }
+              bookmarks: 1234,
+            },
+          },
         ];
         setStories(mockStories);
         setIsLoading(false);
@@ -98,31 +100,46 @@ const AdminStoryManager: React.FC = () => {
     }
   };
 
-  const filteredStories = stories.filter(story => {
-    const matchesSearch = story.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         story.author?.name.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredStories = stories.filter((story) => {
+    const matchesSearch =
+      story.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      story.author?.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === "ALL" || story.type === filterType;
-    const matchesStatus = filterStatus === "ALL" || story.status === filterStatus;
-    
+    const matchesStatus =
+      filterStatus === "ALL" || story.status === filterStatus;
+
     return matchesSearch && matchesType && matchesStatus;
   });
 
   const handleDelete = async (storyId: string) => {
     if (window.confirm(t("admin.stories.confirm_delete"))) {
-      setStories(prev => prev.filter(story => story.id !== storyId));
+      setStories((prev) => prev.filter((story) => story.id !== storyId));
     }
   };
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      PUBLISHED: { color: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200", text: t("common.published") },
-      DRAFT: { color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200", text: t("common.draft") },
-      HIDDEN: { color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200", text: t("common.hidden") },
+      PUBLISHED: {
+        color:
+          "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+        text: t("common.published"),
+      },
+      DRAFT: {
+        color:
+          "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+        text: t("common.draft"),
+      },
+      HIDDEN: {
+        color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
+        text: t("common.hidden"),
+      },
     };
-    
+
     const config = statusConfig[status as keyof typeof statusConfig];
     return (
-      <span className={`px-2 py-1 text-xs font-medium rounded-full ${config.color}`}>
+      <span
+        className={`px-2 py-1 text-xs font-medium rounded-full ${config.color}`}
+      >
         {config.text}
       </span>
     );
@@ -148,7 +165,10 @@ const AdminStoryManager: React.FC = () => {
             <div className="h-8 bg-gray-300 dark:bg-gray-600 rounded w-1/4"></div>
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="h-16 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                <div
+                  key={i}
+                  className="h-16 bg-gray-300 dark:bg-gray-600 rounded"
+                ></div>
               ))}
             </div>
           </div>
@@ -190,7 +210,7 @@ const AdminStoryManager: React.FC = () => {
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {t("common.type")}
@@ -262,11 +282,17 @@ const AdminStoryManager: React.FC = () => {
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {filteredStories.map((story) => (
-                <tr key={story.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                <tr
+                  key={story.id}
+                  className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <img
-                        src={story.thumbnailUrl || "https://via.placeholder.com/60x80?text=No+Image"}
+                        src={
+                          story.thumbnailUrl ||
+                          "https://via.placeholder.com/60x80?text=No+Image"
+                        }
                         alt={story.title}
                         className="h-16 w-12 object-cover rounded"
                       />
@@ -324,7 +350,9 @@ const AdminStoryManager: React.FC = () => {
           <div className="text-center py-12">
             <div className="text-gray-400 text-4xl mb-4">📚</div>
             <p className="text-gray-500 dark:text-gray-400">
-              {searchTerm ? t("admin.stories.no_results") : t("admin.stories.no_stories")}
+              {searchTerm
+                ? t("admin.stories.no_results")
+                : t("admin.stories.no_stories")}
             </p>
           </div>
         )}
