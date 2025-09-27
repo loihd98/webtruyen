@@ -8,6 +8,7 @@ import {
   updateCurrentAudio,
 } from "../../store/slices/uiSlice";
 import { AppDispatch } from "../../store";
+import { getMediaUrl } from "../../utils/media";
 
 const AudioPlayer: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -25,7 +26,7 @@ const AudioPlayer: React.FC = () => {
   useEffect(() => {
     if (currentAudio && audioRef.current) {
       const audio = audioRef.current;
-      audio.src = currentAudio.audioUrl;
+      audio.src = getMediaUrl(currentAudio.audioUrl);
       audio.load();
       setIsLoading(true);
     }

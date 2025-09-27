@@ -6,6 +6,7 @@ import StoryCard from "../stories/StoryCard";
 import { storiesAPI } from "../../utils/api";
 import { Story } from "../../types";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getMediaUrl } from "../../utils/media";
 
 const FeaturedStories: React.FC = () => {
   const { t } = useLanguage();
@@ -131,7 +132,7 @@ const FeaturedStories: React.FC = () => {
               <>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
                   {stories.map((story) => (
-                    <StoryCard key={story.id} story={story} variant="compact" />
+                    <StoryCard key={story.id} story={story} variant="card" />
                   ))}
                 </div>
 
@@ -247,7 +248,7 @@ const FeaturedStories: React.FC = () => {
             {audioStories.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {audioStories.map((story) => (
-                  <StoryCard key={story.id} story={story} variant="compact" />
+                  <StoryCard key={story.id} story={story} variant="card" />
                 ))}
               </div>
             ) : (
@@ -312,7 +313,7 @@ const FeaturedStories: React.FC = () => {
                         <div className="flex-1 min-w-0">
                           {story.thumbnailUrl && (
                             <img
-                              src={story.thumbnailUrl}
+                              src={getMediaUrl(story.thumbnailUrl)}
                               alt={story.title}
                               className="w-12 h-16 object-cover rounded mb-2"
                             />

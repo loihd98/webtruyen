@@ -24,6 +24,7 @@ const Navbar: React.FC = () => {
   const { user, isAuthenticated } = useSelector(
     (state: RootState) => state.auth
   );
+
   const { theme } = useSelector((state: RootState) => state.ui);
 
   // Close user menu when clicking outside

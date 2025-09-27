@@ -2,6 +2,10 @@ import React, { Suspense } from "react";
 import { Metadata } from "next";
 import Layout from "../../components/layout/Layout";
 import StoriesClient from "./StoriesClient";
+import StorySidebar from "../../components/layout/StorySidebar";
+
+// Force dynamic rendering for this page due to searchParams
+export const dynamic = "force-dynamic";
 
 // Server-side data fetching
 async function getStories(searchParams: {
@@ -127,6 +131,7 @@ export default async function StoriesPage({
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
   const data = await getStories(searchParams);
+
   const stories = data.data || [];
   const pagination = data.pagination || {
     total: 0,
@@ -148,14 +153,24 @@ export default async function StoriesPage({
           </p>
         </div>
 
-        {/* Client-side interactive components */}
-        <Suspense fallback={<StoriesLoading />}>
-          <StoriesClient
-            initialStories={stories}
-            initialPagination={pagination}
-            searchParams={searchParams}
-          />
-        </Suspense>
+        {/* Main Content with Sidebar */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-3">
+            <Suspense fallback={<StoriesLoading />}>
+              <StoriesClient
+                initialStories={stories}
+                initialPagination={pagination}
+                searchParams={searchParams}
+              />
+            </Suspense>
+          </div>
+
+          {/* Sidebar */}
+          <div className="lg:col-span-1">
+            <StorySidebar />
+          </div>
+        </div>
       </div>
     </Layout>
   );

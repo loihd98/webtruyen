@@ -49,6 +49,8 @@ apiClient.interceptors.request.use(
   (config) => {
     if (getAuthToken) {
       const token = getAuthToken();
+      console.log(token, "token");
+
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }

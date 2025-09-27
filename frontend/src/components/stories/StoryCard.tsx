@@ -8,10 +8,12 @@ import { RootState } from "../../store";
 import { addBookmark, removeBookmark } from "../../store/slices/bookmarkSlice";
 import { openAudioPlayer } from "../../store/slices/uiSlice";
 import { AppDispatch } from "../../store";
-
+import { getMediaUrl } from "../../utils/media";
+import router from "next/router";
+import Image from "next/image";
 interface StoryCardProps {
   story: Story;
-  variant?: "default" | "compact" | "featured";
+  variant?: "default" | "compact" | "featured" | "card";
   showBookmark?: boolean;
 }
 
@@ -20,6 +22,8 @@ const StoryCard: React.FC<StoryCardProps> = ({
   variant = "default",
   showBookmark = true,
 }) => {
+  console.log("story", story?.type);
+
   const dispatch = useDispatch<AppDispatch>();
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const { bookmarks } = useSelector((state: RootState) => state.bookmarks);
@@ -81,7 +85,7 @@ const StoryCard: React.FC<StoryCardProps> = ({
                 {story.thumbnailUrl && (
                   <div className="w-16 h-16 flex-shrink-0">
                     <img
-                      src={story.thumbnailUrl}
+                      src={getMediaUrl(story.thumbnailUrl)}
                       alt={story.title}
                       className="w-full h-full object-cover"
                     />
@@ -144,7 +148,7 @@ const StoryCard: React.FC<StoryCardProps> = ({
               {story.thumbnailUrl && (
                 <div className="aspect-video relative overflow-hidden">
                   <img
-                    src={story.thumbnailUrl}
+                    src={getMediaUrl(story.thumbnailUrl)}
                     alt={story.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -249,6 +253,113 @@ const StoryCard: React.FC<StoryCardProps> = ({
           </Link>
         );
 
+      case "card":
+        return (
+          <Link href={`/stories/${story.slug}`} className="block group">
+            <div
+              key={story?.id}
+              className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow group"
+            >
+              <div className="relative aspect-[3/4] overflow-hidden">
+                {story?.thumbnailUrl ? (
+                  <Image
+                    src={getMediaUrl(story?.thumbnailUrl)}
+                    alt={story?.title ?? ""}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                    <div className="text-4xl text-gray-400">
+                      {story?.type === "AUDIO" ? "🎧" : "📖"}
+                    </div>
+                  </div>
+                )}
+                {/* Type Badge */}
+
+                <div className="absolute top-2 left-2">
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      story?.type === "AUDIO"
+                        ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                        : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                    }`}
+                  >
+                    {story?.type === "AUDIO" ? "🎧 Audio" : "📖 Text"}
+                  </span>
+                </div>
+                {showBookmark && (
+                  <button
+                    onClick={handleBookmark}
+                    className={`absolute p-1 top-3 right-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                      isBookmarked
+                        ? "text-yellow-500"
+                        : "text-gray-400 hover:text-yellow-500"
+                    }`}
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill={isBookmarked ? "currentColor" : "none"}
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
+
+              {/* Content */}
+              <div className="p-4">
+                <h3
+                  className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
+                  onClick={() => router.push(`/stories/${story?.slug}`)}
+                >
+                  {story?.title}
+                </h3>
+
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  👤 {story?.author?.name}
+                </p>
+
+                <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
+                  {story?.description || "Chưa có mô tả"}
+                </p>
+
+                {/* Genres */}
+                <div className="flex flex-wrap gap-1 mb-3">
+                  {story?.genres?.slice(0, 2).map((genre) => (
+                    <span
+                      key={genre.id}
+                      className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded text-xs"
+                    >
+                      {genre.name}
+                    </span>
+                  ))}
+                  {(story?.genres?.length ?? 0) > 2 && (
+                    <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded text-xs">
+                      +{(story?.genres?.length ?? 0) - 2}
+                    </span>
+                  )}
+                </div>
+
+                {/* Stats */}
+                <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                  <span>👁️ {story?.viewCount?.toLocaleString()}</span>
+                  <span>
+                    📅 {new Date(story?.createdAt)?.toLocaleDateString("vi-VN")}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Link>
+        );
+
       default:
         return (
           <Link href={`/stories/${story.slug}`} className="block group">
@@ -256,7 +367,7 @@ const StoryCard: React.FC<StoryCardProps> = ({
               {story.thumbnailUrl && (
                 <div className="aspect-[3/4] relative overflow-hidden">
                   <img
-                    src={story.thumbnailUrl}
+                    src={getMediaUrl(story.thumbnailUrl)}
                     alt={story.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />

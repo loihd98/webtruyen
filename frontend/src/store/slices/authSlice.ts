@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
+import { REHYDRATE } from "redux-persist";
 import { AuthState, User, AuthResponse } from "../../types";
 import { authAPI } from "../../utils/api";
 
@@ -16,7 +17,10 @@ export const getRedirectPath = (user: User | null): string => {
 };
 
 // Async thunks
-export const loginUser = createAsyncThunk(
+export const loginUser = createAsyncThunk<
+  AuthResponse,
+  { email: string; password: string }
+>(
   "auth/login",
   async (
     { email, password }: { email: string; password: string },
@@ -24,16 +28,21 @@ export const loginUser = createAsyncThunk(
   ) => {
     try {
       const response = await authAPI.login(email, password);
-      console.log(response);
-
-      return response.data;
+      // Extract the AuthResponse from the API response
+      if ("data" in response && response.data) {
+        return response.data;
+      }
+      return response as AuthResponse;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || "Login failed");
     }
   }
 );
 
-export const registerUser = createAsyncThunk(
+export const registerUser = createAsyncThunk<
+  AuthResponse,
+  { email: string; password: string; name: string }
+>(
   "auth/register",
   async (
     {
@@ -45,7 +54,11 @@ export const registerUser = createAsyncThunk(
   ) => {
     try {
       const response = await authAPI.register(email, password, name);
-      return response.data;
+      // Extract the AuthResponse from the API response
+      if ("data" in response && response.data) {
+        return response.data;
+      }
+      return response as AuthResponse;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.error || "Registration failed"
@@ -54,7 +67,7 @@ export const registerUser = createAsyncThunk(
   }
 );
 
-export const refreshToken = createAsyncThunk(
+export const refreshToken = createAsyncThunk<AuthResponse, void>(
   "auth/refresh",
   async (_, { getState, rejectWithValue }) => {
     try {
@@ -66,7 +79,11 @@ export const refreshToken = createAsyncThunk(
       }
 
       const response = await authAPI.refreshToken(refreshToken);
-      return response.data;
+      // Extract the AuthResponse from the API response
+      if ("data" in response && response.data) {
+        return response.data;
+      }
+      return response as AuthResponse;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.error || "Token refresh failed"
@@ -88,6 +105,11 @@ export const logoutUser = createAsyncThunk(
     } catch (error) {
       // Ignore logout errors, still clear local state
       console.error("Logout error:", error);
+    }
+
+    // Clear persisted data
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("persist:auth");
     }
   }
 );
@@ -153,11 +175,14 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
+        console.log("loginUser.fulfilled", action);
+
         state.isLoading = false;
-        if (action.payload) {
-          state.user = action.payload.user;
-          state.accessToken = action.payload.accessToken;
-          state.refreshToken = action.payload.refreshToken;
+        const authResponse = action.payload;
+        if (authResponse) {
+          state.user = authResponse.user;
+          state.accessToken = authResponse.accessToken;
+          state.refreshToken = authResponse.refreshToken;
           state.isAuthenticated = true;
         }
         state.error = null;
@@ -174,10 +199,11 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        if (action.payload) {
-          state.user = action.payload.user;
-          state.accessToken = action.payload.accessToken;
-          state.refreshToken = action.payload.refreshToken;
+        const authResponse = action.payload;
+        if (authResponse) {
+          state.user = authResponse.user;
+          state.accessToken = authResponse.accessToken;
+          state.refreshToken = authResponse.refreshToken;
           state.isAuthenticated = true;
         }
         state.error = null;
@@ -189,11 +215,12 @@ const authSlice = createSlice({
 
       // Refresh token
       .addCase(refreshToken.fulfilled, (state, action) => {
-        if (action.payload) {
-          state.accessToken = action.payload.accessToken;
-          state.refreshToken = action.payload.refreshToken;
-          if (action.payload.user) {
-            state.user = action.payload.user;
+        const authResponse = action.payload;
+        if (authResponse) {
+          state.accessToken = authResponse.accessToken;
+          state.refreshToken = authResponse.refreshToken;
+          if (authResponse.user) {
+            state.user = authResponse.user;
           }
           state.isAuthenticated = true;
         }
@@ -231,7 +258,31 @@ const authSlice = createSlice({
         state.accessToken = null;
         state.refreshToken = null;
         state.isAuthenticated = false;
-      });
+      })
+
+      // Handle rehydration from persisted state
+      .addMatcher(
+        (action) => action.type === REHYDRATE,
+        (state, action: any) => {
+          if (action.payload?.auth) {
+            const persistedAuth = action.payload.auth;
+            // Validate that we have the required tokens
+            if (persistedAuth.accessToken && persistedAuth.refreshToken) {
+              return {
+                ...state,
+                ...persistedAuth,
+                isLoading: false,
+                error: null,
+              };
+            }
+          }
+          // If no valid persisted auth, maintain clean initial state
+          return {
+            ...initialState,
+            isLoading: false,
+          };
+        }
+      );
   },
 });
 
