@@ -100,6 +100,7 @@ const optionalAuth = async (req, res, next) => {
 
 module.exports = {
   authenticateToken,
-  requireAdmin,
+  requireAuth: authenticateToken, // Alias for consistency
+  requireAdmin: [authenticateToken, requireAdmin], // Combine auth + admin check
   optionalAuth,
 };

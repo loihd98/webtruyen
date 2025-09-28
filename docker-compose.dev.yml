@@ -1,0 +1,88 @@
+version: "3.8"
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: webtruyen-db-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: webtruyen_dev
+      POSTGRES_USER: webtruyen_dev
+      POSTGRES_PASSWORD: dev_password_123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./logs/postgres:/var/log/postgres
+    networks:
+      - webtruyen-network
+
+  # Redis (Optional - for caching)
+  redis:
+    image: redis:7-alpine
+    container_name: webtruyen-redis-dev
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+    networks:
+      - webtruyen-network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: webtruyen-backend-dev
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://webtruyen_dev:dev_password_123@db:5432/webtruyen_dev
+      - JWT_SECRET=dev-jwt-secret-key-make-it-long-enough-for-security
+      - PORT=3001
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend:/app
+      - ./uploads:/app/uploads
+      - ./logs/backend:/app/logs
+      - /app/node_modules
+    depends_on:
+      - db
+      - redis
+    networks:
+      - webtruyen-network
+    command: npm run dev
+
+  # Frontend Next.js
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: webtruyen-frontend-dev
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - NEXTAUTH_URL=http://localhost:3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - backend
+    networks:
+      - webtruyen-network
+    command: npm run dev
+
+volumes:
+  postgres_dev_data:
+  redis_dev_data:
+
+networks:
+  webtruyen-network:
+    driver: bridge

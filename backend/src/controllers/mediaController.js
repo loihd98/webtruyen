@@ -4,10 +4,30 @@ const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
 const config = require("../config");
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
+// Configure multer for audio files
+const audioStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadDir = path.join(config.uploadPath, "audio");
+    const uploadDir = path.join(config.uploadPath || "uploads", "audio");
+
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    // Generate unique filename
+    const ext = path.extname(file.originalname);
+    const filename = `${uuidv4()}${ext}`;
+    cb(null, filename);
+  },
+});
+
+// Configure multer for image files
+const imageStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(config.uploadPath || "uploads", "images");
 
     // Create directory if it doesn't exist
     if (!fs.existsSync(uploadDir)) {
@@ -25,7 +45,7 @@ const storage = multer.diskStorage({
 });
 
 // File filter for audio files
-const fileFilter = (req, file, cb) => {
+const audioFilter = (req, file, cb) => {
   const allowedMimes = [
     "audio/mpeg", // MP3
     "audio/mp3",
@@ -45,9 +65,37 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer({
-  storage,
-  fileFilter,
+// File filter for image files
+const imageFilter = (req, file, cb) => {
+  const allowedMimes = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+  ];
+
+  if (allowedMimes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(
+      new Error("Chỉ cho phép upload file hình ảnh (JPG, PNG, WEBP, GIF)"),
+      false
+    );
+  }
+};
+
+const audioUpload = multer({
+  storage: audioStorage,
+  fileFilter: audioFilter,
+  limits: {
+    fileSize: 100 * 1024 * 1024, // 100MB for audio
+  },
+});
+
+const imageUpload = multer({
+  storage: imageStorage,
+  fileFilter: imageFilter,
   limits: {
     fileSize: config.maxFileSize, // 100MB
   },
@@ -64,7 +112,7 @@ class MediaController {
         });
       }
 
-      const audioUrl = `/media/audio/${req.file.filename}`;
+      const audioUrl = `/uploads/audio/${req.file.filename}`;
 
       res.json({
         message: "Upload thành công",
@@ -95,7 +143,7 @@ class MediaController {
         });
       }
 
-      const imageUrl = `/media/images/${req.file.filename}`;
+      const imageUrl = `/uploads/images/${req.file.filename}`;
 
       res.json({
         message: "Upload thành công",
@@ -185,7 +233,7 @@ class MediaController {
         size: stats.size,
         createdAt: stats.birthtime,
         modifiedAt: stats.mtime,
-        url: `/media/${type}/${filename}`,
+        url: `/uploads/${type}/${filename}`,
       });
     } catch (error) {
       console.error("Get file info error:", error);
@@ -243,7 +291,7 @@ class MediaController {
             size: stats.size,
             createdAt: stats.birthtime,
             modifiedAt: stats.mtime,
-            url: `/media/${type}/${filename}`,
+            url: `/uploads/${type}/${filename}`,
           };
         })
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -267,50 +315,8 @@ class MediaController {
   }
 }
 
-// Configure image upload
-const imageStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = path.join(config.uploadPath, "images");
-
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const filename = `${uuidv4()}${ext}`;
-    cb(null, filename);
-  },
-});
-
-const imageFilter = (req, file, cb) => {
-  const allowedMimes = [
-    "image/jpeg",
-    "image/jpg",
-    "image/png",
-    "image/gif",
-    "image/webp",
-  ];
-
-  if (allowedMimes.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error("Chỉ cho phép upload file ảnh (JPEG, PNG, GIF, WebP)"), false);
-  }
-};
-
-const uploadImage = multer({
-  storage: imageStorage,
-  fileFilter: imageFilter,
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB for images
-  },
-});
-
 module.exports = {
   MediaController: new MediaController(),
-  uploadAudio: upload.single("audio"),
-  uploadImage: uploadImage.single("image"),
+  uploadAudio: audioUpload.single("audio"),
+  uploadImage: imageUpload.single("image"),
 };

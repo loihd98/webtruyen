@@ -52,10 +52,24 @@ class AuthController {
       // Generate tokens
       const tokens = tokenService.generateTokenPair(user);
 
+      // Format user response with all required fields
+      const userResponse = {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        avatar: user.avatar,
+        role: user.role,
+        googleId: null,
+        facebookId: null,
+        createdAt: user.createdAt,
+        updatedAt: user.createdAt, // Same as createdAt for new user
+      };
+
       res.status(201).json({
         message: "Đăng ký thành công",
-        user,
-        ...tokens,
+        user: userResponse,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
       });
     } catch (error) {
       console.error("Register error:", error);
@@ -107,13 +121,27 @@ class AuthController {
       // Generate tokens
       const tokens = tokenService.generateTokenPair(user);
 
-      // Return user data without password
+      // Return user data without password, including all fields
       const { passwordHash, ...userWithoutPassword } = user;
+
+      // Ensure we have all required fields with proper formatting
+      const userResponse = {
+        id: userWithoutPassword.id,
+        email: userWithoutPassword.email,
+        name: userWithoutPassword.name,
+        avatar: userWithoutPassword.avatar,
+        role: userWithoutPassword.role,
+        googleId: userWithoutPassword.googleId,
+        facebookId: userWithoutPassword.facebookId,
+        createdAt: userWithoutPassword.createdAt,
+        updatedAt: userWithoutPassword.updatedAt,
+      };
 
       res.json({
         message: "Đăng nhập thành công",
-        user: userWithoutPassword,
-        ...tokens,
+        user: userResponse,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
       });
     } catch (error) {
       console.error("Login error:", error);
@@ -170,10 +198,24 @@ class AuthController {
       // Generate new tokens
       const tokens = tokenService.generateTokenPair(user);
 
+      // Format user response with all required fields
+      const userResponse = {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        avatar: user.avatar,
+        role: user.role,
+        googleId: user.googleId || null,
+        facebookId: user.facebookId || null,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt || user.createdAt,
+      };
+
       res.json({
         message: "Token đã được làm mới",
-        user,
-        ...tokens,
+        user: userResponse,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
       });
     } catch (error) {
       console.error("Refresh token error:", error);

@@ -894,7 +894,6 @@ class AdminController {
           _count: {
             select: {
               stories: true,
-              analytics: true,
             },
           },
         },

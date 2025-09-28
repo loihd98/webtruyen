@@ -153,6 +153,7 @@ class StoriesController {
               id: true,
               number: true,
               title: true,
+              content: true,
               isLocked: true,
               audioUrl: true,
               createdAt: true,
@@ -466,6 +467,359 @@ class StoriesController {
       res.status(500).json({
         error: "Internal Server Error",
         message: "Có lỗi xảy ra khi lấy danh sách thể loại",
+      });
+    }
+  }
+
+  // Create new story (Admin only)
+  async createStory(req, res) {
+    try {
+      const { title, description, type, genreIds, affiliateId } = req.body;
+      const authorId = req.user.id;
+
+      // Validation
+      if (!title || title.trim().length === 0) {
+        return res.status(400).json({
+          error: "Validation Error",
+          message: "Tiêu đề truyện là bắt buộc",
+        });
+      }
+
+      if (!type || !["TEXT", "AUDIO"].includes(type)) {
+        return res.status(400).json({
+          error: "Validation Error",
+          message: "Loại truyện không hợp lệ. Chỉ được TEXT hoặc AUDIO",
+        });
+      }
+
+      // Generate slug
+      const slug = slugify(title, { lower: true, strict: true });
+
+      // Check if slug exists
+      const existingStory = await prisma.story.findUnique({ where: { slug } });
+      let finalSlug = slug;
+      let counter = 1;
+
+      while (existingStory) {
+        finalSlug = `${slug}-${counter}`;
+        const slugExists = await prisma.story.findUnique({
+          where: { slug: finalSlug },
+        });
+        if (!slugExists) break;
+        counter++;
+      }
+
+      // Create story with genre connections
+      const storyData = {
+        title: title.trim(),
+        description: description?.trim(),
+        slug: finalSlug,
+        type,
+        status: "DRAFT", // Default to draft
+        authorId,
+      };
+
+      if (affiliateId) {
+        storyData.affiliateId = affiliateId;
+      }
+
+      if (genreIds && genreIds.length > 0) {
+        storyData.genres = {
+          connect: genreIds.map((id) => ({ id })),
+        };
+      }
+
+      const story = await prisma.story.create({
+        data: storyData,
+        include: {
+          author: {
+            select: {
+              id: true,
+              name: true,
+              avatar: true,
+            },
+          },
+          genres: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+          affiliate: {
+            select: {
+              id: true,
+              provider: true,
+              label: true,
+            },
+          },
+        },
+      });
+
+      res.status(201).json({
+        message: "Tạo truyện thành công",
+        story,
+      });
+    } catch (error) {
+      console.error("Create story error:", error);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Có lỗi xảy ra khi tạo truyện",
+      });
+    }
+  }
+
+  // Update story (Admin/Author only)
+  async updateStory(req, res) {
+    try {
+      const { slug } = req.params;
+      const {
+        title,
+        description,
+        type,
+        genreIds,
+        affiliateId,
+        status,
+        thumbnailUrl,
+      } = req.body;
+
+      // Find existing story
+      const existingStory = await prisma.story.findUnique({
+        where: { slug },
+        include: { author: true },
+      });
+
+      if (!existingStory) {
+        return res.status(404).json({
+          error: "Not Found",
+          message: "Truyện không tồn tại",
+        });
+      }
+
+      // Check permission (admin or author)
+      if (req.user.role !== "ADMIN" && req.user.id !== existingStory.authorId) {
+        return res.status(403).json({
+          error: "Forbidden",
+          message: "Bạn không có quyền cập nhật truyện này",
+        });
+      }
+
+      // Build update data
+      const updateData = {};
+
+      if (title && title !== existingStory.title) {
+        updateData.title = title.trim();
+        updateData.slug = slugify(title, { lower: true, strict: true });
+      }
+
+      if (description !== undefined) {
+        updateData.description = description?.trim();
+      }
+
+      if (type && ["TEXT", "AUDIO"].includes(type)) {
+        updateData.type = type;
+      }
+
+      if (status && ["DRAFT", "PUBLISHED", "HIDDEN"].includes(status)) {
+        updateData.status = status;
+      }
+
+      if (thumbnailUrl !== undefined) {
+        updateData.thumbnailUrl = thumbnailUrl;
+      }
+
+      if (affiliateId !== undefined) {
+        updateData.affiliateId = affiliateId;
+      }
+
+      // Handle genres update
+      if (genreIds) {
+        updateData.genres = {
+          set: [], // Clear existing
+          connect: genreIds.map((id) => ({ id })),
+        };
+      }
+
+      const updatedStory = await prisma.story.update({
+        where: { slug },
+        data: updateData,
+        include: {
+          author: {
+            select: {
+              id: true,
+              name: true,
+              avatar: true,
+            },
+          },
+          genres: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+          affiliate: {
+            select: {
+              id: true,
+              provider: true,
+              label: true,
+            },
+          },
+        },
+      });
+
+      res.json({
+        message: "Cập nhật truyện thành công",
+        story: updatedStory,
+      });
+    } catch (error) {
+      console.error("Update story error:", error);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Có lỗi xảy ra khi cập nhật truyện",
+      });
+    }
+  }
+
+  // Delete story (Admin/Author only)
+  async deleteStory(req, res) {
+    try {
+      const { slug } = req.params;
+
+      // Find existing story
+      const existingStory = await prisma.story.findUnique({
+        where: { slug },
+        include: { author: true },
+      });
+
+      if (!existingStory) {
+        return res.status(404).json({
+          error: "Not Found",
+          message: "Truyện không tồn tại",
+        });
+      }
+
+      // Check permission (admin or author)
+      if (req.user.role !== "ADMIN" && req.user.id !== existingStory.authorId) {
+        return res.status(403).json({
+          error: "Forbidden",
+          message: "Bạn không có quyền xóa truyện này",
+        });
+      }
+
+      // Delete story (cascade will handle related data)
+      await prisma.story.delete({
+        where: { slug },
+      });
+
+      res.json({
+        message: "Xóa truyện thành công",
+      });
+    } catch (error) {
+      console.error("Delete story error:", error);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Có lỗi xảy ra khi xóa truyện",
+      });
+    }
+  }
+
+  // Get stories for admin (all stories including drafts)
+  async getAdminStories(req, res) {
+    try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 12;
+      const skip = (page - 1) * limit;
+
+      const { type, genre, search, status, sort = "createdAt" } = req.query;
+
+      // Build where clause (admin can see all stories)
+      const where = {};
+
+      if (type && ["TEXT", "AUDIO"].includes(type)) {
+        where.type = type;
+      }
+
+      if (status && ["DRAFT", "PUBLISHED", "HIDDEN"].includes(status)) {
+        where.status = status;
+      }
+
+      if (genre) {
+        where.genres = {
+          some: {
+            slug: genre,
+          },
+        };
+      }
+
+      if (search) {
+        where.OR = [
+          {
+            title: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+          {
+            description: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+        ];
+      }
+
+      const [stories, total] = await Promise.all([
+        prisma.story.findMany({
+          where,
+          include: {
+            author: {
+              select: {
+                id: true,
+                name: true,
+                avatar: true,
+              },
+            },
+            genres: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
+            _count: {
+              select: {
+                chapters: true,
+                bookmarks: true,
+              },
+            },
+          },
+          orderBy: {
+            [sort]: "desc",
+          },
+          skip,
+          take: limit,
+        }),
+        prisma.story.count({ where }),
+      ]);
+
+      res.json({
+        message: "Lấy danh sách truyện thành công",
+        data: {
+          data: stories,
+          pagination: {
+            page,
+            limit,
+            total,
+            pages: Math.ceil(total / limit),
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Get admin stories error:", error);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Có lỗi xảy ra khi lấy danh sách truyện",
       });
     }
   }
