@@ -8,6 +8,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { getMediaUrl } from "@/utils/media";
 import SimpleAudioPlayer from "../audio/SimpleAudioPlayer";
+import apiClient from "@/utils/api";
 
 interface Story {
   id: string;
@@ -72,15 +73,9 @@ const StoryDetailPage: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/stories/${slug}`, {
-        headers: user
-          ? {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            }
-          : {},
-      });
+      const response = await apiClient.get(`/stories/${slug}`);
 
-      if (!response.ok) {
+      if (!response.data) {
         if (response.status === 404) {
           setError("Truyện không tồn tại");
         } else {
@@ -89,8 +84,7 @@ const StoryDetailPage: React.FC = () => {
         return;
       }
 
-      const data = await response.json();
-      setStory(data.story);
+      setStory(response.data.story);
 
       // Check if bookmarked
       if (user) {
@@ -106,18 +100,12 @@ const StoryDetailPage: React.FC = () => {
 
   const checkBookmarkStatus = async () => {
     try {
-      const response = await fetch(
-        `/api/bookmarks/check?storyId=${story?.id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        }
+      const response = await apiClient.get(
+        `/bookmarks/check?storyId=${story?.id}`
       );
 
-      if (response.ok) {
-        const data = await response.json();
-        setIsBookmarked(data.isBookmarked);
+      if (response.data) {
+        setIsBookmarked(response.data.isBookmarked);
       }
     } catch (error) {
       console.error("Error checking bookmark status:", error);
@@ -131,18 +119,14 @@ const StoryDetailPage: React.FC = () => {
     }
 
     try {
-      const response = await fetch("/api/bookmarks", {
-        method: isBookmarked ? "DELETE" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-        body: JSON.stringify({
+      const response = await apiClient[isBookmarked ? "delete" : "post"](
+        "/api/bookmarks",
+        JSON.stringify({
           storyId: story?.id,
-        }),
-      });
+        })
+      );
 
-      if (response.ok) {
+      if (response.data) {
         setIsBookmarked(!isBookmarked);
       } else {
         alert("Có lỗi xảy ra khi cập nhật bookmark");

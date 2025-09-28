@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { getMediaUrl } from "../../utils/media";
+import apiClient from "@/utils/api";
 
 interface Story {
   id: string;
@@ -39,21 +40,19 @@ export default function StorySidebar({ className = "" }: SidebarProps) {
       setLoading(true);
 
       // Fetch hot stories (most viewed)
-      const hotResponse = await fetch(
-        "/api/stories?sort=viewCount&order=desc&limit=5"
+      const hotResponse = await apiClient.get(
+        "/stories?sort=viewCount&order=desc&limit=5"
       );
-      if (hotResponse.ok) {
-        const hotData = await hotResponse.json();
-        setHotStories(hotData.stories || []);
+      if (hotResponse.data) {
+        setHotStories(hotResponse.data.stories || []);
       }
 
       // Fetch trending stories (recently popular)
-      const trendingResponse = await fetch(
-        "/api/stories?sort=createdAt&order=desc&limit=5"
+      const trendingResponse = await apiClient.get(
+        "/stories?sort=createdAt&order=desc&limit=5"
       );
-      if (trendingResponse.ok) {
-        const trendingData = await trendingResponse.json();
-        setTrendingStories(trendingData.stories || []);
+      if (trendingResponse.data) {
+        setTrendingStories(trendingResponse.data.stories || []);
       }
     } catch (error) {
       console.error("Error fetching sidebar data:", error);

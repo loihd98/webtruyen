@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import StoryCard from "../../components/stories/StoryCard";
 import { Story } from "../../types";
+import apiClient from "@/utils/api";
 
 interface StoriesClientProps {
   initialStories: any;
@@ -45,10 +46,9 @@ export default function StoriesClient({
   React.useEffect(() => {
     const fetchGenres = async () => {
       try {
-        const response = await fetch("/api/stories/genres");
-        if (response.ok) {
-          const data = await response.json();
-          setGenres(data.genres || []);
+        const response = await apiClient.get("/stories/genres");
+        if (response.data) {
+          setGenres(response.data.genres || []);
         }
       } catch (error) {
         console.error("Error fetching genres:", error);

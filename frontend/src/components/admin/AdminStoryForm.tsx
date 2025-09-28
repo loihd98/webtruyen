@@ -3,13 +3,30 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useAccessToken } from "../../hooks/useAuth";
-import { getMediaUrl, validateFileType } from "../../utils/media";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store";
+import { getMediaUrl } from "../../utils/media";
+import apiClient from "@/utils/api";
 
 interface Genre {
   id: string;
   name: string;
   slug: string;
+}
+
+interface Affiliate {
+  id: string;
+  provider: string;
+  targetUrl: string;
+  label?: string;
+}
+
+interface ChapterFormData {
+  number: number;
+  title: string;
+  content?: string;
+  audioUrl?: string;
+  isLocked: boolean;
 }
 
 interface StoryFormData {
@@ -19,22 +36,23 @@ interface StoryFormData {
   genreIds: string[];
   thumbnailUrl: string;
   audioUrl?: string;
+  content?: string;
+  affiliateId?: string;
+  chapters?: ChapterFormData[];
   status: "DRAFT" | "PUBLISHED" | "HIDDEN";
 }
 
 interface AdminStoryFormProps {
   storyId?: string;
-  initialData?: Partial<StoryFormData>;
-  onSubmit?: (data: StoryFormData) => Promise<void>;
+  onClose?: () => void;
 }
 
 const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
   storyId,
-  initialData,
-  onSubmit,
+  onClose,
 }) => {
   const router = useRouter();
-  const accessToken = useAccessToken();
+  const { user } = useSelector((state: RootState) => state.auth);
   const [formData, setFormData] = useState<StoryFormData>({
     title: "",
     description: "",
@@ -42,36 +60,84 @@ const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
     genreIds: [],
     thumbnailUrl: "",
     audioUrl: "",
+    content: "",
+    affiliateId: "",
     status: "DRAFT",
-    ...initialData,
   });
 
   const [genres, setGenres] = useState<Genre[]>([]);
+  const [affiliates, setAffiliates] = useState<Affiliate[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [thumbnailPreview, setThumbnailPreview] = useState<string>("");
   const [audioPreview, setAudioPreview] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [success, setSuccess] = useState<string>("");
 
-  // Fetch genres on component mount
   useEffect(() => {
     fetchGenres();
-    if (initialData?.thumbnailUrl) {
-      setThumbnailPreview(getMediaUrl(initialData.thumbnailUrl));
+    fetchAffiliates();
+    if (storyId) {
+      fetchStoryData();
     }
-    if (initialData?.audioUrl) {
-      setAudioPreview(getMediaUrl(initialData.audioUrl));
-    }
-  }, [initialData]);
+  }, [storyId]);
 
   const fetchGenres = async () => {
     try {
-      const response = await fetch("/api/stories/genres");
-      if (response.ok) {
-        const data = await response.json();
-        setGenres(data.genres || []);
+      const response = await apiClient.get("/stories/genres");
+      if (response.data) {
+        setGenres(response.data.genres || []);
       }
     } catch (error) {
       console.error("Error fetching genres:", error);
+    }
+  };
+
+  const fetchAffiliates = async () => {
+    try {
+      const response = await apiClient.get("/admin/affiliate-links");
+      if (response.data) {
+        setAffiliates(response.data.affiliateLinks || []);
+      }
+    } catch (error) {
+      console.error("Error fetching affiliates:", error);
+    }
+  };
+
+  const fetchStoryData = async () => {
+    try {
+      setLoading(true);
+      const response = await apiClient.get(`/api/admin/stories/${storyId}`);
+
+      if (response.data) {
+        const story = response.data.story;
+
+        setFormData({
+          title: story.title || "",
+          description: story.description || "",
+          type: story.type || "TEXT",
+          genreIds: story.genres?.map((g: any) => g.id) || [],
+          thumbnailUrl: story.thumbnailUrl || "",
+          audioUrl: story.audioUrl || "",
+          content: story.content || "",
+          affiliateId: story.affiliateId || "",
+          status: story.status || "DRAFT",
+        });
+
+        if (story.thumbnailUrl) {
+          setThumbnailPreview(getMediaUrl(story.thumbnailUrl));
+        }
+        if (story.audioUrl) {
+          setAudioPreview(getMediaUrl(story.audioUrl));
+        }
+      } else {
+        setError("Không thể tải thông tin truyện");
+      }
+    } catch (error) {
+      console.error("Error fetching story:", error);
+      setError("Có lỗi xảy ra khi tải thông tin truyện");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -100,66 +166,93 @@ const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
     file: File,
     type: "image" | "audio"
   ): Promise<string> => {
-    const formData = new FormData();
-    formData.append(type, file);
+    const fileKey = type === "audio" ? "audio" : "image";
+    console.log(file, "file");
 
-    const response = await fetch(`/api/media/upload/${type}`, {
-      method: "POST",
+    const formData = new FormData();
+    formData.append(fileKey, file);
+
+    const response = await apiClient.post(`media/upload/${type}`, formData, {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "multipart/form-data",
       },
-      body: formData,
     });
 
-    if (!response.ok) {
-      throw new Error(`Failed to upload ${type}`);
-    }
-
-    const data = await response.json();
-    return data.file.url;
+    return response.data.file.url;
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleThumbnailChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = e.target.files?.[0];
+
     if (!file) return;
 
     // Validate file type
-    if (!validateFileType(file, "image")) {
-      alert("Vui lòng chọn file hình ảnh hợp lệ (JPG, PNG, WEBP, GIF)");
+    if (!file.type.startsWith("image/")) {
+      setError("Vui lòng chọn file hình ảnh");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 100 * 1024 * 1024) {
+      setError("File hình ảnh không được vượt quá 5MB");
       return;
     }
 
     try {
       setUploading(true);
-      const url = await uploadFile(file, "image");
-      setFormData((prev) => ({ ...prev, thumbnailUrl: url }));
-      setThumbnailPreview(getMediaUrl(url));
+      setError("");
+
+      // Show preview immediately
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setThumbnailPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+
+      // Upload file
+      const filename = await uploadFile(file, "image");
+      setFormData((prev) => ({ ...prev, thumbnailUrl: filename }));
     } catch (error) {
-      console.error("Error uploading image:", error);
-      alert("Có lỗi khi upload hình ảnh");
+      console.error("Error uploading thumbnail:", error);
+      setError("Có lỗi xảy ra khi upload hình ảnh");
+      setThumbnailPreview("");
     } finally {
       setUploading(false);
     }
   };
 
-  const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAudioChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     // Validate file type
-    if (!validateFileType(file, "audio")) {
-      alert("Vui lòng chọn file audio hợp lệ (MP3, WAV, OGG, AAC, FLAC)");
+    if (!file.type.startsWith("audio/")) {
+      setError("Vui lòng chọn file audio");
+      return;
+    }
+
+    // Validate file size (max 50MB)
+    if (file.size > 50 * 1024 * 1024) {
+      setError("File audio không được vượt quá 50MB");
       return;
     }
 
     try {
       setUploading(true);
-      const url = await uploadFile(file, "audio");
-      setFormData((prev) => ({ ...prev, audioUrl: url }));
-      setAudioPreview(getMediaUrl(url));
+      setError("");
+
+      // Show preview immediately
+      setAudioPreview(URL.createObjectURL(file));
+
+      // Upload file
+      const filename = await uploadFile(file, "audio");
+      setFormData((prev) => ({ ...prev, audioUrl: filename }));
     } catch (error) {
       console.error("Error uploading audio:", error);
-      alert("Có lỗi khi upload file audio");
+      setError("Có lỗi xảy ra khi upload file audio");
+      setAudioPreview("");
     } finally {
       setUploading(false);
     }
@@ -168,241 +261,330 @@ const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validation
     if (!formData.title.trim()) {
-      alert("Vui lòng nhập tiêu đề truyện");
+      setError("Vui lòng nhập tiêu đề truyện");
       return;
     }
 
+    if (!formData.description.trim()) {
+      setError("Vui lòng nhập mô tả truyện");
+      return;
+    }
+
+    if (formData.genreIds.length === 0) {
+      setError("Vui lòng chọn ít nhất một thể loại");
+      return;
+    }
+
+    if (formData.type === "TEXT" && !formData.content?.trim()) {
+      setError("Vui lòng nhập nội dung truyện");
+      return;
+    }
+    console.log(formData);
+
     if (formData.type === "AUDIO" && !formData.audioUrl) {
-      alert("Vui lòng upload file audio cho truyện audio");
+      setError("Vui lòng upload file audio");
       return;
     }
 
     try {
       setLoading(true);
+      setError("");
+      setSuccess("");
 
-      if (onSubmit) {
-        await onSubmit(formData);
-      } else {
-        // Default submit behavior
-        const url = storyId ? `/api/stories/${storyId}` : "/api/stories";
-        const method = storyId ? "PUT" : "POST";
+      const url = storyId ? `admin/stories/${storyId}` : "admin/stories";
 
-        const response = await fetch(url, {
-          method,
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify(formData),
-        });
+      const method = storyId ? "put" : "post";
 
-        if (!response.ok) {
-          throw new Error("Failed to save story");
-        }
+      const response = await apiClient[method](url, formData);
 
-        alert(
+      if (response.status >= 200 && response.status < 300) {
+        const data = response.data;
+        setSuccess(
           storyId ? "Cập nhật truyện thành công!" : "Tạo truyện thành công!"
         );
-        router.push("/admin/stories");
+
+        // Reset form if creating new story
+        if (!storyId) {
+          setFormData({
+            title: "",
+            description: "",
+            type: "TEXT",
+            genreIds: [],
+            thumbnailUrl: "",
+            audioUrl: "",
+            content: "",
+            affiliateId: "",
+            status: "DRAFT",
+            chapters: [] as {
+              number: number;
+              title: string;
+              content?: string;
+              audioUrl?: string;
+              isLocked: boolean;
+            }[],
+          });
+          setThumbnailPreview("");
+          setAudioPreview("");
+        }
+
+        // Close modal or redirect after success
+        setTimeout(() => {
+          if (onClose) {
+            onClose();
+          } else {
+            router.push("/admin/stories");
+          }
+        }, 2000);
       }
-    } catch (error) {
-      console.error("Error saving story:", error);
-      alert("Có lỗi xảy ra khi lưu truyện");
+    } catch (error: any) {
+      console.error("Error submitting form:", error);
+      setError(error.response?.data?.message || "Có lỗi xảy ra khi lưu truyện");
     } finally {
       setLoading(false);
     }
   };
 
+  if (loading && storyId) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <span className="ml-2">Đang tải...</span>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold mb-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
           {storyId ? "Chỉnh sửa truyện" : "Tạo truyện mới"}
         </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Title */}
-          <div>
-            <label
-              htmlFor="title"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Tiêu đề truyện *
-            </label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Nhập tiêu đề truyện"
-              required
-            />
+        {/* Error & Success Messages */}
+        {error && (
+          <div className="mb-4 p-4 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-100 rounded-lg">
+            {error}
           </div>
+        )}
 
-          {/* Description */}
-          <div>
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Mô tả
-            </label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Nhập mô tả truyện"
-            />
+        {success && (
+          <div className="mb-4 p-4 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-100 rounded-lg">
+            {success}
           </div>
+        )}
 
-          {/* Type and Status */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Column */}
+          <div className="space-y-4">
+            {/* Title */}
             <div>
-              <label
-                htmlFor="type"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Loại truyện
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Tiêu đề truyện *
+              </label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                placeholder="Nhập tiêu đề truyện..."
+                required
+              />
+            </div>
+
+            {/* Type */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Loại truyện *
               </label>
               <select
-                id="type"
                 name="type"
                 value={formData.type}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               >
-                <option value="TEXT">Truyện chữ</option>
-                <option value="AUDIO">Truyện audio</option>
+                <option value="TEXT">📖 Truyện chữ</option>
+                <option value="AUDIO">🎧 Truyện audio</option>
               </select>
             </div>
 
+            {/* Status */}
             <div>
-              <label
-                htmlFor="status"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Trạng thái
               </label>
               <select
-                id="status"
                 name="status"
                 value={formData.status}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               >
-                <option value="DRAFT">Bản nháp</option>
-                <option value="PUBLISHED">Đã xuất bản</option>
-                <option value="HIDDEN">Ẩn</option>
+                <option value="DRAFT">📝 Bản nháp</option>
+                <option value="PUBLISHED">🌟 Đã xuất bản</option>
+                <option value="HIDDEN">👁️ Ẩn</option>
+              </select>
+            </div>
+
+            {/* Genres */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Thể loại * (chọn ít nhất 1)
+              </label>
+              <div className="max-h-40 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-md p-2 bg-white dark:bg-gray-700">
+                {genres.map((genre) => (
+                  <label key={genre.id} className="flex items-center py-1">
+                    <input
+                      type="checkbox"
+                      checked={formData.genreIds.includes(genre.id)}
+                      onChange={(e) =>
+                        handleGenreChange(genre.id, e.target.checked)
+                      }
+                      className="mr-2 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-gray-900 dark:text-white">
+                      {genre.name}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Affiliate */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Liên kết affiliate (tùy chọn)
+              </label>
+              <select
+                name="affiliateId"
+                value={formData.affiliateId}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Không có</option>
+                {affiliates.map((affiliate) => (
+                  <option key={affiliate.id} value={affiliate.id}>
+                    {affiliate.provider} -{" "}
+                    {affiliate.label || affiliate.targetUrl}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
 
-          {/* Genres */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Thể loại
-            </label>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-              {genres.map((genre) => (
-                <label key={genre.id} className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={formData.genreIds.includes(genre.id)}
-                    onChange={(e) =>
-                      handleGenreChange(genre.id, e.target.checked)
-                    }
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-700">{genre.name}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Thumbnail Upload */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Ảnh bìa truyện
-            </label>
-            <div className="space-y-4">
+          {/* Right Column */}
+          <div className="space-y-4">
+            {/* Thumbnail Upload */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Hình ảnh thumbnail
+              </label>
               <input
                 type="file"
                 accept="image/*"
-                onChange={handleImageUpload}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                disabled={uploading}
+                onChange={handleThumbnailChange}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
               />
               {thumbnailPreview && (
-                <div className="relative w-32 h-48">
+                <div className="mt-2">
                   <Image
                     src={thumbnailPreview}
                     alt="Thumbnail preview"
-                    fill
-                    className="object-cover rounded-md"
+                    width={200}
+                    height={250}
+                    className="rounded-md object-cover"
                   />
                 </div>
               )}
             </div>
-          </div>
 
-          {/* Audio Upload (for AUDIO type) */}
-          {formData.type === "AUDIO" && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                File Audio *
-              </label>
-              <div className="space-y-4">
+            {/* Audio Upload for AUDIO type */}
+            {formData.type === "AUDIO" && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  File audio *
+                </label>
                 <input
                   type="file"
                   accept="audio/*"
-                  onChange={handleAudioUpload}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  disabled={uploading}
+                  onChange={handleAudioChange}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                 />
                 {audioPreview && (
-                  <audio controls className="w-full">
-                    <source src={audioPreview} type="audio/mpeg" />
-                    Trình duyệt của bạn không hỗ trợ phát audio.
-                  </audio>
+                  <div className="mt-2">
+                    <audio controls className="w-full">
+                      <source src={audioPreview} />
+                      Trình duyệt không hỗ trợ phát audio.
+                    </audio>
+                  </div>
                 )}
               </div>
-            </div>
-          )}
-
-          {/* Submit Buttons */}
-          <div className="flex space-x-4">
-            <button
-              type="submit"
-              disabled={loading || uploading}
-              className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? "Đang lưu..." : storyId ? "Cập nhật" : "Tạo mới"}
-            </button>
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="flex-1 bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
-            >
-              Hủy
-            </button>
+            )}
           </div>
-        </form>
+        </div>
+        {/* Description */}
+        <div className="mt-6">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Mô tả *
+          </label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleInputChange}
+            rows={4}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+            placeholder="Nhập mô tả truyện..."
+            required
+          />
+        </div>
 
-        {uploading && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white p-4 rounded-lg">
-              <p>Đang upload file...</p>
-            </div>
+        {/* Content for TEXT type */}
+        {formData.type === "TEXT" && (
+          <div className="mt-6">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Nội dung truyện *
+            </label>
+            <textarea
+              name="content"
+              value={formData.content}
+              onChange={handleInputChange}
+              rows={12}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+              placeholder="Nhập nội dung truyện..."
+              required
+            />
           </div>
         )}
+
+        {/* Submit Buttons */}
+        <div className="flex justify-end space-x-4 mt-6">
+          <button
+            type="button"
+            onClick={onClose || (() => router.back())}
+            className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+          >
+            Hủy
+          </button>
+          <button
+            type="submit"
+            disabled={loading || uploading}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {loading ? (
+              <div className="flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Đang lưu...
+              </div>
+            ) : storyId ? (
+              "Cập nhật"
+            ) : (
+              "Tạo mới"
+            )}
+          </button>
+        </div>
       </div>
-    </div>
+    </form>
   );
 };
 

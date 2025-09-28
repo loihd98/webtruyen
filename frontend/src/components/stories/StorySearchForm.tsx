@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import apiClient from "@/utils/api";
 
 interface Genre {
   id: string;
@@ -75,10 +76,9 @@ const StorySearchForm: React.FC<StorySearchFormProps> = ({
 
   const fetchGenres = async () => {
     try {
-      const response = await fetch("/api/stories/genres");
-      if (response.ok) {
-        const data = await response.json();
-        setGenres(data.genres || []);
+      const response = await apiClient.get("/stories/genres");
+      if (response.data) {
+        setGenres(response.data.genres || []);
       }
     } catch (error) {
       console.error("Error fetching genres:", error);

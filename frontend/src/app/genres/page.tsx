@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import StorySidebar from "../../components/layout/StorySidebar";
 import Layout from "@/components/layout/Layout";
+import apiClient from "@/utils/api";
 
 interface Genre {
   id: string;
@@ -31,13 +32,12 @@ export default function GenresPage() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch("/api/stories/genres");
-      if (!response.ok) {
+      const response = await apiClient.get("/stories/genres");
+      if (!response.data) {
         throw new Error("Không thể tải danh sách thể loại");
       }
 
-      const data = await response.json();
-      setGenres(data.genres || []);
+      setGenres(response.data.genres || []);
     } catch (error) {
       console.error("Error fetching genres:", error);
       setError("Có lỗi xảy ra khi tải danh sách thể loại");

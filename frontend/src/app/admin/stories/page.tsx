@@ -6,6 +6,7 @@ import Link from "next/link";
 import StorySearchForm from "../../../components/stories/StorySearchForm";
 import { getMediaUrl } from "../../../utils/media";
 import { useAccessToken } from "../../../hooks/useAuth";
+import apiClient from "@/utils/api";
 
 // Force dynamic rendering for this page
 export const dynamic = "force-dynamic";
@@ -81,18 +82,13 @@ const AdminStoriesPage: React.FC = () => {
         ),
       });
 
-      const response = await fetch(`/api/stories/admin/stories?${params}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await apiClient.get(`/stories/admin/stories?${params}`);
 
-      if (response.ok) {
-        const data = await response.json();
-        setStories(data.data?.data || []);
+      if (response.data?.data) {
+        setStories(response.data.data?.data || []);
         setPagination((prev) => ({
           ...prev,
-          ...data.data?.pagination,
+          ...response.data.data.pagination,
         }));
       }
     } catch (error) {
@@ -113,14 +109,9 @@ const AdminStoriesPage: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`/api/stories/${story.slug}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await apiClient.delete(`/stories/${story.slug}`);
 
-      if (response.ok) {
+      if (response.data) {
         alert("Xóa truyện thành công!");
         fetchStories();
       } else {

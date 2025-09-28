@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { Story } from "../../types";
+import Layout from "../layout/Layout";
 
 const AdminStoryManager: React.FC = () => {
   const { t } = useLanguage();
@@ -26,49 +27,6 @@ const AdminStoryManager: React.FC = () => {
       // Mock data - replace with actual API call
       setTimeout(() => {
         const mockStories: Story[] = [
-          {
-            id: "1",
-            slug: "dau-pha-thuong-khung",
-            title: "Đấu Phá Thương Khung",
-            description: "Truyện tu tiên nổi tiếng của Thiên Tàm Thổ Đậu",
-            thumbnailUrl: "https://via.placeholder.com/300x400?text=ĐPTK",
-            type: "TEXT",
-            status: "PUBLISHED",
-            viewCount: 45234,
-            authorId: "author1",
-            createdAt: "2025-01-15T00:00:00Z",
-            updatedAt: "2025-09-22T00:00:00Z",
-            author: {
-              id: "author1",
-              name: "Thiên Tàm Thổ Đậu",
-              avatar: "https://via.placeholder.com/100x100?text=TTTĐ",
-            },
-            _count: {
-              chapters: 1200,
-              bookmarks: 3421,
-            },
-          },
-          {
-            id: "2",
-            slug: "tien-nghich",
-            title: "Tiên Nghịch",
-            description: "Tu tiên kinh điển của Nhĩ Căn",
-            thumbnailUrl: "https://via.placeholder.com/300x400?text=TN",
-            type: "AUDIO",
-            status: "PUBLISHED",
-            viewCount: 38945,
-            authorId: "author2",
-            createdAt: "2025-02-10T00:00:00Z",
-            updatedAt: "2025-09-21T00:00:00Z",
-            author: {
-              id: "author2",
-              name: "Nhĩ Căn",
-            },
-            _count: {
-              chapters: 890,
-              bookmarks: 2876,
-            },
-          },
           {
             id: "3",
             slug: "hoan-my-the-gioi",
@@ -178,186 +136,189 @@ const AdminStoryManager: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {t("admin.stories.title")}
-            </h3>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-            >
-              + {t("admin.stories.create_new")}
-            </button>
-          </div>
-        </div>
-
-        {/* Filters */}
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t("admin.stories.search")}
-              </label>
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder={t("admin.stories.search_placeholder")}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t("common.type")}
-              </label>
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value as any)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-              >
-                <option value="ALL">{t("stories.filter.all")}</option>
-                <option value="TEXT">{t("stories.filter.text")}</option>
-                <option value="AUDIO">{t("stories.filter.audio")}</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t("common.status")}
-              </label>
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value as any)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-              >
-                <option value="ALL">{t("stories.filter.all")}</option>
-                <option value="PUBLISHED">{t("common.published")}</option>
-                <option value="DRAFT">{t("common.draft")}</option>
-                <option value="HIDDEN">{t("common.hidden")}</option>
-              </select>
-            </div>
-
-            <div className="flex items-end">
+    <Layout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                {t("admin.stories.title")}
+              </h3>
               <button
-                onClick={fetchStories}
-                className="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                onClick={() => setShowCreateModal(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
               >
-                🔄 {t("admin.stories.refresh")}
+                + {t("admin.stories.create_new")}
               </button>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Stories Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-700">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  {t("admin.stories.story")}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  {t("common.author")}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+          {/* Filters */}
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {t("admin.stories.search")}
+                </label>
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder={t("admin.stories.search_placeholder")}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {t("common.type")}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  {t("common.status")}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  {t("admin.stories.stats")}
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  {t("admin.stories.actions")}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {filteredStories.map((story) => (
-                <tr
-                  key={story.id}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                </label>
+                <select
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value as any)}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
                 >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <img
-                        src={
-                          story.thumbnailUrl ||
-                          "https://via.placeholder.com/60x80?text=No+Image"
-                        }
-                        alt={story.title}
-                        className="h-16 w-12 object-cover rounded"
-                      />
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {story.title}
-                        </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate">
-                          {story.description}
+                  <option value="ALL">{t("stories.filter.all")}</option>
+                  <option value="TEXT">{t("stories.filter.text")}</option>
+                  <option value="AUDIO">{t("stories.filter.audio")}</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {t("common.status")}
+                </label>
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value as any)}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                >
+                  <option value="ALL">{t("stories.filter.all")}</option>
+                  <option value="PUBLISHED">{t("common.published")}</option>
+                  <option value="DRAFT">{t("common.draft")}</option>
+                  <option value="HIDDEN">{t("common.hidden")}</option>
+                </select>
+              </div>
+
+              <div className="flex items-end">
+                <button
+                  onClick={fetchStories}
+                  className="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                  🔄 {t("admin.stories.refresh")}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stories Table */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    {t("admin.stories.story")}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    {t("common.author")}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    {t("common.type")}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    {t("common.status")}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    {t("admin.stories.stats")}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    {t("admin.stories.actions")}
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                {filteredStories.map((story) => (
+                  <tr
+                    key={story.id}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <img
+                          src={
+                            story.thumbnailUrl ||
+                            "https://via.placeholder.com/60x80?text=No+Image"
+                          }
+                          alt={story.title}
+                          className="h-16 w-12 object-cover rounded"
+                        />
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">
+                            {story.title}
+                          </div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate">
+                            {story.description}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900 dark:text-white">
-                      {story.author?.name || t("admin.stories.unknown_author")}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {getTypeBadge(story.type)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {getStatusBadge(story.status)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    <div className="space-y-1">
-                      <div>👁️ {story.viewCount.toLocaleString()}</div>
-                      <div>📖 {story._count?.chapters || 0}</div>
-                      <div>🔖 {story._count?.bookmarks || 0}</div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => setEditingStory(story)}
-                        className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        onClick={() => handleDelete(story.id)}
-                        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {filteredStories.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 text-4xl mb-4">📚</div>
-            <p className="text-gray-500 dark:text-gray-400">
-              {searchTerm
-                ? t("admin.stories.no_results")
-                : t("admin.stories.no_stories")}
-            </p>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900 dark:text-white">
+                        {story.author?.name ||
+                          t("admin.stories.unknown_author")}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {getTypeBadge(story.type)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {getStatusBadge(story.status)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      <div className="space-y-1">
+                        <div>👁️ {story.viewCount.toLocaleString()}</div>
+                        <div>📖 {story._count?.chapters || 0}</div>
+                        <div>🔖 {story._count?.bookmarks || 0}</div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => setEditingStory(story)}
+                          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          onClick={() => handleDelete(story.id)}
+                          className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
+
+          {filteredStories.length === 0 && (
+            <div className="text-center py-12">
+              <div className="text-gray-400 text-4xl mb-4">📚</div>
+              <p className="text-gray-500 dark:text-gray-400">
+                {searchTerm
+                  ? t("admin.stories.no_results")
+                  : t("admin.stories.no_stories")}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 

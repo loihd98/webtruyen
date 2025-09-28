@@ -8,6 +8,7 @@ import { RootState } from "../../../store";
 import SimpleAudioPlayer from "../../../components/audio/SimpleAudioPlayer";
 import { getMediaUrl } from "../../../utils/media";
 import Layout from "@/components/layout/Layout";
+import apiClient from "@/utils/api";
 
 interface Story {
   id: string;
@@ -77,15 +78,9 @@ export default function StoryPage({ params }: StoryPageProps) {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/stories/${slug}`, {
-        headers: user
-          ? {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            }
-          : {},
-      });
+      const response = await apiClient.get(`/stories/${slug}`);
 
-      if (!response.ok) {
+      if (!response.data) {
         if (response.status === 404) {
           setError("Truyện không tồn tại");
         } else {
@@ -94,12 +89,11 @@ export default function StoryPage({ params }: StoryPageProps) {
         return;
       }
 
-      const data = await response.json();
-      setStory(data.story);
+      setStory(response.data.story);
 
       // Check if bookmarked
-      if (user && data.story) {
-        checkBookmarkStatus(data.story.id);
+      if (user && response.data.story) {
+        checkBookmarkStatus(response.data.story.id);
       }
     } catch (error) {
       console.error("Error fetching story:", error);
@@ -111,17 +105,12 @@ export default function StoryPage({ params }: StoryPageProps) {
 
   const checkBookmarkStatus = async (storyId: string) => {
     try {
-      const response = await fetch(`/api/bookmarks/check?storyId=${storyId}`, {
-        headers: user
-          ? {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            }
-          : {},
-      });
+      const response = await apiClient.get(
+        `/bookmarks/check?storyId=${storyId}`
+      );
 
-      if (response.ok) {
-        const data = await response.json();
-        setIsBookmarked(data.isBookmarked);
+      if (response.data) {
+        setIsBookmarked(response.data.isBookmarked);
       }
     } catch (error) {
       console.error("Error checking bookmark status:", error);
@@ -135,19 +124,16 @@ export default function StoryPage({ params }: StoryPageProps) {
     }
 
     try {
-      const response = await fetch("/api/bookmarks", {
-        method: isBookmarked ? "DELETE" : "POST",
-        headers: user
-          ? {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            }
-          : {},
-        body: JSON.stringify({
-          storyId: story?.id,
-        }),
-      });
+      const response = await apiClient[isBookmarked ? "delete" : "post"](
+        "/bookmarks",
+        {
+          data: JSON.stringify({
+            storyId: story?.id,
+          }) as any,
+        }
+      );
 
-      if (response.ok) {
+      if (response.data) {
         setIsBookmarked(!isBookmarked);
       } else {
         alert("Có lỗi xảy ra khi cập nhật bookmark");
