@@ -44,12 +44,12 @@ interface StoryFormData {
 
 interface AdminStoryFormProps {
   storyId?: string;
-  onClose?: () => void;
+  onCloseModal?: () => void;
 }
 
 const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
   storyId,
-  onClose,
+  onCloseModal,
 }) => {
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.auth);
@@ -328,15 +328,11 @@ const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
           setThumbnailPreview("");
           setAudioPreview("");
         }
+        if (onCloseModal) {
+          onCloseModal();
+        }
 
         // Close modal or redirect after success
-        setTimeout(() => {
-          if (onClose) {
-            onClose();
-          } else {
-            router.push("/admin/stories");
-          }
-        }, 2000);
       }
     } catch (error: any) {
       console.error("Error submitting form:", error);
@@ -357,11 +353,7 @@ const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-          {storyId ? "Chỉnh sửa truyện" : "Tạo truyện mới"}
-        </h2>
-
+      <div className="bg-white dark:bg-gray-800 ">
         {/* Error & Success Messages */}
         {error && (
           <div className="mb-4 p-4 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-100 rounded-lg">
@@ -561,7 +553,7 @@ const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
         <div className="flex justify-end space-x-4 mt-6">
           <button
             type="button"
-            onClick={onClose || (() => router.back())}
+            onClick={onCloseModal}
             className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           >
             Hủy

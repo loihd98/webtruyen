@@ -137,7 +137,7 @@ const Navbar: React.FC = () => {
                 {t("nav.home")}
               </Link>
               <Link
-                href="/stories"
+                href="/stories?type=TEXT"
                 className="text-gray-500 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 {t("nav.stories")}
@@ -557,7 +557,7 @@ const Navbar: React.FC = () => {
                 🏠 {t("nav.home")}
               </Link>
               <Link
-                href="/stories"
+                href="/stories?type=TEXT"
                 onClick={closeMobileMenu}
                 className="block px-3 py-2 rounded-md text-base font-medium text-gray-500 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >

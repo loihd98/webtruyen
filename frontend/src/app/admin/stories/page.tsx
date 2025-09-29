@@ -7,6 +7,7 @@ import StorySearchForm from "../../../components/stories/StorySearchForm";
 import { getMediaUrl } from "../../../utils/media";
 import { useAccessToken } from "../../../hooks/useAuth";
 import apiClient from "@/utils/api";
+import Layout from "@/components/layout/Layout";
 
 // Force dynamic rendering for this page
 export const dynamic = "force-dynamic";

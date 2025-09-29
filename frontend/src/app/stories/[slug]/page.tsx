@@ -1,7 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import React, { useState, useEffect, use } from "react";
+import {
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 import Image from "next/image";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
@@ -56,6 +61,8 @@ interface StoryPageProps {
 
 export default function StoryPage({ params }: StoryPageProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const { user } = useSelector((state: RootState) => state.auth);
 
   const [story, setStory] = useState<Story | null>(null);
@@ -72,6 +79,25 @@ export default function StoryPage({ params }: StoryPageProps) {
       fetchStory();
     }
   }, [slug]);
+
+  useEffect(() => {
+    const chapterFromUrl = Number(searchParams.get("chapter"));
+    if (chapterFromUrl && chapterFromUrl > 0) {
+      setSelectedChapter(chapterFromUrl);
+    } else {
+      // Nếu không có chapter param, set 1 và update URL
+      setSelectedChapter(1);
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("chapter", "1");
+      router.replace(`${pathname}?${params.toString()}`); // replace để không tạo history mới
+    }
+  }, [searchParams, pathname, router]);
+
+  const updateUrlChapter = (chapterNumber: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("chapter", String(chapterNumber));
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
   const fetchStory = async () => {
     try {
@@ -150,17 +176,21 @@ export default function StoryPage({ params }: StoryPageProps) {
 
   const handleChapterChange = (chapterNumber: number) => {
     setSelectedChapter(chapterNumber);
+    // Cập nhật URL param
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("chapter", String(chapterNumber));
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   const handleNextChapter = () => {
     if (story && selectedChapter < story.chapters.length) {
-      setSelectedChapter(selectedChapter + 1);
+      handleChapterChange(selectedChapter + 1);
     }
   };
 
   const handlePrevChapter = () => {
     if (selectedChapter > 1) {
-      setSelectedChapter(selectedChapter - 1);
+      handleChapterChange(selectedChapter - 1);
     }
   };
 

@@ -17,6 +17,7 @@
 ## 📋 Thông Tin Cơ Bản
 
 ### Server Information
+
 - **IP:** 180.93.138.93
 - **Domain:** yourdomain.com (optional)
 - **OS:** Ubuntu 20.04+ LTS
@@ -25,6 +26,7 @@
 - **Deploy Methods:** Docker + Docker Compose
 
 ### Application Stack
+
 - **Frontend:** Next.js 14 + TypeScript + Tailwind CSS
 - **Backend:** Node.js + Express + Prisma ORM
 - **Database:** PostgreSQL 15
@@ -908,13 +910,13 @@ http {
             expires 30d;
             add_header Cache-Control "public, immutable";
             add_header X-Content-Type-Options "nosniff";
-            
+
             # Security: Only allow specific file types
             location ~* \.(jpg|jpeg|png|gif|webp|mp3|wav|m4a|aac)$ {
                 expires 30d;
                 add_header Cache-Control "public, immutable";
             }
-            
+
             # Deny access to other file types
             location ~* \.(php|pl|py|sh|cgi)$ {
                 deny all;
@@ -976,6 +978,8 @@ docker compose -f docker-compose.prod.yml exec backend npm run seed
 # Xem logs
 docker compose -f docker-compose.prod.yml logs -f
 ```
+
+npx prisma migrate dev --name init
 
 ---
 
@@ -1258,6 +1262,7 @@ crontab -e
 ### 8.1 Common Issues
 
 **Container won't start:**
+
 ```bash
 # Check container logs
 docker compose -f docker-compose.prod.yml logs [service-name]
@@ -1272,6 +1277,7 @@ docker compose -f docker-compose.prod.yml restart [service-name]
 ```
 
 **Database connection issues:**
+
 ```bash
 # Check database status
 docker compose -f docker-compose.prod.yml exec db pg_isready
@@ -1286,6 +1292,7 @@ docker compose -f docker-compose.prod.yml up -d
 ```
 
 **Frontend build failures:**
+
 ```bash
 # Clear build cache
 docker system prune -a
@@ -1296,6 +1303,7 @@ docker compose -f docker-compose.prod.yml up -d frontend
 ```
 
 **SSL/HTTPS issues:**
+
 ```bash
 # Check SSL certificate validity
 openssl x509 -in /var/www/webtruyen/ssl/yourdomain.com/fullchain.pem -text -noout
@@ -1335,6 +1343,7 @@ docker compose -f docker-compose.prod.yml exec backend env
 ### 8.3 Recovery Procedures
 
 **Restore from backup:**
+
 ```bash
 # Stop services
 docker compose -f docker-compose.prod.yml down
@@ -1352,6 +1361,7 @@ docker compose -f docker-compose.prod.yml up -d
 ```
 
 **Complete reset (DANGEROUS - Will lose all data!):**
+
 ```bash
 # Stop and remove everything
 docker compose -f docker-compose.prod.yml down -v
@@ -1369,6 +1379,7 @@ rm -rf uploads/* logs/*
 ## 📝 Quick Commands Reference
 
 ### Development
+
 ```bash
 # Start development environment
 docker compose -f docker-compose.dev.yml up -d --build
@@ -1381,6 +1392,7 @@ docker compose -f docker-compose.dev.yml down
 ```
 
 ### Production
+
 ```bash
 # Deploy production
 ./scripts/deploy.sh
@@ -1399,6 +1411,7 @@ docker compose -f docker-compose.prod.yml down
 ```
 
 ### Maintenance
+
 ```bash
 # Backup
 ./scripts/backup.sh
@@ -1430,10 +1443,12 @@ sudo certbot renew
 ## 🔐 Default Credentials
 
 **Admin Account (after seeding):**
+
 - Email: admin@webtruyen.com
 - Password: admin123456
 
 **Database:**
+
 - Host: localhost:5432
 - Database: webtruyen_prod
 - Username: webtruyen_prod
@@ -1444,6 +1459,7 @@ sudo certbot renew
 **🎉 Congratulations! Your Web Truyện application is now deployed and ready for use!**
 
 Remember to:
+
 1. Change all default passwords
 2. Set up proper domain and SSL
 3. Configure email settings
