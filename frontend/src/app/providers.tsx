@@ -42,40 +42,61 @@ export default function ClientProvider({
       }
     );
 
+    // Clean up old persist keys (migration)
+    if (typeof window !== "undefined") {
+      const oldAuthKey = localStorage.getItem("persist:auth");
+      if (oldAuthKey) {
+        console.log("🧹 Cleaning up old persist:auth key");
+        localStorage.removeItem("persist:auth");
+        localStorage.removeItem("persist:ui");
+      }
+    }
+
     // Validate tokens on app startup
     const validatePersistedTokens = () => {
       const state = store.getState();
-      console.log("Auth state on startup:", state.auth);
+      console.log("🚀 Auth state on startup:", {
+        isAuthenticated: state.auth.isAuthenticated,
+        hasUser: !!state.auth.user,
+        hasAccessToken: !!state.auth.accessToken,
+        hasRefreshToken: !!state.auth.refreshToken,
+        userEmail: state.auth.user?.email
+      });
       
-      if (state.auth.isAuthenticated && state.auth.refreshToken) {
-        console.log("Refreshing token on startup...");
+      if (state.auth.isAuthenticated && state.auth.refreshToken && state.auth.user) {
+        console.log("🔄 Refreshing token on startup...");
         // Try to refresh the token to validate it's still valid
         store
           .dispatch(refreshToken())
           .then((result) => {
-            console.log("Token refresh result:", result);
+            console.log("🎯 Token refresh result:", result);
             if (refreshToken.fulfilled.match(result)) {
               // If refresh successful, load user's bookmarks
-              console.log("Token refresh successful, loading bookmarks");
+              console.log("✅ Token refresh successful, loading bookmarks");
               store.dispatch(getBookmarks());
             } else {
               // If refresh was dispatched but failed
-              console.log("Token refresh was rejected, clearing auth");
+              console.log("❌ Token refresh was rejected, clearing auth");
               store.dispatch(clearAuth());
             }
           })
           .catch((error) => {
             // If refresh fails, clear the auth state
-            console.log("Token refresh failed, clearing auth:", error);
+            console.log("❌ Token refresh failed, clearing auth:", error);
             store.dispatch(clearAuth());
           });
       } else {
-        console.log("No valid auth state found, staying logged out");
+        console.log("⚠️  No valid auth state found, staying logged out");
+        // Clear any partial auth state
+        if (state.auth.isAuthenticated || state.auth.accessToken || state.auth.refreshToken) {
+          console.log("🧹 Clearing partial auth state");
+          store.dispatch(clearAuth());
+        }
       }
     };
 
     // Wait for persist gate to rehydrate, then validate
-    setTimeout(validatePersistedTokens, 500);
+    setTimeout(validatePersistedTokens, 1000);
   }, []);
 
   return (

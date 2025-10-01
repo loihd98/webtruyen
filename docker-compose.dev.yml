@@ -5,9 +5,19 @@ services:
     env_file:
       - ./.env.dev
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_dev:/var/lib/postgresql/data
+      - ./logs/postgres:/var/log/postgresql
     ports:
       - "5432:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - app-network
 
@@ -19,9 +29,19 @@ services:
     env_file:
       - ./.env.dev
     volumes:
-      - ./uploads:/uploads   # Map local uploads to container uploads
+      - ./uploads:/uploads
+      - ./logs/backend:/app/logs
+      - ./backend:/app  # Hot reload for development
+      - /app/node_modules  # Exclude node_modules from hot reload
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - FRONTEND_URL=${FRONTEND_URL}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     ports:
       - "5000:5000"
     networks:
@@ -34,8 +54,17 @@ services:
     restart: unless-stopped
     env_file:
       - ./.env.dev
+    volumes:
+      - ./frontend:/app  # Hot reload for development
+      - /app/node_modules  # Exclude node_modules from hot reload
+      - /app/.next  # Exclude .next from hot reload
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=${BACKEND_URL}
+      - NEXT_PUBLIC_FRONTEND_URL=${FRONTEND_URL}
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     ports:
       - "3000:3000"
     networks:
@@ -45,14 +74,14 @@ services:
     image: nginx:alpine
     restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+      - "8080:80"  # Different port for development
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./uploads:/uploads        # Map local uploads to nginx
-      - ./ssl:/etc/nginx/ssl
-      - ./frontend/.next:/usr/share/nginx/html:ro
+      - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/default.dev.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./uploads:/uploads:ro
+      - ./logs/nginx:/var/log/nginx
+    environment:
+      - DOMAIN=localhost
     depends_on:
       - frontend
       - backend
@@ -60,7 +89,7 @@ services:
       - app-network
 
 volumes:
-  postgres_data:
+  postgres_data_dev:
 
 networks:
   app-network:

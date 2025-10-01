@@ -110,6 +110,8 @@ export const logoutUser = createAsyncThunk(
     // Clear persisted data
     if (typeof window !== "undefined") {
       localStorage.removeItem("persist:auth");
+      localStorage.removeItem("persist:ui");
+      localStorage.removeItem("persist:root");
     }
   }
 );
@@ -175,7 +177,7 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        console.log("loginUser.fulfilled", action);
+        console.log("✅ loginUser.fulfilled", action.payload);
 
         state.isLoading = false;
         const authResponse = action.payload;
@@ -184,6 +186,22 @@ const authSlice = createSlice({
           state.accessToken = authResponse.accessToken;
           state.refreshToken = authResponse.refreshToken;
           state.isAuthenticated = true;
+          
+          console.log("📝 Auth state after login:", {
+            hasUser: !!state.user,
+            userEmail: state.user?.email,
+            hasAccessToken: !!state.accessToken,
+            hasRefreshToken: !!state.refreshToken,
+            isAuthenticated: state.isAuthenticated
+          });
+          
+          // Force check what will be persisted
+          setTimeout(() => {
+            if (typeof window !== "undefined") {
+              const persistedData = localStorage.getItem("persist:auth");
+              console.log("🏪 Data persisted after login:", persistedData);
+            }
+          }, 1000);
         }
         state.error = null;
       })
@@ -269,13 +287,49 @@ const authSlice = createSlice({
       .addMatcher(
         (action) => action.type === REHYDRATE,
         (state, action: any) => {
-          console.log("REHYDRATE action:", action);
+          console.log("🔄 REHYDRATE action:", action);
+          
+          // Debug localStorage - check all possible keys
+          if (typeof window !== "undefined") {
+            const persistAuth = localStorage.getItem("persist:auth");
+            const persistRoot = localStorage.getItem("persist:root");
+            console.log("🗄️ localStorage debug:", {
+              "persist:auth": persistAuth,
+              "persist:root": persistRoot,
+              allKeys: Object.keys(localStorage).filter(k => k.startsWith('persist'))
+            });
+          }
+          
+          // Debug the full action payload
+          console.log("📦 Full action payload:", JSON.stringify(action.payload, null, 2));
+          
+          // With root persist, auth data will be in action.payload.auth
+          let persistedAuth = null;
+          
+          // Try both locations for auth data
           if (action.payload?.auth) {
-            const persistedAuth = action.payload.auth;
-            console.log("Persisted auth found:", persistedAuth);
+            persistedAuth = action.payload.auth;
+            console.log("📍 Found auth data in payload.auth");
+          } else if (action.payload && typeof action.payload === 'object') {
+            // Sometimes the auth data might be directly in payload
+            if (action.payload.user || action.payload.accessToken) {
+              persistedAuth = action.payload;
+              console.log("📍 Found auth data directly in payload");
+            }
+          }
+          
+          if (persistedAuth) {
+            console.log("📦 Persisted auth found:", {
+              hasUser: !!persistedAuth.user,
+              hasAccessToken: !!persistedAuth.accessToken,
+              hasRefreshToken: !!persistedAuth.refreshToken,
+              isAuthenticated: persistedAuth.isAuthenticated,
+              userEmail: persistedAuth.user?.email
+            });
+            
             // Validate that we have the required tokens
             if (persistedAuth.accessToken && persistedAuth.refreshToken) {
-              console.log("Valid tokens found, restoring auth state");
+              console.log("✅ Valid tokens found, restoring auth state");
               return {
                 ...state,
                 ...persistedAuth,
@@ -285,7 +339,7 @@ const authSlice = createSlice({
             }
           }
           // If no valid persisted auth, maintain clean initial state
-          console.log("No valid persisted auth, using initial state");
+          console.log("❌ No valid persisted auth, using initial state");
           return {
             ...initialState,
             isLoading: false,

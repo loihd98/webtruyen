@@ -1,293 +1,243 @@
-# Website Đọc & Nghe Truyện - Full Stack
+# 📚 Web Truyện - Modern Story Reading Platform
 
-Một website đọc và nghe truyện với đầy đủ chức năng như Vivu Truyện Hay, được xây dựng với kiến trúc production-ready.
+A comprehensive web application for reading stories and novels online with advanced features and professional UI/UX.
 
-## 🚀 Tính năng chính
+## 🌟 Features
 
-### Frontend (Next.js + TailwindCSS)
+### User Features
+- 🔐 **Secure Authentication** - JWT-based login/register with refresh tokens
+- 📖 **Story Reading** - Clean, responsive reading interface
+- 🔊 **Audio Support** - Listen to stories with built-in audio player
+- 📑 **Bookmarks** - Save and organize favorite stories
+- 💬 **Comments System** - Professional nested comments with replies
+- 🌙 **Theme Support** - Dark/Light mode with persistence
+- 📱 **Mobile Responsive** - Optimized for all devices
 
-- ✅ **SEO tối ưu**: SSR/ISR, meta tags, sitemap.xml, robots.txt, JSON-LD schema.org
-- ✅ **Mobile-first**: Fully responsive design
-- ✅ **State management**: Redux Toolkit (auth, bookmarks, unlockStates, settings)
-- ✅ **Analytics**: Google Analytics GA4 integration
-- ✅ **Animation**: Framer Motion cho UX mượt mà
+### Admin Features
+- 📊 **Admin Dashboard** - Comprehensive content management
+- ✍️ **Story Management** - Create, edit, and manage stories
+- 📝 **Chapter Editor** - Rich text editor with media support
+- 👥 **User Management** - User roles and permissions
+- 💬 **Comment Moderation** - Approve/reject comments
+- 📈 **Analytics** - View counts and user engagement
 
-### Backend (Node.js + Express + Prisma)
-
-- ✅ **Authentication**: JWT (access + refresh), OAuth (Google, Facebook)
-- ✅ **Authorization**: Role-based access (admin, user)
-- ✅ **Database**: PostgreSQL với Prisma ORM
-- ✅ **File Upload**: MP3 upload với static serving
-- ✅ **Rate Limiting**: API protection
-- ✅ **Security**: Helmet, CORS, input validation
-
-### Core Features
-
-- 📚 **Truyện Text**: Đọc chapter, unlock qua affiliate
-- 🎵 **Truyện Audio**: Audio player custom, speed control
-- 🔓 **Chapter Unlock**: Affiliate link integration
-- 💬 **Comment System**: Nested comments, moderation
-- 🔖 **Bookmark**: Save stories và chapters
-- 🔍 **Search**: Tìm kiếm truyện theo tiêu đề, tác giả, thể loại
-- 👑 **Admin Dashboard**: CRUD đầy đủ cho stories, chapters, users
-
-## 🏗️ Kiến trúc
-
-```
-web_truyen/
-├── frontend/          # Next.js app
-├── backend/           # Node.js API
-├── nginx/             # Reverse proxy config
-├── uploads/           # Static files (MP3, images)
-├── docker-compose.yml # Multi-service orchestration
-└── .env              # Environment variables
-```
+### Technical Features
+- ⚡ **High Performance** - Optimized caching and lazy loading
+- 🔒 **Security** - Rate limiting, CORS, and input validation
+- 🐳 **Docker Ready** - Full containerization support
+- 🔄 **Auto Backup** - Automated database backups
+- 📊 **Monitoring** - Health checks and logging
+- 🌐 **SEO Optimized** - Meta tags and sitemap generation
 
 ## 🛠️ Tech Stack
 
-**Frontend:**
+### Frontend
+- **Next.js 14** - React framework with App Router
+- **TypeScript** - Type-safe development
+- **Tailwind CSS** - Utility-first styling
+- **Redux Toolkit** - State management
+- **Redux Persist** - State persistence
 
-- Next.js 14 (React 18)
-- TailwindCSS + Framer Motion
-- Redux Toolkit + Redux Persist
-- NextAuth.js (OAuth)
-- TypeScript
+### Backend
+- **Node.js + Express** - Server framework
+- **PostgreSQL** - Primary database
+- **Prisma ORM** - Database toolkit
+- **JWT** - Authentication tokens
+- **Multer** - File upload handling
 
-**Backend:**
-
-- Node.js + Express
-- Prisma ORM + PostgreSQL
-- JWT Authentication
-- Passport.js (OAuth)
-- Multer (File upload)
-
-**Infrastructure:**
-
-- Docker + Docker Compose
-- Nginx (Reverse proxy + Static serving)
-- PostgreSQL
-- SSL/TLS support
+### Infrastructure
+- **Docker** - Containerization
+- **Nginx** - Reverse proxy & load balancer
+- **SSL/TLS** - HTTPS security
+- **Let's Encrypt** - Free SSL certificates
 
 ## 🚀 Quick Start
 
-### 1. Clone và Setup
+### Prerequisites
+- Docker & Docker Compose
+- Git
+- Domain name (for production)
 
-```bash
-git clone <repo-url>
-cd web_truyen
+### Local Development
 
-# Copy environment file
-cp .env.example .env
-# Chỉnh sửa .env với các giá trị thực
+1. **Clone Repository**
+   ```bash
+   git clone https://github.com/loihd98/webtruyen.git
+   cd webtruyen
+   ```
+
+2. **Setup Environment**
+   ```bash
+   cp .env.dev.example .env.dev
+   # Edit .env.dev with your local settings
+   ```
+
+3. **Start Development Server**
+   ```bash
+   docker-compose -f docker-compose.dev.yml up --build
+   ```
+
+4. **Access Application**
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:5000
+   - Admin Panel: http://localhost:3000/admin
+   - Nginx: http://localhost:8080
+
+### Production Deployment
+
+See [PRODUCTION_DEPLOYMENT_GUIDE.md](./PRODUCTION_DEPLOYMENT_GUIDE.md) for detailed production setup instructions.
+
+**Quick Production Setup:**
+1. **Setup Environment**
+   ```bash
+   cp .env.prod.example .env.prod
+   # Configure production values
+   ```
+
+2. **Deploy**
+   ```bash
+   docker-compose -f docker-compose.prod.yml up --build -d
+   ```
+
+## 📁 Project Structure
+
 ```
-
-### 2. Development
-
-**Chạy với Docker (Recommended):**
-
-```bash
-# Chạy development environment với .env.dev
-docker compose -f docker-compose.dev.yml up -d --build
-
-# Hoặc sử dụng script helper
-# Windows:
-.\scripts\dev.ps1
-# Linux/Mac:
-./scripts/dev.sh
-
-# Xem logs
-docker compose -f docker-compose.dev.yml logs -f
-
-# Dừng containers
-docker compose -f docker-compose.dev.yml down
+webtruyen/
+├── 📁 backend/                    # Node.js Backend
+│   ├── 📁 src/
+│   │   ├── 📁 controllers/        # API controllers
+│   │   ├── 📁 routes/             # Express routes
+│   │   ├── 📁 middleware/         # Custom middleware
+│   │   ├── 📁 utils/              # Utilities
+│   │   └── 📄 index.js            # Server entry
+│   ├── 📁 prisma/                 # Database schema
+│   └── 📁 uploads/                # File storage
+├── 📁 frontend/                   # Next.js Frontend
+│   ├── 📁 src/
+│   │   ├── 📁 app/                # App Router pages
+│   │   ├── 📁 components/         # React components
+│   │   ├── 📁 hooks/              # Custom hooks
+│   │   ├── 📁 store/              # Redux store
+│   │   └── 📁 utils/              # Client utilities
+│   └── 📁 public/                 # Static assets
+├── 📁 nginx/                      # Nginx configs
+├── 📁 ssl/                        # SSL certificates
+├── 📄 docker-compose.prod.yml     # Production config
+├── 📄 docker-compose.dev.yml      # Development config
+├── 📄 .env.prod.example           # Production env template
+├── 📄 .env.dev.example            # Development env template
+└── 📄 README.md                   # This file
 ```
-
-**Chạy riêng lẻ (Local Development):**
-
-```bash
-# Backend
-cd backend && npm install && npm run dev
-
-# Frontend (tab mới)
-cd frontend && npm install && npm run dev
-```
-
-**URLs khi chạy Development:**
-
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:5000
-- Nginx: http://localhost
-- Database: localhost:5432
-
-### 3. Production Deploy
-
-```bash
-# Trên Ubuntu VPS
-git clone <repo-url>
-cd web_truyen
-
-# Setup environment
-cp .env.example .env
-nano .env  # Cập nhật các giá trị production
-
-# Deploy với Docker
-docker-compose -f docker-compose.yml up -d --build
-
-# Setup SSL với Certbot
-sudo apt install certbot
-sudo certbot --nginx -d yourdomain.com
-```
-
-## 📱 User Flows
-
-### Truyện Text Flow
-
-1. **Trang chủ** → Click thumbnail truyện
-2. **Affiliate click** → Mở tab mới + load trang detail
-3. **Trang detail** → Hiển thị Chapter 1 mặc định
-4. **Chapter locked** → Click icon 🔒 → Mở affiliate + unlock chapter
-5. **Navigation** → Chuyển chapter với `← →`
-
-### Truyện Audio Flow
-
-1. **Trang chủ** → Click thumbnail audio
-2. **Affiliate click** → Mở tab mới + load trang detail
-3. **Audio player** → Play/pause, seek, speed control
-4. **Chapter locked** → Click icon 🔒 → Mở affiliate + load audio
-5. **Background play** → Tiếp tục phát khi browse
-
-### Authentication Flow
-
-- **Guest**: Unlock tạm lưu Redux/localStorage
-- **Logged in**: Unlock lưu database permanent
-- **OAuth**: Google/Facebook one-click login
-- **Admin**: Truy cập dashboard CRUD
 
 ## 🔧 Configuration
 
 ### Environment Variables
 
-```bash
-# Database
-POSTGRES_DB=web_truyen
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=your-password
+#### Production (.env.prod)
+- `DATABASE_URL` - PostgreSQL connection string
+- `JWT_SECRET` - JWT signing secret
+- `DOMAIN` - Your domain name
+- `FRONTEND_URL` - Frontend URL
+- `BACKEND_URL` - Backend API URL
 
-# JWT
-JWT_SECRET=your-jwt-secret-32-chars-min
-JWT_REFRESH_SECRET=your-refresh-secret
+#### Development (.env.dev)
+- Same as production but with localhost URLs
+- Relaxed security settings for development
 
-# OAuth
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-secret
-FACEBOOK_APP_ID=your-facebook-app-id
-FACEBOOK_APP_SECRET=your-facebook-secret
+### Docker Compose Files
 
-# Analytics
-NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
-```
+- **docker-compose.prod.yml** - Production with SSL, monitoring, and security
+- **docker-compose.dev.yml** - Development with hot reload and debugging
+- **docker-compose.yml** - Legacy (use specific env files instead)
 
-### Database Schema
+## 📊 API Documentation
 
-- **User**: email, password, role (user|admin), OAuth profiles
-- **Story**: title, description, type (text|audio), affiliate links
-- **Chapter**: content, audio file, lock status, unlock tracking
-- **Comment**: nested comments với moderation
-- **Bookmark**: user story/chapter saves
-- **Analytics**: affiliate clicks, page views tracking
+### Authentication
+- `POST /api/auth/login` - User login
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/refresh` - Refresh access token
 
-## 📊 Admin Features
+### Stories
+- `GET /api/stories` - List stories with pagination
+- `GET /api/stories/:slug` - Get story details
+- `POST /api/stories` - Create story (admin)
+- `PUT /api/stories/:id` - Update story (admin)
 
-### Dashboard Analytics
+### Chapters
+- `GET /api/chapters/:id` - Get chapter content
+- `POST /api/chapters` - Create chapter (admin)
+- `PUT /api/chapters/:id` - Update chapter (admin)
 
-- Total users, stories, chapters
-- Popular stories, view statistics
-- Affiliate click tracking
-- User engagement metrics
+### Comments
+- `GET /api/comments/chapter/:chapterId` - Get chapter comments
+- `POST /api/comments` - Create comment
+- `POST /api/comments/:id/reply` - Reply to comment
+- `PUT /api/comments/:id/approve` - Approve comment (admin)
 
-### Content Management
+### Admin
+- `GET /api/admin/stats` - Dashboard statistics
+- `GET /api/admin/users` - User management
+- `GET /api/admin/comments` - Comment moderation
 
-- **Stories**: CRUD, SEO settings, affiliate links
-- **Chapters**: Content editor, audio upload, lock management
-- **Users**: Role management, activity monitoring
-- **Comments**: Moderation queue, approve/reject
+## 🔐 Security Features
 
-### Media Management
+- **Rate Limiting** - API request throttling
+- **CORS Protection** - Cross-origin request security
+- **Input Validation** - Request data sanitization
+- **SQL Injection Protection** - Prisma ORM safety
+- **XSS Prevention** - Content Security Policy
+- **HTTPS Enforcement** - SSL/TLS encryption
+- **JWT Security** - Secure token handling
 
-- MP3 file upload với progress
-- Audio file optimization
-- Static file serving với CDN-ready
+## 📈 Monitoring & Maintenance
 
-## 🔒 Security Features
+### Health Checks
+- `GET /health` - Application health status
+- Docker health checks for all services
+- Automated service restart on failure
 
-- **Rate Limiting**: API endpoints protection
-- **CORS**: Configured for production domains
-- **Helmet**: Security headers
-- **Input Validation**: Server-side validation
-- **SQL Injection**: Prisma ORM protection
-- **XSS Protection**: Content sanitization
-- **JWT Security**: Secure token handling
+### Backups
+- **Automated Daily Backups** - Database and uploads
+- **7-day Retention** - Automatic cleanup
+- **Manual Backup Commands** - See [DATABASE_BACKUP_GUIDE.md](./DATABASE_BACKUP_GUIDE.md)
 
-## 📈 SEO & Performance
+### Logs
+- Application logs: `logs/backend/`
+- Nginx logs: `logs/nginx/`
+- PostgreSQL logs: `logs/postgres/`
 
-### SEO Optimization
+## 🤝 Contributing
 
-- **SSR/ISR**: Server-side rendering cho crawler
-- **Meta Tags**: Dynamic OG tags, Twitter cards
-- **Sitemap**: Auto-generated XML sitemap
-- **Schema.org**: JSON-LD structured data
-- **Robots.txt**: Search engine directives
+1. Fork the repository
+2. Create feature branch: `git checkout -b feature-name`
+3. Make changes and test thoroughly
+4. Commit: `git commit -m "Add feature"`
+5. Push: `git push origin feature-name`
+6. Submit Pull Request
 
-### Performance
+## 📝 Documentation
 
-- **Image Optimization**: Next.js Image component
-- **Code Splitting**: Automatic route-based splitting
-- **Caching**: Redis-ready, CDN-friendly headers
-- **Compression**: Gzip, Brotli support
-- **Lazy Loading**: Components và images
+- [Production Deployment Guide](./PRODUCTION_DEPLOYMENT_GUIDE.md)
+- [Database Backup Guide](./DATABASE_BACKUP_GUIDE.md)
 
-## 🚀 Deployment
+## 🔗 Production Instance
 
-### VPS Requirements
+- **Domain:** [vuaxemohinh.com](https://vuaxemohinh.com)
+- **Server:** VPS at 180.93.138.93
+- **SSL:** Let's Encrypt certificates
+- **CDN:** Nginx static file serving
 
-- Ubuntu 20.04+
-- 2GB RAM minimum
-- 20GB storage
-- Docker + Docker Compose
-- Domain với DNS pointing
+## 📄 License
 
-### Automated Deploy
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-```bash
-# Clone repo
-git clone <repo-url> /var/www/web_truyen
-cd /var/www/web_truyen
+## 🆘 Support
 
-# Environment setup
-cp .env.example .env
-nano .env
-
-# SSL certificates
-mkdir -p ssl/
-# Copy cert.pem và key.pem vào ssl/
-
-# Deploy
-docker-compose up -d --build
-
-# Verify
-docker-compose ps
-curl http://localhost/health
-```
-
-## 📞 Support
-
-- **Documentation**: `/docs` endpoint
-- **API Docs**: `/api/docs` (Swagger)
-- **Health Check**: `/health`
-- **Admin Panel**: `/admin`
+For issues and questions:
+- Create GitHub issue for bugs
+- Check logs for troubleshooting
+- Review documentation guides
 
 ---
 
-**Developed by**: Web Truyen Team  
-**License**: MIT  
-**Version**: 1.0.0
+**Built with ❤️ by the Web Truyện Team**

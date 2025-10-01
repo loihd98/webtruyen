@@ -9,34 +9,27 @@ import uiSlice from "./slices/uiSlice";
 import bookmarkSlice from "./slices/bookmarkSlice";
 import unlockSlice from "./slices/unlockSlice";
 
-// Persist config for auth slice
-const authPersistConfig = {
-  key: "auth",
-  storage,
-  whitelist: ["user", "accessToken", "refreshToken", "isAuthenticated"], // Only persist these fields
-};
-
-// Persist config for UI slice (only theme)
-const uiPersistConfig = {
-  key: "ui",
-  storage,
-  whitelist: ["theme"], // Only persist theme
-};
-
-// Create persisted reducers
-const persistedAuthReducer = persistReducer(authPersistConfig, authSlice);
-const persistedUiReducer = persistReducer(uiPersistConfig, uiSlice);
-
-// Combine all reducers
+// Combine all reducers first
 const rootReducer = combineReducers({
-  auth: persistedAuthReducer,
-  ui: persistedUiReducer,
+  auth: authSlice,
+  ui: uiSlice,
   bookmarks: bookmarkSlice,
   unlock: unlockSlice,
 });
 
+// Single persist config for the entire root
+const persistConfig = {
+  key: "root",
+  storage,
+  whitelist: ["auth", "ui"], // Only persist auth and ui slices
+  transforms: [], // No transforms needed for now
+};
+
+// Create single persisted root reducer
+const persistedRootReducer = persistReducer(persistConfig, rootReducer);
+
 export const store = configureStore({
-  reducer: rootReducer,
+  reducer: persistedRootReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
