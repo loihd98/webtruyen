@@ -284,7 +284,6 @@ class AdminController {
               select: {
                 chapters: true,
                 bookmarks: true,
-                comments: true,
               },
             },
           },
@@ -357,7 +356,6 @@ class AdminController {
             select: {
               chapters: true,
               bookmarks: true,
-              comments: true,
             },
           },
         },
@@ -684,7 +682,8 @@ class AdminController {
   async createChapter(req, res) {
     try {
       const { storyId } = req.params;
-      const { number, title, content, audioUrl, isLocked } = req.body;
+      const { number, title, content, audioUrl, isLocked, affiliateId } =
+        req.body;
 
       // Validation
       validationService.validateChapterData({ number, title });
@@ -727,6 +726,7 @@ class AdminController {
           content: content?.trim() || null,
           audioUrl: audioUrl || null,
           isLocked: Boolean(isLocked),
+          affiliateId: affiliateId || null,
           storyId,
         },
         include: {
@@ -735,6 +735,15 @@ class AdminController {
               title: true,
               slug: true,
               type: true,
+            },
+          },
+          affiliate: {
+            select: {
+              id: true,
+              provider: true,
+              targetUrl: true,
+              label: true,
+              isActive: true,
             },
           },
         },
@@ -765,7 +774,7 @@ class AdminController {
   async updateChapter(req, res) {
     try {
       const { id } = req.params;
-      const { title, content, audioUrl, isLocked } = req.body;
+      const { title, content, audioUrl, isLocked, affiliateId } = req.body;
 
       const updateData = {};
 
@@ -786,6 +795,10 @@ class AdminController {
         updateData.isLocked = Boolean(isLocked);
       }
 
+      if (affiliateId !== undefined) {
+        updateData.affiliateId = affiliateId || null;
+      }
+
       const chapter = await prisma.chapter.update({
         where: { id },
         data: updateData,
@@ -795,6 +808,15 @@ class AdminController {
               title: true,
               slug: true,
               type: true,
+            },
+          },
+          affiliate: {
+            select: {
+              id: true,
+              provider: true,
+              targetUrl: true,
+              label: true,
+              isActive: true,
             },
           },
         },

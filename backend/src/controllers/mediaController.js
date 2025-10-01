@@ -104,6 +104,64 @@ const imageUpload = multer({
   },
 });
 
+// Universal upload for both image and audio
+const universalStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const type = file.mimetype.startsWith("image/") ? "images" : "audio";
+    const uploadDir = path.join(config.uploadPath || "uploads", type);
+
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    // Generate unique filename
+    const ext = path.extname(file.originalname);
+    const filename = `${uuidv4()}${ext}`;
+    cb(null, filename);
+  },
+});
+
+const universalFilter = (req, file, cb) => {
+  const allowedMimes = [
+    // Images
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/webp",
+    "image/gif",
+    // Audio
+    "audio/mpeg",
+    "audio/mp3",
+    "audio/wav",
+    "audio/ogg",
+    "audio/aac",
+    "audio/flac",
+  ];
+
+  if (allowedMimes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(
+      new Error(
+        "Chỉ cho phép upload file hình ảnh (JPG, PNG, WEBP, GIF) hoặc audio (MP3, WAV, OGG, AAC, FLAC)"
+      ),
+      false
+    );
+  }
+};
+
+const universalUpload = multer({
+  storage: universalStorage,
+  fileFilter: universalFilter,
+  limits: {
+    fileSize: 100 * 1024 * 1024, // 100MB
+  },
+});
+
 class MediaController {
   // Upload audio file
   async uploadAudio(req, res) {
@@ -513,4 +571,5 @@ module.exports = {
   MediaController: new MediaController(),
   uploadAudio: audioUpload.single("audio"),
   uploadImage: imageUpload.single("image"),
+  uploadUniversal: universalUpload.single("image"), // Accept "image" field name for both types
 };

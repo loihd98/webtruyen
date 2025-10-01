@@ -41,6 +41,14 @@ interface Story {
     content?: string;
     audioUrl?: string;
     isLocked: boolean;
+    affiliateId?: string;
+    affiliate?: {
+      id: string;
+      provider: string;
+      targetUrl: string;
+      label?: string;
+      isActive: boolean;
+    };
     createdAt: string;
   }>;
   affiliate?: {
@@ -184,7 +192,17 @@ export default function StoryPage({ params }: StoryPageProps) {
 
   const handleNextChapter = () => {
     if (story && selectedChapter < story.chapters.length) {
-      handleChapterChange(selectedChapter + 1);
+      const nextChapterNumber = selectedChapter + 1;
+      const nextChapter = story.chapters.find(
+        (c) => c.number === nextChapterNumber
+      );
+
+      // If next chapter has an active affiliate link, open it in new tab
+      if (nextChapter?.affiliate?.isActive && nextChapter.affiliate.targetUrl) {
+        window.open(nextChapter.affiliate.targetUrl, "_blank");
+      }
+
+      handleChapterChange(nextChapterNumber);
     }
   };
 
@@ -472,6 +490,46 @@ export default function StoryPage({ params }: StoryPageProps) {
                         <p>Nội dung chương đang được cập nhật...</p>
                       </div>
                     )}
+
+                    {/* Affiliate Link Section */}
+                    {currentChapter.affiliate?.isActive && (
+                      <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-blue-600 dark:text-blue-400">
+                            📥
+                          </span>
+                          <h4 className="font-medium text-blue-900 dark:text-blue-200">
+                            Link tải chương này
+                          </h4>
+                        </div>
+                        <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
+                          {currentChapter.affiliate.label ||
+                            `Tải từ ${currentChapter.affiliate.provider}`}
+                        </p>
+                        <a
+                          href={currentChapter.affiliate.targetUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                        >
+                          <span>📥</span>
+                          Tải về
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                            />
+                          </svg>
+                        </a>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -494,7 +552,21 @@ export default function StoryPage({ params }: StoryPageProps) {
                     disabled={selectedChapter >= story.chapters.length}
                     className="flex items-center gap-2 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    Chương tiếp →
+                    {(() => {
+                      const nextChapter = story.chapters.find(
+                        (c) => c.number === selectedChapter + 1
+                      );
+                      return nextChapter?.affiliate?.isActive ? (
+                        <>
+                          Chương tiếp →
+                          <span className="text-xs bg-yellow-400 text-yellow-900 px-1 rounded">
+                            📥
+                          </span>
+                        </>
+                      ) : (
+                        "Chương tiếp →"
+                      );
+                    })()}
                   </button>
                 </div>
               </div>

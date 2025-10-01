@@ -17,6 +17,8 @@ async function getStories(searchParams: {
     const page = searchParams.page ? Number(searchParams.page) : 1;
     const type = searchParams.type as string;
     const search = searchParams.search as string;
+    const genre = searchParams.genre as string;
+    const sort = searchParams.sort as string;
 
     const params = new URLSearchParams({
       page: page.toString(),
@@ -29,6 +31,14 @@ async function getStories(searchParams: {
 
     if (search) {
       params.append("search", search);
+    }
+
+    if (genre) {
+      params.append("genre", genre);
+    }
+
+    if (sort) {
+      params.append("sort", sort);
     }
 
     const response = await fetch(`${baseUrl}/stories?${params}`, {
@@ -54,6 +64,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const type = searchParams.type as string;
   const search = searchParams.search as string;
+  const genre = searchParams.genre as string;
 
   let title = "Kho Truyện - Web Truyện";
   let description =
@@ -67,6 +78,11 @@ export async function generateMetadata({
     title = "Truyện Audio - Kho Truyện";
     description =
       "Nghe truyện audio online miễn phí. Thư giãn với những câu chuyện được kể một cách sinh động.";
+  }
+
+  if (genre) {
+    title = `Thể loại ${genre} - Kho Truyện`;
+    description = `Khám phá những câu chuyện thuộc thể loại ${genre}. Đọc và nghe truyện miễn phí.`;
   }
 
   if (search) {

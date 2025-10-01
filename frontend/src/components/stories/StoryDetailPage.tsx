@@ -120,7 +120,7 @@ const StoryDetailPage: React.FC = () => {
 
     try {
       const response = await apiClient[isBookmarked ? "delete" : "post"](
-        "/api/bookmarks",
+        "/bookmarks",
         JSON.stringify({
           storyId: story?.id,
         })

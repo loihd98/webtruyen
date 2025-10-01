@@ -56,6 +56,7 @@ app.use("/api/comments", require("./routes/comments"));
 app.use("/api/bookmarks", require("./routes/bookmarks"));
 app.use("/api/admin", require("./routes/admin"));
 app.use("/api/media", require("./routes/media"));
+app.use("/api/contact", require("./routes/contact"));
 
 // Affiliate redirect
 app.use("/r", require("./routes/affiliate"));

@@ -3,7 +3,7 @@ services:
     image: postgres:15-alpine
     restart: unless-stopped
     env_file:
-      - ./.env
+      - ./.env.dev
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -17,7 +17,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     env_file:
-      - ./.env
+      - ./.env.dev
     volumes:
       - ./uploads:/uploads   # Map local uploads to container uploads
     depends_on:
@@ -33,7 +33,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     env_file:
-      - ./.env
+      - ./.env.dev
     depends_on:
       - backend
     ports:

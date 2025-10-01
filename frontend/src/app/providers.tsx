@@ -7,6 +7,7 @@ import { Toaster } from "react-hot-toast";
 import { store, persistor } from "../store";
 import { setTokenHandlers } from "../utils/api";
 import { clearAuth, refreshToken } from "../store/slices/authSlice";
+import { getBookmarks } from "../store/slices/bookmarkSlice";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 
 export default function ClientProvider({
@@ -46,10 +47,18 @@ export default function ClientProvider({
       const state = store.getState();
       if (state.auth.isAuthenticated && state.auth.refreshToken) {
         // Try to refresh the token to validate it's still valid
-        store.dispatch(refreshToken()).catch(() => {
-          // If refresh fails, clear the auth state
-          store.dispatch(clearAuth());
-        });
+        store
+          .dispatch(refreshToken())
+          .then((result) => {
+            if (refreshToken.fulfilled.match(result)) {
+              // If refresh successful, load user's bookmarks
+              store.dispatch(getBookmarks());
+            }
+          })
+          .catch(() => {
+            // If refresh fails, clear the auth state
+            store.dispatch(clearAuth());
+          });
       }
     };
 

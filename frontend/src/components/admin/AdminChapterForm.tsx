@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import apiClient from "@/utils/api";
 import toast from "react-hot-toast";
@@ -10,6 +10,7 @@ import AffiliateLinkSelect from "./AffiliateLinkSelect";
 import { MediaSelectModal } from "./AdminMediaManager";
 
 interface ChapterFormData {
+  id?: string;
   number: number;
   title: string;
   content?: string;
@@ -18,6 +19,13 @@ interface ChapterFormData {
   thumbnailUrl?: string;
   duration?: number;
   affiliateId?: string;
+  storyId?: string;
+}
+
+interface Story {
+  id: string;
+  title: string;
+  slug: string;
 }
 
 interface AdminChapterFormProps {
@@ -34,6 +42,8 @@ const AdminChapterForm: React.FC<AdminChapterFormProps> = ({
   onCloseModal,
 }) => {
   const router = useRouter();
+  const [stories, setStories] = useState<Story[]>([]);
+  const [selectedStoryId, setSelectedStoryId] = useState<string>(storyId || "");
   const [formData, setFormData] = useState<ChapterFormData>(
     chapter || {
       number: 1,
@@ -44,6 +54,7 @@ const AdminChapterForm: React.FC<AdminChapterFormProps> = ({
       thumbnailUrl: "",
       duration: undefined,
       affiliateId: "",
+      storyId: storyId || "",
     }
   );
   const [audioPreview, setAudioPreview] = useState<string>("");
@@ -57,6 +68,25 @@ const AdminChapterForm: React.FC<AdminChapterFormProps> = ({
   const [activeMediaTab, setActiveMediaTab] = useState<"audio" | "image">(
     "audio"
   );
+
+  // Fetch stories if no storyId provided
+  useEffect(() => {
+    if (!storyId) {
+      fetchStories();
+    }
+  }, [storyId]);
+
+  const fetchStories = async () => {
+    try {
+      const response = await apiClient.get("/admin/stories?limit=1000");
+      if (response.data?.success) {
+        setStories(response.data.data.stories);
+      }
+    } catch (error) {
+      console.error("Error fetching stories:", error);
+      toast.error("Không thể tải danh sách truyện");
+    }
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -137,6 +167,13 @@ const AdminChapterForm: React.FC<AdminChapterFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const targetStoryId = selectedStoryId || storyId;
+    if (!targetStoryId) {
+      setError("Vui lòng chọn truyện");
+      return;
+    }
+
     if (!formData.title.trim()) {
       setError("Vui lòng nhập tiêu đề chương");
       return;
@@ -150,8 +187,8 @@ const AdminChapterForm: React.FC<AdminChapterFormProps> = ({
       setError("");
       setSuccess("");
       const url = chapter
-        ? `/admin/chapters/${chapter?.number}`
-        : `/admin/stories/${storyId}/chapters`;
+        ? `/admin/chapters/${chapter?.id || chapter?.number}`
+        : `/admin/stories/${targetStoryId}/chapters`;
       const method = chapter ? "put" : "post";
       const response = await apiClient[method](url, formData);
       if (response.status >= 200 && response.status < 300) {
@@ -175,13 +212,13 @@ const AdminChapterForm: React.FC<AdminChapterFormProps> = ({
   // Media selection handlers
   const handleImageSelect = (media: any) => {
     setFormData((prev) => ({ ...prev, thumbnailUrl: media.url }));
-    setThumbnailPreview(media.url);
+    setThumbnailPreview(getMediaUrl(media.url));
     setShowImageSelectModal(false);
   };
 
   const handleAudioSelect = (media: any) => {
     setFormData((prev) => ({ ...prev, audioUrl: media.url }));
-    setAudioPreview(media.url);
+    setAudioPreview(getMediaUrl(media.url));
     setShowAudioSelectModal(false);
   };
 
@@ -203,6 +240,28 @@ const AdminChapterForm: React.FC<AdminChapterFormProps> = ({
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
+          {/* Story Selection - only show when creating new chapter without specified story */}
+          {!storyId && (
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Chọn truyện *
+              </label>
+              <select
+                value={selectedStoryId}
+                onChange={(e) => setSelectedStoryId(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                required
+              >
+                <option value="">Chọn truyện...</option>
+                {stories.map((story) => (
+                  <option key={story.id} value={story.id}>
+                    {story.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-medium mb-1">
               Số chương *

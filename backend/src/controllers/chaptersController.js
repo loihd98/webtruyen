@@ -59,6 +59,15 @@ class ChaptersController {
               },
             },
           },
+          affiliate: {
+            select: {
+              id: true,
+              provider: true,
+              targetUrl: true,
+              label: true,
+              isActive: true,
+            },
+          },
           unlockedBy: req.user
             ? {
                 where: {
@@ -255,6 +264,16 @@ class ChaptersController {
           title: true,
           isLocked: true,
           audioUrl: true,
+          affiliateId: true,
+          affiliate: {
+            select: {
+              id: true,
+              provider: true,
+              targetUrl: true,
+              label: true,
+              isActive: true,
+            },
+          },
           createdAt: true,
           unlockedBy: req.user
             ? {

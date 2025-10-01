@@ -15,6 +15,7 @@ router.post("/change-password", usersController.changePassword);
 
 // User data routes
 router.get("/me/bookmarks", usersController.getBookmarks);
+router.get("/bookmarks", usersController.getBookmarks); // For compatibility with old API
 router.get("/me/history", usersController.getReadingHistory);
 
 module.exports = router;

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { getMediaUrl } from "../../utils/media";
 import apiClient from "@/utils/api";
+import AdminChapterForm from "./AdminChapterForm";
 
 interface Story {
   id: string;
@@ -484,16 +485,25 @@ const AdminChapterManager: React.FC = () => {
               </button>
             </div>
             <div className="p-6">
-              {/* Chapter form will be implemented later */}
-              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                <p>
-                  Chức năng tạo/chỉnh sửa chương sẽ được triển khai ở phiên bản
-                  tiếp theo.
-                </p>
-                <p className="mt-2">
-                  Hiện tại vui lòng sử dụng trang quản lý truyện để thêm chương.
-                </p>
-              </div>
+              <AdminChapterForm
+                storyId={editingChapter?.storyId || null}
+                chapter={
+                  editingChapter
+                    ? {
+                        id: editingChapter.id,
+                        number: editingChapter.number,
+                        title: editingChapter.title,
+                        content: editingChapter.content,
+                        audioUrl: editingChapter.audioUrl,
+                        isLocked: editingChapter.isLocked,
+                        affiliateId: editingChapter.affiliate?.id,
+                        storyId: editingChapter.storyId,
+                      }
+                    : undefined
+                }
+                onSuccess={handleSuccess}
+                onCloseModal={handleCloseModal}
+              />
             </div>
           </div>
         </div>

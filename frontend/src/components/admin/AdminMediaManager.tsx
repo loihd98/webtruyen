@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useLanguage } from "../../contexts/LanguageContext";
 import Layout from "../layout/Layout";
 import apiClient from "@/utils/api";
+import { getMediaUrl } from "../../utils/media";
 import Modal from "./Modal";
 import Pagination from "./Pagination";
 import Image from "next/image";
@@ -104,7 +105,7 @@ const MediaSelectModal: React.FC<MediaSelectModalProps> = ({
                   {media.type === "image" ? (
                     <div className="aspect-square relative mb-2">
                       <Image
-                        src={media.url}
+                        src={getMediaUrl(media.url)}
                         alt={media.originalName}
                         fill
                         className="object-cover rounded"
@@ -312,7 +313,7 @@ const AdminMediaManager: React.FC = () => {
               <div className="aspect-square relative">
                 {media.type === "image" ? (
                   <Image
-                    src={media.url}
+                    src={getMediaUrl(media.url)}
                     alt={media.originalName}
                     fill
                     className="object-cover"
@@ -326,7 +327,9 @@ const AdminMediaManager: React.FC = () => {
                 {/* Overlay actions */}
                 <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2">
                   <button
-                    onClick={() => window.open(media.url, "_blank")}
+                    onClick={() =>
+                      window.open(getMediaUrl(media.url), "_blank")
+                    }
                     className="bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors"
                     title="Xem"
                   >

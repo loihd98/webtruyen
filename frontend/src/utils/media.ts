@@ -4,11 +4,10 @@
 
 // Get the base URL for media files
 export const getMediaBaseUrl = (): string => {
-  // Use the specific media URL if set, otherwise fallback to base URL or localhost
+  // Use the specific media URL if set, otherwise fallback to nginx proxy
+  // This ensures media files are served through nginx reverse proxy
   return (
-    process.env.NEXT_PUBLIC_MEDIA_URL ||
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    "http://localhost"
+    process.env.NEXT_PUBLIC_MEDIA_URL || "http://localhost" // nginx serves uploads directly
   );
 };
 
@@ -23,7 +22,9 @@ export const getMediaUrl = (url: string): string => {
 
   // If it starts with /uploads/, prepend the base URL (nginx serves these directly)
   if (url.startsWith("/uploads/")) {
-    return `${getMediaBaseUrl()}${url}`;
+    const fullUrl = `${getMediaBaseUrl()}${url}`;
+    console.log("Media URL generated:", { input: url, output: fullUrl });
+    return fullUrl;
   }
 
   // If it's just a filename, assume it's in uploads

@@ -4,6 +4,7 @@ const {
   MediaController,
   uploadAudio,
   uploadImage,
+  uploadUniversal,
 } = require("../controllers/mediaController");
 const { authenticateToken, requireAdmin } = require("../middleware/auth");
 
@@ -21,7 +22,7 @@ router.post("/upload/image", uploadImage, MediaController.uploadImage);
 
 // Media management routes
 router.get("/", MediaController.getMediaFiles);
-router.post("/upload", uploadImage, MediaController.uploadMediaToDatabase);
+router.post("/upload", uploadUniversal, MediaController.uploadMediaToDatabase);
 router.delete("/:id", MediaController.deleteMediaFile);
 router.get("/search", MediaController.searchMediaFiles);
 

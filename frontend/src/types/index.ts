@@ -74,11 +74,13 @@ export interface Chapter {
   audioUrl?: string;
   isLocked: boolean;
   storyId: string;
+  affiliateId?: string;
   createdAt: string;
   updatedAt: string;
 
   // Relations
   story?: Story;
+  affiliate?: AffiliateLink;
   unlockedBy?: User[];
   comments?: Comment[];
 

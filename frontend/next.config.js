@@ -26,6 +26,11 @@ const nextConfig = {
         hostname: "**",
         pathname: "/uploads/**",
       },
+      {
+        protocol: "https",
+        hostname: "picsum.photos",
+        pathname: "/**",
+      },
     ],
   },
   env: {

@@ -1,52 +1,101 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useLanguage } from "../../contexts/LanguageContext";
+import apiClient from "../../utils/api";
+import { getMediaUrl } from "../../utils/media";
+import toast from "react-hot-toast";
 
-interface UploadedFile {
+interface MediaFile {
   id: string;
-  name: string;
+  filename: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
   url: string;
   type: "image" | "audio";
-  size: number;
-  uploadedAt: Date;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 const AdminMediaUpload: React.FC = () => {
   const { t } = useLanguage();
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
   const [dragActive, setDragActive] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState<"" | "image" | "audio">("");
+
+  // Load media files on component mount
+  useEffect(() => {
+    fetchMediaFiles();
+  }, [searchQuery, filterType]);
+
+  const fetchMediaFiles = async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams({
+        ...(searchQuery && { search: searchQuery }),
+        ...(filterType && { type: filterType }),
+        limit: "50",
+      });
+
+      const response = await apiClient.get(`/media?${params}`);
+      if (response.data?.success) {
+        setMediaFiles(response.data.data.mediaFiles || []);
+      }
+    } catch (error) {
+      console.error("Error fetching media files:", error);
+      toast.error("Không thể tải danh sách media");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleFiles = useCallback(async (files: FileList) => {
     setIsUploading(true);
     setUploadProgress(0);
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const fileType = file.type.startsWith("image/") ? "image" : "audio";
 
-      // Simulate upload progress
-      for (let progress = 0; progress <= 100; progress += 10) {
-        setUploadProgress(progress);
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        // Create FormData for upload (use "image" field name for both types)
+        const formData = new FormData();
+        formData.append("image", file);
+
+        // Update progress
+        setUploadProgress(((i + 0.5) / files.length) * 100);
+
+        // Upload to backend (use /media/upload to save to database)
+        const response = await apiClient.post("/media/upload", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        if (response.data?.success) {
+          toast.success(`Upload ${file.name} thành công!`);
+        }
+
+        // Update progress
+        setUploadProgress(((i + 1) / files.length) * 100);
       }
 
-      // Create mock uploaded file
-      const uploadedFile: UploadedFile = {
-        id: Date.now().toString() + i,
-        name: file.name,
-        url: URL.createObjectURL(file),
-        type: file.type.startsWith("image/") ? "image" : "audio",
-        size: file.size,
-        uploadedAt: new Date(),
-      };
-
-      setUploadedFiles((prev) => [...prev, uploadedFile]);
+      // Refresh media files list
+      await fetchMediaFiles();
+      toast.success(`Upload ${files.length} file(s) thành công!`);
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      toast.error(error.response?.data?.message || "Có lỗi xảy ra khi upload");
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
     }
-
-    setIsUploading(false);
-    setUploadProgress(0);
   }, []);
 
   const handleDrop = useCallback(
@@ -80,14 +129,23 @@ const AdminMediaUpload: React.FC = () => {
     }
   };
 
-  const deleteFile = (id: string) => {
-    setUploadedFiles((prev) => prev.filter((file) => file.id !== id));
+  const deleteFile = async (id: string) => {
+    try {
+      await apiClient.delete(`/media/${id}`);
+      toast.success("Xóa file thành công!");
+      await fetchMediaFiles(); // Refresh list
+    } catch (error: any) {
+      console.error("Delete error:", error);
+      toast.error(
+        error.response?.data?.message || "Có lỗi xảy ra khi xóa file"
+      );
+    }
   };
 
   const copyUrl = (url: string) => {
-    navigator.clipboard.writeText(url);
-    // Show toast notification (you can implement this)
-    alert(t("admin.media.url_copied"));
+    const fullUrl = getMediaUrl(url);
+    navigator.clipboard.writeText(fullUrl);
+    toast.success(t("admin.media.url_copied"));
   };
 
   const formatFileSize = (bytes: number) => {
@@ -182,26 +240,64 @@ const AdminMediaUpload: React.FC = () => {
         </div>
       </div>
 
-      {/* Uploaded Files */}
-      {uploadedFiles.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {t("admin.media.uploaded_files")} ({uploadedFiles.length})
-            </h3>
+      {/* Search and Filter */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="p-6">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <input
+                type="text"
+                placeholder="Tìm kiếm media files..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <select
+                value={filterType}
+                onChange={(e) =>
+                  setFilterType(e.target.value as "" | "image" | "audio")
+                }
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Tất cả loại</option>
+                <option value="image">Hình ảnh</option>
+                <option value="audio">Audio</option>
+              </select>
+            </div>
           </div>
+        </div>
+      </div>
 
-          <div className="p-6">
+      {/* Media Files */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Media Files ({mediaFiles.length})
+          </h3>
+        </div>
+
+        <div className="p-6">
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="text-gray-500">Đang tải...</div>
+            </div>
+          ) : mediaFiles.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="text-gray-500">Chưa có media files nào</div>
+            </div>
+          ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {uploadedFiles.map((file) => (
+              {mediaFiles.map((file) => (
                 <div
                   key={file.id}
                   className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 hover:shadow-md transition-shadow"
                 >
                   {file.type === "image" ? (
                     <img
-                      src={file.url}
-                      alt={file.name}
+                      src={getMediaUrl(file.url)}
+                      alt={file.originalName}
                       className="w-full h-32 object-cover rounded-lg mb-3"
                     />
                   ) : (
@@ -212,11 +308,11 @@ const AdminMediaUpload: React.FC = () => {
 
                   <div className="space-y-2">
                     <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                      {file.name}
+                      {file.originalName}
                     </h4>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       {formatFileSize(file.size)} •{" "}
-                      {file.uploadedAt.toLocaleDateString()}
+                      {new Date(file.createdAt).toLocaleDateString()}
                     </p>
 
                     <div className="flex items-center space-x-2">
@@ -224,63 +320,20 @@ const AdminMediaUpload: React.FC = () => {
                         onClick={() => copyUrl(file.url)}
                         className="flex-1 bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 px-3 py-1 rounded text-xs hover:bg-blue-100 dark:hover:bg-blue-900/70 transition-colors"
                       >
-                        {t("admin.media.copy_url")}
+                        Copy URL
                       </button>
                       <button
                         onClick={() => deleteFile(file.id)}
                         className="bg-red-50 dark:bg-red-900/50 text-red-600 dark:text-red-400 px-3 py-1 rounded text-xs hover:bg-red-100 dark:hover:bg-red-900/70 transition-colors"
                       >
-                        {t("admin.media.delete")}
+                        Xóa
                       </button>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Media Management */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            {t("admin.media.management")}
-          </h3>
-        </div>
-
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="text-2xl mb-2">🖼️</div>
-              <h4 className="font-medium text-gray-900 dark:text-white">
-                {t("admin.media.story_thumbnails")}
-              </h4>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {t("admin.media.thumbnail_description")}
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="text-2xl mb-2">🎧</div>
-              <h4 className="font-medium text-gray-900 dark:text-white">
-                {t("admin.media.audio_covers")}
-              </h4>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {t("admin.media.audio_description")}
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="text-2xl mb-2">👤</div>
-              <h4 className="font-medium text-gray-900 dark:text-white">
-                {t("admin.media.user_avatars")}
-              </h4>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {t("admin.media.avatar_description")}
-              </p>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

@@ -83,14 +83,41 @@ cp .env.example .env
 
 ### 2. Development
 
-```bash
-# Chạy tất cả services
-docker-compose up --build
+**Chạy với Docker (Recommended):**
 
-# Hoặc chạy riêng lẻ
+```bash
+# Chạy development environment với .env.dev
+docker compose -f docker-compose.dev.yml up -d --build
+
+# Hoặc sử dụng script helper
+# Windows:
+.\scripts\dev.ps1
+# Linux/Mac:
+./scripts/dev.sh
+
+# Xem logs
+docker compose -f docker-compose.dev.yml logs -f
+
+# Dừng containers
+docker compose -f docker-compose.dev.yml down
+```
+
+**Chạy riêng lẻ (Local Development):**
+
+```bash
+# Backend
 cd backend && npm install && npm run dev
+
+# Frontend (tab mới)
 cd frontend && npm install && npm run dev
 ```
+
+**URLs khi chạy Development:**
+
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:5000
+- Nginx: http://localhost
+- Database: localhost:5432
 
 ### 3. Production Deploy
 

@@ -282,13 +282,13 @@ const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
   // Media selection handlers
   const handleImageSelect = (media: any) => {
     setFormData((prev) => ({ ...prev, thumbnailUrl: media.url }));
-    setThumbnailPreview(media.url);
+    setThumbnailPreview(getMediaUrl(media.url));
     setShowImageSelectModal(false);
   };
 
   const handleAudioSelect = (media: any) => {
     setFormData((prev) => ({ ...prev, audioUrl: media.url }));
-    setAudioPreview(media.url);
+    setAudioPreview(getMediaUrl(media.url));
     setShowAudioSelectModal(false);
   };
 

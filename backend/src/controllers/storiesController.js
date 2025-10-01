@@ -165,6 +165,16 @@ class StoriesController {
               content: true,
               isLocked: true,
               audioUrl: true,
+              affiliateId: true,
+              affiliate: {
+                select: {
+                  id: true,
+                  provider: true,
+                  targetUrl: true,
+                  label: true,
+                  isActive: true,
+                },
+              },
               createdAt: true,
               unlockedBy: req.user
                 ? {
