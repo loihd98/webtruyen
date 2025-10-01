@@ -1006,6 +1006,56 @@ class AdminController {
   }
 
   // Manage Genres
+  async getGenres(req, res) {
+    try {
+      const { page = 1, limit = 10, search = "" } = req.query;
+
+      const skip = (parseInt(page) - 1) * parseInt(limit);
+
+      const where = {
+        ...(search && {
+          OR: [
+            { name: { contains: search, mode: "insensitive" } },
+            { slug: { contains: search, mode: "insensitive" } },
+          ],
+        }),
+      };
+
+      const [genres, total] = await Promise.all([
+        prisma.genre.findMany({
+          where,
+          skip,
+          take: parseInt(limit),
+          orderBy: { name: "asc" },
+          include: {
+            _count: {
+              select: {
+                stories: true,
+              },
+            },
+          },
+        }),
+        prisma.genre.count({ where }),
+      ]);
+
+      res.json({
+        genres,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          pages: Math.ceil(total / parseInt(limit)),
+        },
+      });
+    } catch (error) {
+      console.error("Get genres error:", error);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Có lỗi xảy ra khi lấy danh sách thể loại",
+      });
+    }
+  }
+
   async createGenre(req, res) {
     try {
       const { name } = req.body;

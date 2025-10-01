@@ -34,6 +34,7 @@ router.patch("/comments/:id/approve", adminController.approveComment);
 router.delete("/comments/:id/reject", adminController.rejectComment);
 
 // Genre management
+router.get("/genres", adminController.getGenres);
 router.post("/genres", adminController.createGenre);
 router.patch("/genres/:id", adminController.updateGenre);
 router.delete("/genres/:id", adminController.deleteGenre);

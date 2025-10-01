@@ -529,7 +529,15 @@ class StoriesController {
   // Create new story (Admin only)
   async createStory(req, res) {
     try {
-      const { title, description, type, genreIds, affiliateId } = req.body;
+      const {
+        title,
+        description,
+        type,
+        genreIds,
+        affiliateId,
+        audioUrl,
+        thumbnailUrl,
+      } = req.body;
       const authorId = req.user.id;
 
       // Validation
@@ -576,6 +584,14 @@ class StoriesController {
 
       if (affiliateId) {
         storyData.affiliateId = affiliateId;
+      }
+
+      if (audioUrl) {
+        storyData.audioUrl = audioUrl;
+      }
+
+      if (thumbnailUrl) {
+        storyData.thumbnailUrl = thumbnailUrl;
       }
 
       if (genreIds && genreIds.length > 0) {
@@ -636,6 +652,7 @@ class StoriesController {
         affiliateId,
         status,
         thumbnailUrl,
+        audioUrl,
       } = req.body;
 
       // Find existing story
@@ -681,6 +698,10 @@ class StoriesController {
 
       if (thumbnailUrl !== undefined) {
         updateData.thumbnailUrl = thumbnailUrl;
+      }
+
+      if (audioUrl !== undefined) {
+        updateData.audioUrl = audioUrl;
       }
 
       if (affiliateId !== undefined) {

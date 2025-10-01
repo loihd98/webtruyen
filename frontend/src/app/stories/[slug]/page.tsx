@@ -21,6 +21,7 @@ interface Story {
   title: string;
   description: string;
   thumbnailUrl?: string;
+  audioUrl?: string;
   type: "TEXT" | "AUDIO";
   status: "DRAFT" | "PUBLISHED" | "HIDDEN";
   viewCount: number;

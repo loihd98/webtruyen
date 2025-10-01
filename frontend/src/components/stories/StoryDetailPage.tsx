@@ -16,6 +16,7 @@ interface Story {
   title: string;
   description: string;
   thumbnailUrl?: string;
+  audioUrl?: string;
   type: "TEXT" | "AUDIO";
   status: "DRAFT" | "PUBLISHED" | "HIDDEN";
   viewCount: number;
@@ -36,6 +37,14 @@ interface Story {
     content?: string;
     audioUrl?: string;
     isLocked: boolean;
+    affiliateId?: string;
+    affiliate?: {
+      id: string;
+      provider: string;
+      targetUrl: string;
+      label?: string;
+      isActive: boolean;
+    };
     createdAt: string;
   }>;
   affiliate?: {
@@ -147,7 +156,17 @@ const StoryDetailPage: React.FC = () => {
 
   const handleNextChapter = () => {
     if (story && selectedChapter < story.chapters.length) {
-      setSelectedChapter(selectedChapter + 1);
+      const nextChapterNumber = selectedChapter + 1;
+      const nextChapter = story.chapters.find(
+        (c) => c.number === nextChapterNumber
+      );
+
+      // If next chapter has an active affiliate link, open it in new tab
+      if (nextChapter?.affiliate?.isActive && nextChapter.affiliate.targetUrl) {
+        window.open(nextChapter.affiliate.targetUrl, "_blank");
+      }
+
+      setSelectedChapter(nextChapterNumber);
     }
   };
 
@@ -340,6 +359,7 @@ const StoryDetailPage: React.FC = () => {
                       <option key={chapter.id} value={chapter.number}>
                         Chương {chapter.number}: {chapter.title}
                         {chapter.isLocked && !user ? " 🔒" : ""}
+                        {chapter.affiliate?.isActive ? " 🔗" : ""}
                       </option>
                     ))}
                   </select>
@@ -360,6 +380,11 @@ const StoryDetailPage: React.FC = () => {
                     className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     Chương tiếp →
+                    {story.chapters.find(
+                      (c) => c.number === selectedChapter + 1
+                    )?.affiliate?.isActive
+                      ? " 🔗"
+                      : ""}
                   </button>
                 </div>
               </div>
@@ -399,10 +424,13 @@ const StoryDetailPage: React.FC = () => {
                 </div>
               ) : (
                 <div>
-                  {story.type === "AUDIO" && currentChapter.audioUrl ? (
+                  {story.type === "AUDIO" &&
+                  (currentChapter.audioUrl || story.audioUrl) ? (
                     <div className="mb-6">
                       <SimpleAudioPlayer
-                        src={getMediaUrl(currentChapter.audioUrl)}
+                        src={getMediaUrl(
+                          currentChapter.audioUrl || story.audioUrl!
+                        )}
                         title={`${story.title} - Chương ${currentChapter.number}`}
                       />
                     </div>
@@ -451,6 +479,10 @@ const StoryDetailPage: React.FC = () => {
                   className="flex items-center gap-2 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Chương tiếp →
+                  {story.chapters.find((c) => c.number === selectedChapter + 1)
+                    ?.affiliate?.isActive
+                    ? " 🔗"
+                    : ""}
                 </button>
               </div>
             </div>

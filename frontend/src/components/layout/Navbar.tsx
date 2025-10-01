@@ -10,6 +10,7 @@ import LanguageSelector from "./LanguageSelector";
 import Link from "next/link";
 import { AppDispatch } from "../../store";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/hooks/useAuth";
 
 const Navbar: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -21,9 +22,7 @@ const Navbar: React.FC = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  const { user, isAuthenticated } = useSelector(
-    (state: RootState) => state.auth
-  );
+  const { user, isAuthenticated, isAdmin } = useAuth();
 
   const { theme } = useSelector((state: RootState) => state.ui);
 
@@ -71,7 +70,7 @@ const Navbar: React.FC = () => {
   };
 
   const handleProfileClick = () => {
-    if (user?.role === "ADMIN") {
+    if (isAdmin) {
       router.push("/admin");
     } else {
       router.push("/profile");
@@ -350,9 +349,7 @@ const Navbar: React.FC = () => {
                                 {user.name}
                               </p>
                               <p className="text-xs text-blue-600 dark:text-blue-400">
-                                {user.role === "ADMIN"
-                                  ? t("user.admin")
-                                  : t("user.member")}
+                                {isAdmin ? t("user.admin") : t("user.member")}
                               </p>
                             </div>
                           </div>
@@ -377,9 +374,7 @@ const Navbar: React.FC = () => {
                             />
                           </svg>
                           <span>
-                            {user.role === "ADMIN"
-                              ? t("nav.admin")
-                              : t("nav.profile")}
+                            {isAdmin ? t("nav.admin") : t("nav.profile")}
                           </span>
                         </button>
 
@@ -462,7 +457,7 @@ const Navbar: React.FC = () => {
                 </div>
 
                 {/* Admin link */}
-                {user.role === "ADMIN" && (
+                {isAdmin && (
                   <Link
                     href="/admin"
                     className="text-gray-500 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
@@ -641,7 +636,7 @@ const Navbar: React.FC = () => {
                     🔖 {t("nav.bookmarks")}
                   </Link>
 
-                  {user.role === "ADMIN" && (
+                  {isAdmin && (
                     <Link
                       href="/admin"
                       onClick={closeMobileMenu}
