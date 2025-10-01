@@ -14,6 +14,7 @@ import SimpleAudioPlayer from "../../../components/audio/SimpleAudioPlayer";
 import { getMediaUrl } from "../../../utils/media";
 import Layout from "@/components/layout/Layout";
 import apiClient from "@/utils/api";
+import CommentSection from "@/components/comments/CommentSection";
 
 interface Story {
   id: string;
@@ -570,6 +571,16 @@ export default function StoryPage({ params }: StoryPageProps) {
                     })()}
                   </button>
                 </div>
+              </div>
+            )}
+
+            {/* Comments Section */}
+            {currentChapter && (
+              <div className="mt-6">
+                <CommentSection
+                  chapterId={currentChapter.id}
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6"
+                />
               </div>
             )}
           </div>

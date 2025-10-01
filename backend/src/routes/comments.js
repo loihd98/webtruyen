@@ -5,7 +5,14 @@ const { authenticateToken, optionalAuth } = require("../middleware/auth");
 const router = express.Router();
 
 // Get comments for a chapter (public)
-router.get("/chapters/:chapterId/comments", commentsController.getComments);
+router.get(
+  "/chapters/:chapterId/comments",
+  (req, res, next) => {
+    console.log("Comment route hit:", req.path, req.params);
+    next();
+  },
+  commentsController.getComments
+);
 
 // Create comment (requires auth)
 router.post(

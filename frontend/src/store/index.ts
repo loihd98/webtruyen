@@ -16,13 +16,21 @@ const authPersistConfig = {
   whitelist: ["user", "accessToken", "refreshToken", "isAuthenticated"], // Only persist these fields
 };
 
-// Create persisted auth reducer
+// Persist config for UI slice (only theme)
+const uiPersistConfig = {
+  key: "ui",
+  storage,
+  whitelist: ["theme"], // Only persist theme
+};
+
+// Create persisted reducers
 const persistedAuthReducer = persistReducer(authPersistConfig, authSlice);
+const persistedUiReducer = persistReducer(uiPersistConfig, uiSlice);
 
 // Combine all reducers
 const rootReducer = combineReducers({
   auth: persistedAuthReducer,
-  ui: uiSlice,
+  ui: persistedUiReducer,
   bookmarks: bookmarkSlice,
   unlock: unlockSlice,
 });

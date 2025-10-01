@@ -214,7 +214,11 @@ const authSlice = createSlice({
       })
 
       // Refresh token
+      .addCase(refreshToken.pending, (state) => {
+        console.log("Refresh token pending...");
+      })
       .addCase(refreshToken.fulfilled, (state, action) => {
+        console.log("Refresh token fulfilled:", action.payload);
         const authResponse = action.payload;
         if (authResponse) {
           state.accessToken = authResponse.accessToken;
@@ -225,7 +229,8 @@ const authSlice = createSlice({
           state.isAuthenticated = true;
         }
       })
-      .addCase(refreshToken.rejected, (state) => {
+      .addCase(refreshToken.rejected, (state, action) => {
+        console.log("Refresh token rejected:", action.payload);
         state.user = null;
         state.accessToken = null;
         state.refreshToken = null;
@@ -264,10 +269,13 @@ const authSlice = createSlice({
       .addMatcher(
         (action) => action.type === REHYDRATE,
         (state, action: any) => {
+          console.log("REHYDRATE action:", action);
           if (action.payload?.auth) {
             const persistedAuth = action.payload.auth;
+            console.log("Persisted auth found:", persistedAuth);
             // Validate that we have the required tokens
             if (persistedAuth.accessToken && persistedAuth.refreshToken) {
+              console.log("Valid tokens found, restoring auth state");
               return {
                 ...state,
                 ...persistedAuth,
@@ -277,6 +285,7 @@ const authSlice = createSlice({
             }
           }
           // If no valid persisted auth, maintain clean initial state
+          console.log("No valid persisted auth, using initial state");
           return {
             ...initialState,
             isLoading: false,

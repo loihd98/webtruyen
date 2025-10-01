@@ -5,5 +5,6 @@ export type AdminTab =
   | "genres"
   | "affiliate-links"
   | "users"
+  | "comments"
   | "media"
   | "settings";

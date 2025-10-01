@@ -10,12 +10,16 @@ interface AdminSidebarProps {
   activeTab: AdminTab;
   onTabChange: (tab: AdminTab) => void;
   user: User | null;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({
   activeTab,
   onTabChange,
   user,
+  isOpen = false,
+  onClose,
 }) => {
   const { t } = useLanguage();
   const router = useRouter();
@@ -200,92 +204,129 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
         </svg>
       ),
     },
+    {
+      id: "comments" as AdminTab,
+      label: "Quản lý bình luận",
+      icon: (
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+          />
+        </svg>
+      ),
+    },
   ];
 
   return (
-    <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 lg:shadow-none">
-      {/* Header */}
-      <div className="flex items-center justify-between h-16 px-4 bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800">
-        <h2 className="text-lg font-bold text-white">📊 Admin Panel</h2>
-        <button className="lg:hidden text-white hover:text-blue-200 transition-colors">
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
-      </div>
+    <>
+      {/* Mobile backdrop */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
+          onClick={onClose}
+        />
+      )}
 
-      {/* User Profile */}
-      <div className="p-4 bg-gray-50 dark:bg-gray-750 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center space-x-3">
-          {user?.avatar ? (
-            <img
-              src={user.avatar}
-              alt={user.name}
-              className="h-12 w-12 rounded-full object-cover ring-2 ring-blue-500 ring-offset-2"
-            />
-          ) : (
-            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-lg font-semibold ring-2 ring-blue-500 ring-offset-2">
-              {user?.name.charAt(0).toUpperCase()}
+      {/* Sidebar */}
+      <div
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 lg:shadow-none ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:translate-x-0`}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between h-16 px-4 bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800">
+          <h2 className="text-lg font-bold text-white">📊 Admin Panel</h2>
+          <button
+            onClick={onClose}
+            className="lg:hidden text-white hover:text-blue-200 transition-colors"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+
+        {/* User Profile */}
+        <div className="p-4 bg-gray-50 dark:bg-gray-750 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center space-x-3">
+            {user?.avatar ? (
+              <img
+                src={user.avatar}
+                alt={user.name}
+                className="h-12 w-12 rounded-full object-cover ring-2 ring-blue-500 ring-offset-2"
+              />
+            ) : (
+              <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-lg font-semibold ring-2 ring-blue-500 ring-offset-2">
+                {user?.name.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                {user?.name}
+              </p>
+              <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                {t("admin.role")}
+              </p>
             </div>
-          )}
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-              {user?.name}
-            </p>
-            <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
-              {t("admin.role")}
-            </p>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+          {menuItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => handleMenuClick(item.id, item.isPage)}
+              className={`group flex items-center px-4 py-3 text-sm font-medium rounded-xl w-full text-left transition-all duration-200 transform hover:scale-[1.02] ${
+                activeTab === item.id
+                  ? "bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 text-blue-700 dark:text-blue-300 shadow-sm border border-blue-200 dark:border-blue-700"
+                  : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white"
+              }`}
+            >
+              <span
+                className={`mr-3 transition-colors duration-200 ${
+                  activeTab === item.id
+                    ? "text-blue-600 dark:text-blue-400"
+                    : "text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300"
+                }`}
+              >
+                {item.icon}
+              </span>
+              <span className="flex-1">{item.label}</span>
+              {activeTab === item.id && (
+                <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full animate-pulse"></div>
+              )}
+            </button>
+          ))}
+        </nav>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-750">
+          <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
+            <div className="font-medium">Web Truyện Admin</div>
+            <div className="mt-1">Version 1.0.0</div>
           </div>
         </div>
       </div>
-
-      {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-        {menuItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => handleMenuClick(item.id, item.isPage)}
-            className={`group flex items-center px-4 py-3 text-sm font-medium rounded-xl w-full text-left transition-all duration-200 transform hover:scale-[1.02] ${
-              activeTab === item.id
-                ? "bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 text-blue-700 dark:text-blue-300 shadow-sm border border-blue-200 dark:border-blue-700"
-                : "text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-white"
-            }`}
-          >
-            <span
-              className={`mr-3 transition-colors duration-200 ${
-                activeTab === item.id
-                  ? "text-blue-600 dark:text-blue-400"
-                  : "text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300"
-              }`}
-            >
-              {item.icon}
-            </span>
-            <span className="flex-1">{item.label}</span>
-            {activeTab === item.id && (
-              <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full animate-pulse"></div>
-            )}
-          </button>
-        ))}
-      </nav>
-
-      {/* Footer */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-750">
-        <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
-          <div className="font-medium">Web Truyện Admin</div>
-          <div className="mt-1">Version 1.0.0</div>
-        </div>
-      </div>
-    </div>
+    </>
   );
 };
 

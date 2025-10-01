@@ -76,16 +76,18 @@ class CommentsController {
       });
 
       res.json({
-        comments,
-        chapter: {
-          id: chapter.id,
-          title: chapter.title,
-        },
-        pagination: {
-          page,
-          limit,
-          total,
-          pages: Math.ceil(total / limit),
+        data: {
+          comments,
+          chapter: {
+            id: chapter.id,
+            title: chapter.title,
+          },
+          pagination: {
+            page,
+            limit,
+            total,
+            pages: Math.ceil(total / limit),
+          },
         },
       });
     } catch (error) {
@@ -156,7 +158,9 @@ class CommentsController {
 
       res.status(201).json({
         message: "Bình luận đã được tạo",
-        comment,
+        data: {
+          comment,
+        },
       });
     } catch (error) {
       console.error("Create comment error:", error);
@@ -233,7 +237,9 @@ class CommentsController {
 
       res.json({
         message: "Bình luận đã được cập nhật",
-        comment: updatedComment,
+        data: {
+          comment: updatedComment,
+        },
       });
     } catch (error) {
       console.error("Update comment error:", error);

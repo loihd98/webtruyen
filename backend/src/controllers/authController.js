@@ -67,9 +67,11 @@ class AuthController {
 
       res.status(201).json({
         message: "Đăng ký thành công",
-        user: userResponse,
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken,
+        data: {
+          user: userResponse,
+          accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken,
+        }
       });
     } catch (error) {
       console.error("Register error:", error);
@@ -139,9 +141,11 @@ class AuthController {
 
       res.json({
         message: "Đăng nhập thành công",
-        user: userResponse,
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken,
+        data: {
+          user: userResponse,
+          accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken,
+        }
       });
     } catch (error) {
       console.error("Login error:", error);
@@ -213,9 +217,11 @@ class AuthController {
 
       res.json({
         message: "Token đã được làm mới",
-        user: userResponse,
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken,
+        data: {
+          user: userResponse,
+          accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken,
+        },
       });
     } catch (error) {
       console.error("Refresh token error:", error);

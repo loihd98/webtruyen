@@ -11,6 +11,7 @@ import AdminStoryManager from "./AdminStoryManager";
 import AdminChapterManager from "./AdminChapterManager";
 import AdminAffiliatePage from "./AdminAffiliatePage";
 import AdminUserManager from "./AdminUserManager";
+import AdminCommentManager from "./AdminCommentManager";
 import AdminMediaUpload from "./AdminMediaUpload";
 import AdminSystemSettings from "./AdminSystemSettings";
 import AdminGenresManager from "./AdminGenresManager";
@@ -26,9 +27,16 @@ const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AdminTab>("dashboard");
   const [isLoading, setIsLoading] = useState(true);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleTabChange = (tab: AdminTab) => {
     setActiveTab(tab);
+    // Close sidebar on mobile after selecting a tab
+    setIsSidebarOpen(false);
+  };
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
   const handleLogout = () => {
@@ -100,6 +108,8 @@ const AdminDashboard: React.FC = () => {
         return <AdminAffiliatePage />;
       case "users":
         return <AdminUserManager />;
+      case "comments":
+        return <AdminCommentManager />;
       case "media":
         return <AdminMediaUpload />;
       case "settings":
@@ -117,6 +127,8 @@ const AdminDashboard: React.FC = () => {
           activeTab={activeTab}
           onTabChange={handleTabChange}
           user={user}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
         />
 
         {/* Main Content */}
@@ -125,7 +137,10 @@ const AdminDashboard: React.FC = () => {
           <header className="lg:hidden bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
             <div className="px-4 sm:px-6">
               <div className="flex items-center justify-between h-16">
-                <button className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                <button
+                  onClick={toggleSidebar}
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                >
                   <svg
                     className="w-6 h-6"
                     fill="none"

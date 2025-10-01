@@ -14,7 +14,8 @@ class AdminController {
         totalChapters,
         totalComments,
         totalViews,
-        recentUsers,
+        recentUsersCount,
+        recentUsersList,
         recentStories,
         adminUsers,
         topStories,
@@ -32,7 +33,7 @@ class AdminController {
           },
         }),
 
-        // Recent users (last 30 days)
+        // Recent users (last 30 days) - count
         prisma.user.count({
           where: {
             createdAt: {
@@ -41,11 +42,44 @@ class AdminController {
           },
         }),
 
+        // Recent users list (last 5)
+        prisma.user.findMany({
+          where: {
+            createdAt: {
+              gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+            },
+          },
+          take: 5,
+          orderBy: {
+            createdAt: "desc",
+          },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            createdAt: true,
+          },
+        }),
+
         // Recent stories (last 7 days)
-        prisma.story.count({
+        prisma.story.findMany({
           where: {
             createdAt: {
               gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+            },
+          },
+          take: 5,
+          orderBy: {
+            createdAt: "desc",
+          },
+          select: {
+            id: true,
+            title: true,
+            createdAt: true,
+            author: {
+              select: {
+                name: true,
+              },
             },
           },
         }),
@@ -79,9 +113,10 @@ class AdminController {
         totalComments,
         totalViews: totalViews._sum.viewCount || 0,
         activeUsers: totalUsers, // For now, consider all users as active
-        newUsers: recentUsers,
+        newUsers: recentUsersCount,
         adminUsers,
         recentStories,
+        recentUsers: recentUsersList,
         topStories,
       });
     } catch (error) {
@@ -222,6 +257,143 @@ class AdminController {
       res.status(500).json({
         error: "Internal Server Error",
         message: "Có lỗi xảy ra khi cập nhật role",
+      });
+    }
+  }
+
+  async updateUser(req, res) {
+    try {
+      const { id } = req.params;
+      const { name, email, avatar, role } = req.body;
+
+      // Prevent self-demotion from admin
+      if (id === req.user.id && req.user.role === "ADMIN" && role === "USER") {
+        return res.status(400).json({
+          error: "Bad Request",
+          message: "Không thể tự xóa quyền admin của chính mình",
+        });
+      }
+
+      const updateData = {};
+
+      if (name !== undefined) {
+        updateData.name = name.trim();
+      }
+
+      if (email !== undefined) {
+        // Check if email is already taken by another user
+        const existingUser = await prisma.user.findFirst({
+          where: {
+            email: email.toLowerCase(),
+            NOT: { id },
+          },
+        });
+
+        if (existingUser) {
+          return res.status(400).json({
+            error: "Bad Request",
+            message: "Email đã được sử dụng bởi người dùng khác",
+          });
+        }
+
+        updateData.email = email.toLowerCase();
+      }
+
+      if (avatar !== undefined) {
+        updateData.avatar = avatar;
+      }
+
+      if (role !== undefined && ["USER", "ADMIN"].includes(role)) {
+        updateData.role = role;
+      }
+
+      const updatedUser = await prisma.user.update({
+        where: { id },
+        data: updateData,
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          avatar: true,
+          createdAt: true,
+          _count: {
+            select: {
+              stories: true,
+              comments: true,
+              bookmarks: true,
+            },
+          },
+        },
+      });
+
+      res.json({
+        message: "Cập nhật người dùng thành công",
+        user: updatedUser,
+      });
+    } catch (error) {
+      console.error("Update user error:", error);
+
+      if (error.code === "P2025") {
+        return res.status(404).json({
+          error: "Not Found",
+          message: "Người dùng không tồn tại",
+        });
+      }
+
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Có lỗi xảy ra khi cập nhật người dùng",
+      });
+    }
+  }
+
+  async deleteUser(req, res) {
+    try {
+      const { id } = req.params;
+
+      // Prevent self-deletion
+      if (id === req.user.id) {
+        return res.status(400).json({
+          error: "Bad Request",
+          message: "Không thể xóa chính mình",
+        });
+      }
+
+      // Check if user exists
+      const user = await prisma.user.findUnique({
+        where: { id },
+        select: { id: true, name: true, role: true },
+      });
+
+      if (!user) {
+        return res.status(404).json({
+          error: "Not Found",
+          message: "Người dùng không tồn tại",
+        });
+      }
+
+      // Delete user and related data
+      await prisma.user.delete({
+        where: { id },
+      });
+
+      res.json({
+        message: `Đã xóa người dùng "${user.name}" thành công`,
+      });
+    } catch (error) {
+      console.error("Delete user error:", error);
+
+      if (error.code === "P2025") {
+        return res.status(404).json({
+          error: "Not Found",
+          message: "Người dùng không tồn tại",
+        });
+      }
+
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Có lỗi xảy ra khi xóa người dùng",
       });
     }
   }
@@ -878,6 +1050,65 @@ class AdminController {
   }
 
   // Manage Comments
+  async getComments(req, res) {
+    try {
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 20;
+      const skip = (page - 1) * limit;
+
+      const comments = await prisma.comment.findMany({
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true,
+              avatar: true,
+            },
+          },
+          chapter: {
+            select: {
+              id: true,
+              title: true,
+              number: true,
+              story: {
+                select: {
+                  id: true,
+                  title: true,
+                  slug: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        skip,
+        take: limit,
+      });
+
+      const total = await prisma.comment.count();
+
+      res.json({
+        data: comments,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit),
+        },
+      });
+    } catch (error) {
+      console.error("Get comments error:", error);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Có lỗi xảy ra khi lấy danh sách bình luận",
+      });
+    }
+  }
+
   async getPendingComments(req, res) {
     try {
       const page = parseInt(req.query.page) || 1;
@@ -1001,6 +1232,37 @@ class AdminController {
       res.status(500).json({
         error: "Internal Server Error",
         message: "Có lỗi xảy ra khi từ chối bình luận",
+      });
+    }
+  }
+
+  async deleteComment(req, res) {
+    try {
+      const { id } = req.params;
+
+      // Delete comment and its replies recursively
+      await prisma.comment.deleteMany({
+        where: {
+          OR: [{ id }, { parentId: id }],
+        },
+      });
+
+      res.json({
+        message: "Xóa bình luận thành công",
+      });
+    } catch (error) {
+      console.error("Delete comment error:", error);
+
+      if (error.code === "P2025") {
+        return res.status(404).json({
+          error: "Not Found",
+          message: "Bình luận không tồn tại",
+        });
+      }
+
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Có lỗi xảy ra khi xóa bình luận",
       });
     }
   }

@@ -120,9 +120,10 @@ const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
   const fetchStoryData = async () => {
     try {
       setLoading(true);
+      setError("");
       const response = await apiClient.get(`/admin/stories/${storyId}`);
 
-      if (response.data.success) {
+      if (response.data && response.data.success && response.data.data) {
         const story = response.data.data.story;
 
         setFormData({
@@ -144,11 +145,18 @@ const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
           setAudioPreview(getMediaUrl(story.audioUrl));
         }
       } else {
-        setError("Không thể tải thông tin truyện");
+        console.error("Invalid response format:", response.data);
+        setError(
+          "Không thể tải thông tin truyện - định dạng phản hồi không hợp lệ"
+        );
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching story:", error);
-      setError("Có lỗi xảy ra khi tải thông tin truyện");
+      setError(
+        `Không thể tải thông tin truyện: ${
+          error.response?.data?.message || error.message
+        }`
+      );
     } finally {
       setLoading(false);
     }
@@ -554,7 +562,7 @@ const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
             </div>
 
             {/* Audio Upload for AUDIO type */}
-            {formData.type === "AUDIO" && (
+            {/* {formData.type === "AUDIO" && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   File audio *
@@ -583,7 +591,7 @@ const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
                   </div>
                 )}
               </div>
-            )}
+            )} */}
           </div>
         </div>
         {/* Description */}

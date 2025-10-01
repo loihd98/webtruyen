@@ -66,7 +66,7 @@ export default function BookmarksPage() {
       };
       if (filter !== "ALL") params.type = filter;
 
-      const response = await apiClient.get("bookmarks", { params });
+      const response = await apiClient.get("/bookmarks", { params });
 
       setBookmarks(response?.data.bookmarks);
       setTotalPages(response?.data.totalPages);
@@ -82,7 +82,7 @@ export default function BookmarksPage() {
   // ✅ Sửa lại dùng apiClient
   const removeBookmark = async (bookmarkId: string) => {
     try {
-      await apiClient.delete("/bookmarks", { data: { bookmarkId } });
+      await apiClient.delete(`/bookmarks/${bookmarkId}`);
       setBookmarks(bookmarks.filter((b) => b.id !== bookmarkId));
       setTotalBookmarks(totalBookmarks - 1);
     } catch (error) {
@@ -124,9 +124,10 @@ export default function BookmarksPage() {
                   </span>
                   <select
                     value={filter}
-                    onChange={(e) =>
-                      setFilter(e.target.value as "ALL" | "TEXT" | "AUDIO")
-                    }
+                    onChange={(e) => {
+                      setFilter(e.target.value as "ALL" | "TEXT" | "AUDIO");
+                      setCurrentPage(1); // Reset to first page when filter changes
+                    }}
                     className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="ALL">Tất cả</option>

@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "../../contexts/LanguageContext";
+import apiClient from "../../utils/api";
+import toast from "react-hot-toast";
 
 interface StatsData {
   totalStories: number;
@@ -33,68 +35,46 @@ const AdminStats: React.FC = () => {
   const fetchStats = async () => {
     try {
       setIsLoading(true);
-      // Mock data for now - replace with actual API calls
-      setTimeout(() => {
-        setStats({
-          totalStories: 1247,
-          totalUsers: 8432,
-          totalViews: 324567,
-          totalChapters: 15623,
-          recentStories: [
-            {
-              id: 1,
-              title: "Đấu Phá Thương Khung",
-              author: "Thiên Tàm Thổ Đậu",
-              createdAt: "2025-09-22",
-            },
-            {
-              id: 2,
-              title: "Tiên Nghịch",
-              author: "Nhĩ Căn",
-              createdAt: "2025-09-21",
-            },
-            {
-              id: 3,
-              title: "Hoàn Mỹ Thế Giới",
-              author: "Thần Đông",
-              createdAt: "2025-09-20",
-            },
-          ],
-          recentUsers: [
-            {
-              id: 1,
-              name: "Nguyễn Văn A",
-              email: "user1@example.com",
-              createdAt: "2025-09-22",
-            },
-            {
-              id: 2,
-              name: "Trần Thị B",
-              email: "user2@example.com",
-              createdAt: "2025-09-21",
-            },
-            {
-              id: 3,
-              name: "Lê Văn C",
-              email: "user3@example.com",
-              createdAt: "2025-09-20",
-            },
-          ],
-          popularStories: [
-            {
-              id: 1,
-              title: "Đấu Phá Thương Khung",
-              views: 45234,
-              bookmarks: 3421,
-            },
-            { id: 2, title: "Tiên Nghịch", views: 38945, bookmarks: 2876 },
-            { id: 3, title: "Hoàn Mỹ Thế Giới", views: 32156, bookmarks: 2543 },
-          ],
-        });
-        setIsLoading(false);
-      }, 1000);
+
+      // Call the real API
+      const response = await apiClient.get("/admin/dashboard/stats");
+      const data = response.data;
+
+      setStats({
+        totalStories: data.totalStories || 0,
+        totalUsers: data.totalUsers || 0,
+        totalViews: data.totalViews || 0,
+        totalChapters: data.totalChapters || 0,
+        recentStories: Array.isArray(data.recentStories)
+          ? data.recentStories.map((story: any) => ({
+              id: story.id,
+              title: story.title,
+              author: story.author?.name || "Unknown",
+              createdAt: story.createdAt,
+            }))
+          : [],
+        recentUsers: Array.isArray(data.recentUsers)
+          ? data.recentUsers.map((user: any) => ({
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              createdAt: user.createdAt,
+            }))
+          : [],
+        popularStories: Array.isArray(data.topStories)
+          ? data.topStories.map((story: any) => ({
+              id: story.id || story.slug,
+              title: story.title,
+              views: story.viewCount || 0,
+              bookmarks: story._count?.bookmarks || 0,
+            }))
+          : [],
+      });
+
+      setIsLoading(false);
     } catch (error) {
       console.error("Error fetching stats:", error);
+      toast.error("Có lỗi xảy ra khi tải thống kê");
       setIsLoading(false);
     }
   };
@@ -191,7 +171,7 @@ const AdminStats: React.FC = () => {
           </div>
           <div className="p-6">
             <div className="space-y-4">
-              {stats.recentStories.map((story) => (
+              {(stats.recentStories || [])?.map((story) => (
                 <div
                   key={story.id}
                   className="flex items-center justify-between"
@@ -222,7 +202,7 @@ const AdminStats: React.FC = () => {
           </div>
           <div className="p-6">
             <div className="space-y-4">
-              {stats.recentUsers.map((user) => (
+              {(stats.recentUsers || []).map((user) => (
                 <div
                   key={user.id}
                   className="flex items-center justify-between"
@@ -254,7 +234,7 @@ const AdminStats: React.FC = () => {
         </div>
         <div className="p-6">
           <div className="space-y-4">
-            {stats.popularStories.map((story, index) => (
+            {(stats.popularStories || []).map((story, index) => (
               <div key={story.id} className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400 text-sm font-bold">

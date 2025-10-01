@@ -22,7 +22,7 @@ const Navbar: React.FC = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
-  const { user, isAuthenticated, isAdmin } = useAuth();
+  const { user, isAuthenticated, isAdmin, isReady } = useAuth();
 
   const { theme } = useSelector((state: RootState) => state.ui);
 
@@ -65,7 +65,9 @@ const Navbar: React.FC = () => {
     }
   };
 
-  const toggleMobileMenu = () => {
+  const toggleMobileMenu = (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
@@ -90,8 +92,12 @@ const Navbar: React.FC = () => {
           <div className="flex items-center">
             {/* Mobile menu button */}
             <button
-              onClick={toggleMobileMenu}
-              className="md:hidden p-2 rounded-md text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-colors duration-200"
+              onClick={(e) => toggleMobileMenu(e)}
+              className={`md:hidden p-2 rounded-md text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-colors duration-200 z-50 relative ${
+                isMobileMenuOpen ? "bg-blue-100 dark:bg-blue-900" : ""
+              }`}
+              aria-label="Toggle mobile menu"
+              type="button"
             >
               <svg
                 className="h-6 w-6"
@@ -120,38 +126,53 @@ const Navbar: React.FC = () => {
             {/* Logo */}
             <Link
               href="/"
-              className="flex-shrink-0 flex items-center ml-4 md:ml-0"
+              className="flex-shrink-0 flex items-center ml-4 md:ml-0 group"
             >
-              <div className="hidden md:block text-xl font-bold text-blue-600 dark:text-blue-400">
-                📚 Web Truyện
+              <div className="hidden md:block text-lg font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 dark:from-blue-400 dark:via-purple-400 dark:to-indigo-400 bg-clip-text text-transparent group-hover:scale-105 transition-transform duration-300">
+                <span className="inline-block group-hover:animate-bounce">
+                  📚
+                </span>{" "}
+                Web Truyện
               </div>
             </Link>
 
             {/* Desktop navigation */}
-            <div className="hidden lg:ml-10 lg:flex lg:space-x-8">
+            <div className="hidden lg:ml-10 lg:flex lg:space-x-1">
               <Link
                 href="/"
-                className="text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                className="relative text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 text-xs font-medium transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md"
               >
-                {t("nav.home")}
+                <span className="relative">
+                  {t("nav.home")}
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-200 group-hover:w-full"></span>
+                </span>
               </Link>
               <Link
                 href="/stories?type=TEXT"
-                className="text-gray-500 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                className="relative text-gray-500 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 text-xs font-medium transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md group"
               >
-                {t("nav.stories")}
+                <span className="relative">
+                  {t("nav.stories")}
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-200 group-hover:w-full"></span>
+                </span>
               </Link>
               <Link
                 href="/stories?type=AUDIO"
-                className="text-gray-500 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                className="relative text-gray-500 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 text-xs font-medium transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md group"
               >
-                {t("nav.audio")}
+                <span className="relative">
+                  {t("nav.audio")}
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-200 group-hover:w-full"></span>
+                </span>
               </Link>
               <Link
                 href="/genres"
-                className="text-gray-500 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                className="relative text-gray-500 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 text-xs font-medium transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-md group"
               >
-                {t("nav.genres")}
+                <span className="relative">
+                  {t("nav.genres")}
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 transition-all duration-200 group-hover:w-full"></span>
+                </span>
               </Link>
             </div>
           </div>
@@ -243,11 +264,11 @@ const Navbar: React.FC = () => {
             {/* Theme toggle */}
             <button
               onClick={() => dispatch(toggleTheme())}
-              className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-all duration-200"
+              className="group p-3 rounded-xl text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gradient-to-br hover:from-yellow-50 hover:to-orange-50 dark:hover:from-gray-700 dark:hover:to-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 hover:shadow-lg hover:scale-110 transform"
             >
               {theme === "light" ? (
                 <svg
-                  className="h-5 w-5 text-gray-700 dark:text-gray-300"
+                  className="h-5 w-5 text-gray-700 dark:text-gray-300 group-hover:text-blue-600 transition-colors duration-300 group-hover:rotate-12 transform"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
@@ -255,7 +276,7 @@ const Navbar: React.FC = () => {
                 </svg>
               ) : (
                 <svg
-                  className="h-5 w-5 text-yellow-500 dark:text-yellow-400"
+                  className="h-5 w-5 text-yellow-500 dark:text-yellow-400 group-hover:text-yellow-400 transition-colors duration-300 group-hover:rotate-180 transform"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
@@ -267,15 +288,22 @@ const Navbar: React.FC = () => {
               )}
             </button>
 
-            {isAuthenticated && user ? (
+            {!isReady ? (
+              // Loading state while auth is initializing
+              <div className="flex items-center space-x-3">
+                <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-8 w-20 rounded"></div>
+                <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-8 w-20 rounded"></div>
+              </div>
+            ) : isAuthenticated && user ? (
               <div className="flex items-center space-x-3">
                 {/* Bookmarks */}
                 <Link
                   href="/bookmarks"
-                  className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+                  className="group p-3 rounded-xl text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gradient-to-br hover:from-blue-50 hover:to-indigo-50 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 hover:shadow-lg hover:scale-110 transform"
+                  title="Bookmarks"
                 >
                   <svg
-                    className="h-5 w-5"
+                    className="h-5 w-5 group-hover:scale-110 transition-transform duration-300"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -306,9 +334,7 @@ const Navbar: React.FC = () => {
                         {user.name.charAt(0).toUpperCase()}
                       </div>
                     )}
-                    <span className="hidden md:block text-gray-700 dark:text-gray-300 max-w-20 truncate">
-                      {user.name}
-                    </span>
+
                     <svg
                       className={`h-4 w-4 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${
                         isUserMenuOpen ? "rotate-180" : ""
@@ -330,31 +356,6 @@ const Navbar: React.FC = () => {
                   {isUserMenuOpen && (
                     <div className="absolute right-0 mt-2 w-56 rounded-lg shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 z-50">
                       <div className="py-1">
-                        {/* User Info Header */}
-                        <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                          <div className="flex items-center space-x-3">
-                            {user.avatar ? (
-                              <img
-                                className="h-10 w-10 rounded-full object-cover ring-2 ring-blue-500"
-                                src={user.avatar}
-                                alt={user.name}
-                              />
-                            ) : (
-                              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-medium">
-                                {user.name.charAt(0).toUpperCase()}
-                              </div>
-                            )}
-                            <div className="min-w-0 flex-1">
-                              <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                {user.name}
-                              </p>
-                              <p className="text-xs text-blue-600 dark:text-blue-400">
-                                {isAdmin ? t("user.admin") : t("user.member")}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
                         {/* Menu Items */}
                         <button
                           onClick={handleProfileClick}
@@ -460,33 +461,43 @@ const Navbar: React.FC = () => {
                 {isAdmin && (
                   <Link
                     href="/admin"
-                    className="text-gray-500 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                    className="group relative text-gray-500 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 hover:shadow-md hover:scale-105"
                   >
-                    Admin
+                    <span className="flex items-center gap-2">⚙️ Admin</span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                   </Link>
                 )}
 
                 {/* Logout */}
                 <button
                   onClick={handleLogout}
-                  className="text-gray-500 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="group relative text-gray-500 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 dark:hover:from-red-900/20 dark:hover:to-pink-900/20 hover:shadow-md hover:scale-105"
                 >
-                  {t("nav.logout")}
+                  <span className="flex items-center gap-2">
+                    🚪 {t("nav.logout")}
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-pink-600 rounded-lg opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                 </button>
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3">
                 <Link
                   href="/auth/login"
-                  className="text-gray-500 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="group relative text-gray-500 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 hover:shadow-md hover:scale-105 border border-transparent hover:border-blue-200 dark:hover:border-blue-700"
                 >
-                  {t("nav.login")}
+                  <span className="flex items-center gap-2">
+                    🔑 {t("nav.login")}
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                 </Link>
                 <Link
                   href="/auth/register"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="group relative bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform"
                 >
-                  {t("nav.register")}
+                  <span className="flex items-center gap-2">
+                    ✨ {t("nav.register")}
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-white to-blue-100 rounded-lg opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                 </Link>
               </div>
             )}
@@ -495,7 +506,7 @@ const Navbar: React.FC = () => {
 
         {/* Mobile menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 animate-slide-down">
+          <div className="md:hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
             <div className="px-2 pt-2 pb-3 space-y-1">
               {/* Mobile Search */}
               <div className="px-3 py-2">
@@ -604,7 +615,16 @@ const Navbar: React.FC = () => {
                   : `☀️ ${t("theme.light")}`}
               </button>{" "}
               {/* User Section for Mobile */}
-              {isAuthenticated && user ? (
+              {!isReady ? (
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
+                  <div className="flex items-center px-3 py-2">
+                    <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-10 w-10 rounded-full"></div>
+                    <div className="ml-3">
+                      <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-4 w-24 rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              ) : isAuthenticated && user ? (
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
                   <div className="flex items-center px-3 py-2">
                     {user.avatar ? (

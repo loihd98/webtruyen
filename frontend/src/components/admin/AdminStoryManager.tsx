@@ -316,6 +316,24 @@ const AdminStoryManager: React.FC = () => {
         >
           <AdminStoryForm onCloseModal={() => setShowCreateModal(false)} />
         </Modal>
+
+        {/* Edit Story Modal */}
+        <Modal
+          isOpen={!!editingStory}
+          onClose={() => setEditingStory(null)}
+          title="Edit Story"
+        >
+          {editingStory && (
+            <AdminStoryForm
+              storyId={editingStory.id}
+              onCloseModal={() => setEditingStory(null)}
+              onSuccess={() => {
+                setEditingStory(null);
+                fetchStories(currentPage, 10);
+              }}
+            />
+          )}
+        </Modal>
       </div>
     </div>
   );

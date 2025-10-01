@@ -52,7 +52,7 @@ app.use("/api/auth", require("./routes/auth"));
 app.use("/api/users", require("./routes/users"));
 app.use("/api/stories", require("./routes/stories"));
 app.use("/api/chapters", require("./routes/chapters"));
-app.use("/api/comments", require("./routes/comments"));
+app.use("/api/comments", require("./routes/comments")); // Mount back at /api/comments
 app.use("/api/bookmarks", require("./routes/bookmarks"));
 app.use("/api/admin", require("./routes/admin"));
 app.use("/api/media", require("./routes/media"));

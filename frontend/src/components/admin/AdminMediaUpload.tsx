@@ -55,48 +55,178 @@ const AdminMediaUpload: React.FC = () => {
     }
   };
 
-  const handleFiles = useCallback(async (files: FileList) => {
-    setIsUploading(true);
-    setUploadProgress(0);
+  const handleFiles = useCallback(
+    async (files: FileList) => {
+      setIsUploading(true);
+      setUploadProgress(0);
 
-    try {
+      // Check for duplicate filenames before uploading
+      const filesToUpload: File[] = [];
+      const duplicateFiles: string[] = [];
+      const skippedFiles: string[] = [];
+
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        const fileType = file.type.startsWith("image/") ? "image" : "audio";
+        const existingFile = mediaFiles.find(
+          (mediaFile) =>
+            mediaFile.originalName.toLowerCase() === file.name.toLowerCase()
+        );
 
-        // Create FormData for upload (use "image" field name for both types)
-        const formData = new FormData();
-        formData.append("image", file);
+        if (existingFile) {
+          duplicateFiles.push(file.name);
+          // Ask user what to do with duplicate
+          const userChoice = confirm(
+            `File "${file.name}" đã tồn tại. Bạn có muốn thay thế file cũ không?\n\n` +
+              `- Nhấn "OK" để thay thế file cũ\n` +
+              `- Nhấn "Cancel" để bỏ qua file này`
+          );
 
-        // Update progress
-        setUploadProgress(((i + 0.5) / files.length) * 100);
-
-        // Upload to backend (use /media/upload to save to database)
-        const response = await apiClient.post("/media/upload", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-
-        if (response.data?.success) {
-          toast.success(`Upload ${file.name} thành công!`);
+          if (userChoice) {
+            // User wants to replace - add to upload list and we'll delete old one
+            filesToUpload.push(file);
+          } else {
+            // User wants to skip
+            skippedFiles.push(file.name);
+          }
+        } else {
+          // No duplicate, safe to upload
+          filesToUpload.push(file);
         }
-
-        // Update progress
-        setUploadProgress(((i + 1) / files.length) * 100);
       }
 
-      // Refresh media files list
-      await fetchMediaFiles();
-      toast.success(`Upload ${files.length} file(s) thành công!`);
-    } catch (error: any) {
-      console.error("Upload error:", error);
-      toast.error(error.response?.data?.message || "Có lỗi xảy ra khi upload");
-    } finally {
-      setIsUploading(false);
-      setUploadProgress(0);
-    }
-  }, []);
+      // Show notifications for duplicates and skipped files
+      if (duplicateFiles.length > 0) {
+        toast(
+          `⚠️ Phát hiện ${
+            duplicateFiles.length
+          } file trùng tên: ${duplicateFiles.join(", ")}`,
+          {
+            duration: 6000,
+            style: {
+              background: "#FEF3C7",
+              color: "#92400E",
+              border: "1px solid #F59E0B",
+            },
+          }
+        );
+      }
+
+      if (skippedFiles.length > 0) {
+        toast(
+          `📋 Đã bỏ qua ${skippedFiles.length} file: ${skippedFiles.join(
+            ", "
+          )}`,
+          {
+            duration: 4000,
+            style: {
+              background: "#E0F2FE",
+              color: "#0369A1",
+              border: "1px solid #0284C7",
+            },
+          }
+        );
+      }
+
+      if (filesToUpload.length === 0) {
+        toast("Không có file nào được upload", {
+          duration: 3000,
+          style: {
+            background: "#E0F2FE",
+            color: "#0369A1",
+            border: "1px solid #0284C7",
+          },
+        });
+        setIsUploading(false);
+        setUploadProgress(0);
+        return;
+      }
+
+      try {
+        let successCount = 0;
+
+        for (let i = 0; i < filesToUpload.length; i++) {
+          const file = filesToUpload[i];
+          const fileType = file.type.startsWith("image/") ? "image" : "audio";
+
+          // Check if this is a replacement upload
+          const existingFile = mediaFiles.find(
+            (mediaFile) =>
+              mediaFile.originalName.toLowerCase() === file.name.toLowerCase()
+          );
+
+          // Update progress
+          setUploadProgress(((i + 0.3) / filesToUpload.length) * 100);
+
+          try {
+            // If replacing, delete the old file first
+            if (existingFile) {
+              await apiClient.delete(`/media/${existingFile.id}`);
+              toast(`🗑️ Đã xóa file cũ: ${file.name}`, {
+                duration: 3000,
+                style: {
+                  background: "#FEF3C7",
+                  color: "#92400E",
+                  border: "1px solid #F59E0B",
+                },
+              });
+            }
+
+            // Create FormData for upload (use "image" field name for both types)
+            const formData = new FormData();
+            formData.append("image", file);
+
+            // Update progress
+            setUploadProgress(((i + 0.7) / filesToUpload.length) * 100);
+
+            // Upload to backend (use /media/upload to save to database)
+            const response = await apiClient.post("/media/upload", formData, {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            });
+
+            if (response.data?.success) {
+              successCount++;
+              const action = existingFile ? "thay thế" : "upload";
+              toast.success(
+                `✅ ${action.charAt(0).toUpperCase() + action.slice(1)} ${
+                  file.name
+                } thành công!`
+              );
+            }
+
+            // Update progress
+            setUploadProgress(((i + 1) / filesToUpload.length) * 100);
+          } catch (fileError: any) {
+            console.error(`Error uploading ${file.name}:`, fileError);
+            toast.error(
+              `❌ Lỗi khi upload ${file.name}: ${
+                fileError.response?.data?.message || "Unknown error"
+              }`
+            );
+          }
+        }
+
+        // Refresh media files list
+        await fetchMediaFiles();
+
+        if (successCount > 0) {
+          toast.success(
+            `🎉 Hoàn thành! ${successCount}/${filesToUpload.length} file được xử lý thành công!`
+          );
+        }
+      } catch (error: any) {
+        console.error("Upload error:", error);
+        toast.error(
+          error.response?.data?.message || "Có lỗi xảy ra khi upload"
+        );
+      } finally {
+        setIsUploading(false);
+        setUploadProgress(0);
+      }
+    },
+    [mediaFiles]
+  );
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {

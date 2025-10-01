@@ -5,6 +5,7 @@ import { useLanguage } from "../../contexts/LanguageContext";
 import { User } from "../../types";
 import apiClient from "../../utils/api";
 import toast from "react-hot-toast";
+import Modal from "./Modal";
 
 interface UserStats {
   totalUsers: number;
@@ -41,6 +42,13 @@ const AdminUserManager: React.FC = () => {
   const [showUserModal, setShowUserModal] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [updatingUsers, setUpdatingUsers] = useState<Set<string>>(new Set());
+  const [deletingUsers, setDeletingUsers] = useState<Set<string>>(new Set());
+  const [userForm, setUserForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "USER" as "USER" | "ADMIN",
+  });
 
   useEffect(() => {
     fetchUsers();
@@ -130,6 +138,121 @@ const AdminUserManager: React.FC = () => {
   const handleRefresh = () => {
     setPagination((prev) => ({ ...prev, page: 1 }));
     fetchUsers();
+  };
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!userForm.name || !userForm.email || !userForm.password) {
+      toast.error("Vui lòng điền đầy đủ thông tin");
+      return;
+    }
+
+    try {
+      const response = await apiClient.post("/admin/users", userForm);
+      const newUser = response.data.user;
+
+      setUsers((prev) => [newUser, ...prev]);
+      setShowUserModal(false);
+      setUserForm({ name: "", email: "", password: "", role: "USER" });
+      toast.success("Tạo người dùng thành công");
+      fetchUsers(); // Refresh to get updated data
+      fetchStats(); // Update stats
+    } catch (error: any) {
+      console.error("Error creating user:", error);
+      toast.error(
+        error.response?.data?.message || "Có lỗi xảy ra khi tạo người dùng"
+      );
+    }
+  };
+
+  const handleEditUser = (user: User) => {
+    setEditingUser(user);
+    setUserForm({
+      name: user.name || "",
+      email: user.email || "",
+      password: "", // Don't pre-fill password
+      role: user.role as "USER" | "ADMIN",
+    });
+    setShowUserModal(true);
+  };
+
+  const handleUpdateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!editingUser) return;
+
+    try {
+      const updateData: any = {
+        name: userForm.name.trim(),
+        email: userForm.email.trim(),
+        role: userForm.role,
+      };
+
+      // Only include password if provided
+      if (userForm.password.trim()) {
+        updateData.password = userForm.password;
+      }
+
+      const response = await apiClient.patch(
+        `/admin/users/${editingUser.id}`,
+        updateData
+      );
+      const { data } = response;
+
+      setUsers((prev) =>
+        prev.map((user) =>
+          user.id === editingUser.id ? { ...user, ...data.user } : user
+        )
+      );
+
+      toast.success(data.message || "Cập nhật người dùng thành công");
+      handleCloseModal();
+      fetchStats(); // Update stats
+    } catch (error: any) {
+      console.error("Error updating user:", error);
+      toast.error(
+        error.response?.data?.message || "Có lỗi xảy ra khi cập nhật người dùng"
+      );
+    }
+  };
+
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    if (
+      !confirm(
+        `Bạn có chắc chắn muốn xóa người dùng "${userName}"? Hành động này không thể hoàn tác.`
+      )
+    ) {
+      return;
+    }
+
+    if (deletingUsers.has(userId)) return;
+
+    try {
+      setDeletingUsers((prev) => new Set(Array.from(prev).concat([userId])));
+
+      await apiClient.delete(`/admin/users/${userId}`);
+
+      setUsers((prev) => prev.filter((user) => user.id !== userId));
+      toast.success("Xóa người dùng thành công");
+      fetchStats(); // Update stats
+    } catch (error: any) {
+      console.error("Error deleting user:", error);
+      toast.error(
+        error.response?.data?.message || "Có lỗi xảy ra khi xóa người dùng"
+      );
+    } finally {
+      setDeletingUsers((prev) => {
+        const newArray = Array.from(prev).filter((id) => id !== userId);
+        return new Set(newArray);
+      });
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowUserModal(false);
+    setEditingUser(null);
+    setUserForm({ name: "", email: "", password: "", role: "USER" });
   };
 
   const getRoleBadge = (role: string) => {
@@ -446,7 +569,7 @@ const AdminUserManager: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-2 items-center">
                       <select
                         value={user.role}
                         onChange={(e) =>
@@ -455,15 +578,69 @@ const AdminUserManager: React.FC = () => {
                             e.target.value as "USER" | "ADMIN"
                           )
                         }
-                        disabled={updatingUsers.has(user.id)}
+                        disabled={
+                          updatingUsers.has(user.id) ||
+                          deletingUsers.has(user.id)
+                        }
                         className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white disabled:opacity-50"
                       >
                         <option value="USER">User</option>
                         <option value="ADMIN">Admin</option>
                       </select>
-                      {updatingUsers.has(user.id) && (
-                        <div className="animate-spin text-blue-500">⚪</div>
-                      )}
+
+                      <button
+                        onClick={() => handleEditUser(user)}
+                        disabled={
+                          updatingUsers.has(user.id) ||
+                          deletingUsers.has(user.id)
+                        }
+                        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-50 disabled:cursor-not-allowed p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900"
+                        title="Chỉnh sửa người dùng"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                        </svg>
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          handleDeleteUser(
+                            user.id,
+                            user.displayName || user.username || user.name
+                          )
+                        }
+                        disabled={
+                          updatingUsers.has(user.id) ||
+                          deletingUsers.has(user.id)
+                        }
+                        className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed p-1 rounded hover:bg-red-50 dark:hover:bg-red-900"
+                        title="Xóa người dùng"
+                      >
+                        {deletingUsers.has(user.id) ? (
+                          <div className="animate-spin text-red-500">⚪</div>
+                        ) : (
+                          <svg
+                            className="w-4 h-4"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        )}
+                      </button>
+
+                      {updatingUsers.has(user.id) &&
+                        !deletingUsers.has(user.id) && (
+                          <div className="animate-spin text-blue-500">⚪</div>
+                        )}
                     </div>
                   </td>
                 </tr>
@@ -546,6 +723,105 @@ const AdminUserManager: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* User Creation Modal */}
+      <Modal
+        isOpen={showUserModal}
+        onClose={handleCloseModal}
+        title={editingUser ? "Chỉnh sửa người dùng" : "Tạo người dùng mới"}
+      >
+        <form
+          onSubmit={editingUser ? handleUpdateUser : handleCreateUser}
+          className="space-y-4"
+        >
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Tên người dùng *
+            </label>
+            <input
+              type="text"
+              value={userForm.name}
+              onChange={(e) =>
+                setUserForm({ ...userForm, name: e.target.value })
+              }
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              placeholder="Nhập tên người dùng"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Email *
+            </label>
+            <input
+              type="email"
+              value={userForm.email}
+              onChange={(e) =>
+                setUserForm({ ...userForm, email: e.target.value })
+              }
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              placeholder="Nhập email"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Mật khẩu{" "}
+              {editingUser ? "(để trống nếu không muốn thay đổi)" : "*"}
+            </label>
+            <input
+              type="password"
+              value={userForm.password}
+              onChange={(e) =>
+                setUserForm({ ...userForm, password: e.target.value })
+              }
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              placeholder={
+                editingUser ? "Nhập mật khẩu mới (tùy chọn)" : "Nhập mật khẩu"
+              }
+              minLength={6}
+              required={!editingUser}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Vai trò
+            </label>
+            <select
+              value={userForm.role}
+              onChange={(e) =>
+                setUserForm({
+                  ...userForm,
+                  role: e.target.value as "USER" | "ADMIN",
+                })
+              }
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            >
+              <option value="USER">👤 User</option>
+              <option value="ADMIN">👑 Admin</option>
+            </select>
+          </div>
+
+          <div className="flex justify-end space-x-3 pt-4">
+            <button
+              type="button"
+              onClick={handleCloseModal}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg font-medium transition-colors"
+            >
+              Hủy
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+            >
+              {editingUser ? "Cập nhật người dùng" : "Tạo người dùng"}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

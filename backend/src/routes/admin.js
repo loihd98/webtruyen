@@ -13,7 +13,9 @@ router.get("/dashboard/stats", adminController.getDashboardStats);
 
 // User management
 router.get("/users", adminController.getUsers);
+router.patch("/users/:id", adminController.updateUser);
 router.patch("/users/:id/role", adminController.updateUserRole);
+router.delete("/users/:id", adminController.deleteUser);
 
 // Story management
 router.get("/stories", adminController.getStories);
@@ -29,9 +31,10 @@ router.patch("/chapters/:id", adminController.updateChapter);
 router.delete("/chapters/:id", adminController.deleteChapter);
 
 // Comment moderation
+router.get("/comments", adminController.getComments);
 router.get("/comments/pending", adminController.getPendingComments);
 router.patch("/comments/:id/approve", adminController.approveComment);
-router.delete("/comments/:id/reject", adminController.rejectComment);
+router.delete("/comments/:id", adminController.deleteComment);
 
 // Genre management
 router.get("/genres", adminController.getGenres);

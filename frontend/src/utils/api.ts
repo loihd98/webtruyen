@@ -135,14 +135,14 @@ export const authAPI = {
       apiClient.post("/auth/logout", { refreshToken })
     ),
 
-  getProfile: () => apiRequest<User>(() => apiClient.get("/auth/profile")),
+  getProfile: () => apiRequest<User>(() => apiClient.get("/auth/me")),
 
   updateProfile: (data: Partial<User>) =>
-    apiRequest<User>(() => apiClient.put("/auth/profile", data)),
+    apiRequest<User>(() => apiClient.patch("/users/me", data)),
 
   changePassword: (currentPassword: string, newPassword: string) =>
     apiRequest<{ message: string }>(() =>
-      apiClient.put("/auth/password", { currentPassword, newPassword })
+      apiClient.post("/users/change-password", { currentPassword, newPassword })
     ),
 
   googleAuth: (token: string) =>
@@ -224,24 +224,46 @@ export const chaptersAPI = {
 
 // Comments API
 export const commentsAPI = {
-  getComments: (chapterId: string) =>
-    apiRequest<Comment[]>(() =>
-      apiClient.get(`/chapters/${chapterId}/comments`)
+  getComments: (chapterId: string, page: number = 1, limit: number = 10) =>
+    apiRequest<{
+      comments: Comment[];
+      chapter: {
+        id: string;
+        title: string;
+      };
+      pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        pages: number;
+      };
+    }>(() =>
+      apiClient.get(`/comments/chapters/${chapterId}/comments`, {
+        params: { page, limit },
+      })
     ),
 
   createComment: (chapterId: string, content: string, parentId?: string) =>
-    apiRequest<Comment>(() =>
-      apiClient.post(`/chapters/${chapterId}/comments`, { content, parentId })
+    apiRequest<{ message: string; data: { comment: Comment } }>(() =>
+      apiClient.post(`/comments/chapters/${chapterId}/comments`, {
+        content,
+        parentId,
+      })
     ),
 
   updateComment: (commentId: string, content: string) =>
-    apiRequest<Comment>(() =>
-      apiClient.put(`/comments/${commentId}`, { content })
+    apiRequest<{ message: string; data: { comment: Comment } }>(() =>
+      apiClient.patch(`/comments/${commentId}`, { content })
     ),
 
   deleteComment: (commentId: string) =>
     apiRequest<{ message: string }>(() =>
       apiClient.delete(`/comments/${commentId}`)
+    ),
+
+  reportComment: (commentId: string, reason: string) =>
+    apiRequest<{ message: string }>(() =>
+      apiClient.post(`/comments/${commentId}/report`, { reason })
     ),
 };
 
