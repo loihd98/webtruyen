@@ -2,7 +2,10 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const { v4: uuidv4 } = require("uuid");
+const { PrismaClient } = require("@prisma/client");
 const config = require("../config");
+
+const prisma = new PrismaClient();
 
 // Configure multer for audio files
 const audioStorage = multer.diskStorage({
@@ -310,6 +313,197 @@ class MediaController {
       res.status(500).json({
         error: "Internal Server Error",
         message: "Có lỗi xảy ra khi lấy danh sách file",
+      });
+    }
+  }
+
+  // GET /api/media - Get all media files with search and pagination
+  async getMediaFiles(req, res) {
+    try {
+      const {
+        page = 1,
+        limit = 20,
+        search = "",
+        type = "",
+        sortBy = "createdAt",
+        sortOrder = "desc",
+      } = req.query;
+
+      const skip = (parseInt(page) - 1) * parseInt(limit);
+
+      const where = {
+        isActive: true,
+        ...(search && {
+          OR: [
+            { filename: { contains: search, mode: "insensitive" } },
+            { originalName: { contains: search, mode: "insensitive" } },
+          ],
+        }),
+        ...(type && { type }),
+      };
+
+      const orderBy = {};
+      orderBy[sortBy] = sortOrder;
+
+      const [mediaFiles, total] = await Promise.all([
+        prisma.media.findMany({
+          where,
+          skip,
+          take: parseInt(limit),
+          orderBy,
+        }),
+        prisma.media.count({ where }),
+      ]);
+
+      res.json({
+        success: true,
+        data: {
+          mediaFiles,
+          pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            total,
+            totalPages: Math.ceil(total / parseInt(limit)),
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching media files:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch media files",
+      });
+    }
+  }
+
+  // POST /api/media/upload - Upload and save media file to database
+  async uploadMediaToDatabase(req, res) {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: "No file uploaded",
+        });
+      }
+
+      const { file } = req;
+      const type = file.mimetype.startsWith("image/") ? "image" : "audio";
+      const url = `/uploads/${type}s/${file.filename}`;
+
+      const mediaFile = await prisma.media.create({
+        data: {
+          filename: file.filename,
+          originalName: file.originalname,
+          mimeType: file.mimetype,
+          size: file.size,
+          url,
+          type,
+        },
+      });
+
+      res.status(201).json({
+        success: true,
+        data: mediaFile,
+        message: "File uploaded successfully",
+      });
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to upload file",
+      });
+    }
+  }
+
+  // DELETE /api/media/:id - Delete media file
+  async deleteMediaFile(req, res) {
+    try {
+      const { id } = req.params;
+
+      const existingMedia = await prisma.media.findUnique({
+        where: { id },
+      });
+
+      if (!existingMedia) {
+        return res.status(404).json({
+          success: false,
+          message: "Media file not found",
+        });
+      }
+
+      // Delete physical file
+      const filePath = path.join(
+        __dirname,
+        "../../uploads",
+        `${existingMedia.type}s`,
+        existingMedia.filename
+      );
+      try {
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      } catch (fileError) {
+        console.warn("Could not delete physical file:", fileError.message);
+      }
+
+      // Delete database record
+      await prisma.media.delete({
+        where: { id },
+      });
+
+      res.json({
+        success: true,
+        message: "Media file deleted successfully",
+      });
+    } catch (error) {
+      console.error("Error deleting media file:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to delete media file",
+      });
+    }
+  }
+
+  // GET /api/media/search - Search media files for select dropdown
+  async searchMediaFiles(req, res) {
+    try {
+      const { q = "", type = "", limit = 20 } = req.query;
+
+      const where = {
+        isActive: true,
+        ...(type && { type }),
+        ...(q && {
+          OR: [
+            { filename: { contains: q, mode: "insensitive" } },
+            { originalName: { contains: q, mode: "insensitive" } },
+          ],
+        }),
+      };
+
+      const mediaFiles = await prisma.media.findMany({
+        where,
+        take: parseInt(limit),
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          filename: true,
+          originalName: true,
+          url: true,
+          type: true,
+          mimeType: true,
+          size: true,
+        },
+      });
+
+      res.json({
+        success: true,
+        data: mediaFiles,
+      });
+    } catch (error) {
+      console.error("Error searching media files:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to search media files",
       });
     }
   }

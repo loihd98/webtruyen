@@ -19,6 +19,12 @@ router.post("/upload/audio", uploadAudio, MediaController.uploadAudio);
 // Upload image file
 router.post("/upload/image", uploadImage, MediaController.uploadImage);
 
+// Media management routes
+router.get("/", MediaController.getMediaFiles);
+router.post("/upload", uploadImage, MediaController.uploadMediaToDatabase);
+router.delete("/:id", MediaController.deleteMediaFile);
+router.get("/search", MediaController.searchMediaFiles);
+
 // Get file info
 router.get("/files/:filename", MediaController.getFileInfo);
 

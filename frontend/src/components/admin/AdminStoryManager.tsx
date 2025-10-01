@@ -8,15 +8,12 @@ import apiClient from "@/utils/api";
 import Modal from "./Modal";
 import AdminStoryForm from "./AdminStoryForm";
 import Pagination from "./Pagination";
-import AdminChapterForm from "./AdminChapterForm";
 
 const AdminStoryManager: React.FC = () => {
   const { t } = useLanguage();
   const [stories, setStories] = useState<Story[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showCreateChapterModal, setShowCreateChapterModal] = useState(false);
-  const [selectedStoryId, setSelectedStoryId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [editingStory, setEditingStory] = useState<Story | null>(null);
@@ -33,10 +30,10 @@ const AdminStoryManager: React.FC = () => {
   const fetchStories = async (page: number, limit: number) => {
     try {
       setIsLoading(true);
-      const stories = await apiClient.get("/stories/admin/stories", {
+      const stories = await apiClient.get("/admin/stories", {
         params: { limit, page },
       });
-      setStories(stories.data?.data?.data);
+      setStories(stories.data?.data?.stories);
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching stories:", error);
@@ -277,15 +274,6 @@ const AdminStoryManager: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => {
-                          setSelectedStoryId(story.id);
-                          setShowCreateChapterModal(true);
-                        }}
-                        className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                      >
-                        Thêm chương
-                      </button>
-                      <button
                         onClick={() => setEditingStory(story)}
                         className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                       >
@@ -327,16 +315,6 @@ const AdminStoryManager: React.FC = () => {
           title="Create Story"
         >
           <AdminStoryForm onCloseModal={() => setShowCreateModal(false)} />
-        </Modal>
-        <Modal
-          isOpen={showCreateChapterModal}
-          onClose={() => setShowCreateChapterModal(false)}
-          title="Create Chapter"
-        >
-          <AdminChapterForm
-            storyId={selectedStoryId}
-            onCloseModal={() => setShowCreateChapterModal(false)}
-          />
         </Modal>
       </div>
     </div>

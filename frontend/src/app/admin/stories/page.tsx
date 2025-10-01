@@ -3,7 +3,9 @@
 import React, { useState, useEffect, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import toast from "react-hot-toast";
 import StorySearchForm from "../../../components/stories/StorySearchForm";
+import AdminStoryForm from "../../../components/admin/AdminStoryForm";
 import { getMediaUrl } from "../../../utils/media";
 import { useAccessToken } from "../../../hooks/useAuth";
 import apiClient from "@/utils/api";
@@ -67,6 +69,8 @@ const AdminStoriesPage: React.FC = () => {
     total: 0,
     pages: 0,
   });
+  const [showModal, setShowModal] = useState(false);
+  const [editingStory, setEditingStory] = useState<Story | null>(null);
 
   useEffect(() => {
     fetchStories();
@@ -110,18 +114,46 @@ const AdminStoriesPage: React.FC = () => {
     }
 
     try {
-      const response = await apiClient.delete(`/stories/${story.slug}`);
+      const loadingToast = toast.loading("Đang xóa truyện...");
 
-      if (response.data) {
-        alert("Xóa truyện thành công!");
+      const response = await apiClient.delete(`/admin/stories/${story.id}`);
+
+      if (response.status >= 200 && response.status < 300) {
+        toast.success("Xóa truyện thành công!", {
+          id: loadingToast,
+        });
         fetchStories();
       } else {
-        alert("Có lỗi xảy ra khi xóa truyện");
+        toast.error("Có lỗi xảy ra khi xóa truyện", {
+          id: loadingToast,
+        });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting story:", error);
-      alert("Có lỗi xảy ra khi xóa truyện");
+      toast.error(
+        error.response?.data?.message || "Có lỗi xảy ra khi xóa truyện"
+      );
     }
+  };
+
+  const handleCreate = () => {
+    setEditingStory(null);
+    setShowModal(true);
+  };
+
+  const handleEdit = (story: Story) => {
+    setEditingStory(story);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditingStory(null);
+  };
+
+  const handleSuccess = () => {
+    fetchStories();
+    handleCloseModal();
   };
 
   const getStatusBadge = (status: string) => {
@@ -161,12 +193,12 @@ const AdminStoriesPage: React.FC = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Quản lý truyện</h1>
-        <Link
-          href="/admin/stories/create"
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        <button
+          onClick={handleCreate}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
         >
-          Tạo truyện mới
-        </Link>
+          + Tạo truyện mới
+        </button>
       </div>
 
       {/* Search and Filter Form */}
@@ -275,17 +307,43 @@ const AdminStoriesPage: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end space-x-2">
-                        <Link
-                          href={`/admin/stories/${story.slug}/edit`}
-                          className="text-blue-600 hover:text-blue-900"
+                        <button
+                          onClick={() => handleEdit(story)}
+                          className="text-blue-600 hover:text-blue-900 p-2 rounded hover:bg-blue-50 transition-colors"
+                          title="Chỉnh sửa truyện"
                         >
-                          Sửa
-                        </Link>
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                        </button>
                         <button
                           onClick={() => handleDelete(story)}
-                          className="text-red-600 hover:text-red-900"
+                          className="text-red-600 hover:text-red-900 p-2 rounded hover:bg-red-50 transition-colors"
+                          title="Xóa truyện"
                         >
-                          Xóa
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
                         </button>
                       </div>
                     </td>
@@ -332,6 +390,44 @@ const AdminStoriesPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Modal for Create/Edit Story */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                {editingStory ? "Chỉnh sửa truyện" : "Tạo truyện mới"}
+              </h2>
+              <button
+                onClick={handleCloseModal}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className="p-6">
+              <AdminStoryForm
+                storyId={editingStory?.id}
+                onCloseModal={handleCloseModal}
+                onSuccess={handleSuccess}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -4,9 +4,12 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useSelector } from "react-redux";
+import toast from "react-hot-toast";
 import { RootState } from "../../store";
 import { getMediaUrl } from "../../utils/media";
 import apiClient from "@/utils/api";
+import AffiliateLinkSelect from "./AffiliateLinkSelect";
+import { MediaSelectModal } from "./AdminMediaManager";
 
 interface Genre {
   id: string;
@@ -45,11 +48,13 @@ interface StoryFormData {
 interface AdminStoryFormProps {
   storyId?: string;
   onCloseModal?: () => void;
+  onSuccess?: () => void;
 }
 
 const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
   storyId,
   onCloseModal,
+  onSuccess,
 }) => {
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.auth);
@@ -73,6 +78,8 @@ const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
   const [audioPreview, setAudioPreview] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
+  const [showImageSelectModal, setShowImageSelectModal] = useState(false);
+  const [showAudioSelectModal, setShowAudioSelectModal] = useState(false);
 
   useEffect(() => {
     fetchGenres();
@@ -97,20 +104,26 @@ const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
     try {
       const response = await apiClient.get("/admin/affiliate-links");
       if (response.data) {
-        setAffiliates(response.data.affiliateLinks || []);
+        // Handle both old and new response formats
+        const affiliateLinks =
+          response.data.data?.affiliateLinks ||
+          response.data.affiliateLinks ||
+          [];
+        setAffiliates(affiliateLinks);
       }
     } catch (error) {
       console.error("Error fetching affiliates:", error);
+      toast.error("Không thể tải danh sách affiliate links");
     }
   };
 
   const fetchStoryData = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get(`/api/admin/stories/${storyId}`);
+      const response = await apiClient.get(`/admin/stories/${storyId}`);
 
-      if (response.data) {
-        const story = response.data.story;
+      if (response.data.success) {
+        const story = response.data.data.story;
 
         setFormData({
           title: story.title || "",
@@ -190,13 +203,17 @@ const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      setError("Vui lòng chọn file hình ảnh");
+      const errorMsg = "Vui lòng chọn file hình ảnh";
+      toast.error(errorMsg);
+      setError(errorMsg);
       return;
     }
 
     // Validate file size (max 5MB)
-    if (file.size > 100 * 1024 * 1024) {
-      setError("File hình ảnh không được vượt quá 5MB");
+    if (file.size > 5 * 1024 * 1024) {
+      const errorMsg = "File hình ảnh không được vượt quá 5MB";
+      toast.error(errorMsg);
+      setError(errorMsg);
       return;
     }
 
@@ -229,13 +246,17 @@ const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
 
     // Validate file type
     if (!file.type.startsWith("audio/")) {
-      setError("Vui lòng chọn file audio");
+      const errorMsg = "Vui lòng chọn file audio";
+      toast.error(errorMsg);
+      setError(errorMsg);
       return;
     }
 
     // Validate file size (max 50MB)
     if (file.size > 50 * 1024 * 1024) {
-      setError("File audio không được vượt quá 50MB");
+      const errorMsg = "File audio không được vượt quá 50MB";
+      toast.error(errorMsg);
+      setError(errorMsg);
       return;
     }
 
@@ -258,33 +279,56 @@ const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
     }
   };
 
+  // Media selection handlers
+  const handleImageSelect = (media: any) => {
+    setFormData((prev) => ({ ...prev, thumbnailUrl: media.url }));
+    setThumbnailPreview(media.url);
+    setShowImageSelectModal(false);
+  };
+
+  const handleAudioSelect = (media: any) => {
+    setFormData((prev) => ({ ...prev, audioUrl: media.url }));
+    setAudioPreview(media.url);
+    setShowAudioSelectModal(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Validation
     if (!formData.title.trim()) {
-      setError("Vui lòng nhập tiêu đề truyện");
+      const errorMsg = "Vui lòng nhập tiêu đề truyện";
+      toast.error(errorMsg);
+      setError(errorMsg);
       return;
     }
 
     if (!formData.description.trim()) {
-      setError("Vui lòng nhập mô tả truyện");
+      const errorMsg = "Vui lòng nhập mô tả truyện";
+      toast.error(errorMsg);
+      setError(errorMsg);
       return;
     }
 
     if (formData.genreIds.length === 0) {
-      setError("Vui lòng chọn ít nhất một thể loại");
+      const errorMsg = "Vui lòng chọn ít nhất một thể loại";
+      toast.error(errorMsg);
+      setError(errorMsg);
       return;
     }
 
     if (formData.type === "TEXT" && !formData.content?.trim()) {
-      setError("Vui lòng nhập nội dung truyện");
+      const errorMsg = "Vui lòng nhập nội dung truyện";
+      toast.error(errorMsg);
+      setError(errorMsg);
       return;
     }
     console.log(formData);
 
     if (formData.type === "AUDIO" && !formData.audioUrl) {
-      setError("Vui lòng upload file audio");
+      const errorMsg = "Vui lòng upload file audio";
+      toast.error(errorMsg);
+      setError(errorMsg);
       return;
     }
 
@@ -301,9 +345,11 @@ const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
 
       if (response.status >= 200 && response.status < 300) {
         const data = response.data;
-        setSuccess(
-          storyId ? "Cập nhật truyện thành công!" : "Tạo truyện thành công!"
-        );
+        const successMessage = storyId
+          ? "Cập nhật truyện thành công!"
+          : "Tạo truyện thành công!";
+
+        toast.success(successMessage);
 
         // Reset form if creating new story
         if (!storyId) {
@@ -328,15 +374,22 @@ const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
           setThumbnailPreview("");
           setAudioPreview("");
         }
+
+        // Call success callback to refresh parent list
+        if (onSuccess) {
+          onSuccess();
+        }
+
         if (onCloseModal) {
           onCloseModal();
         }
-
-        // Close modal or redirect after success
       }
     } catch (error: any) {
       console.error("Error submitting form:", error);
-      setError(error.response?.data?.message || "Có lỗi xảy ra khi lưu truyện");
+      const errorMessage =
+        error.response?.data?.message || "Có lỗi xảy ra khi lưu truyện";
+      toast.error(errorMessage);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -448,20 +501,20 @@ const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Liên kết affiliate (tùy chọn)
               </label>
-              <select
-                name="affiliateId"
+              <AffiliateLinkSelect
                 value={formData.affiliateId}
-                onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Không có</option>
-                {affiliates.map((affiliate) => (
-                  <option key={affiliate.id} value={affiliate.id}>
-                    {affiliate.provider} -{" "}
-                    {affiliate.label || affiliate.targetUrl}
-                  </option>
-                ))}
-              </select>
+                onChange={(affiliateId) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    affiliateId: affiliateId || "",
+                  }))
+                }
+                placeholder="Chọn affiliate link..."
+                className="w-full"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Người dùng sẽ được chuyển đến link này khi click vào thumbnail
+              </p>
             </div>
           </div>
 
@@ -472,12 +525,21 @@ const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Hình ảnh thumbnail
               </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleThumbnailChange}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-              />
+              <div className="space-y-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleThumbnailChange}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowImageSelectModal(true)}
+                  className="w-full px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                >
+                  📁 Chọn từ thư viện
+                </button>
+              </div>
               {thumbnailPreview && (
                 <div className="mt-2">
                   <Image
@@ -497,12 +559,21 @@ const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   File audio *
                 </label>
-                <input
-                  type="file"
-                  accept="audio/*"
-                  onChange={handleAudioChange}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                />
+                <div className="space-y-2">
+                  <input
+                    type="file"
+                    accept="audio/*"
+                    onChange={handleAudioChange}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowAudioSelectModal(true)}
+                    className="w-full px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                  >
+                    🎵 Chọn từ thư viện
+                  </button>
+                </div>
                 {audioPreview && (
                   <div className="mt-2">
                     <audio controls className="w-full">
@@ -576,6 +647,23 @@ const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Media Selection Modals */}
+      <MediaSelectModal
+        isOpen={showImageSelectModal}
+        onClose={() => setShowImageSelectModal(false)}
+        onSelect={handleImageSelect}
+        type="image"
+        title="Chọn hình ảnh từ thư viện"
+      />
+
+      <MediaSelectModal
+        isOpen={showAudioSelectModal}
+        onClose={() => setShowAudioSelectModal(false)}
+        onSelect={handleAudioSelect}
+        type="audio"
+        title="Chọn audio từ thư viện"
+      />
     </form>
   );
 };

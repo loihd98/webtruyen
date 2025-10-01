@@ -3,6 +3,7 @@
 import { Provider } from "react-redux";
 import { useEffect } from "react";
 import { PersistGate } from "redux-persist/integration/react";
+import { Toaster } from "react-hot-toast";
 import { store, persistor } from "../store";
 import { setTokenHandlers } from "../utils/api";
 import { clearAuth, refreshToken } from "../store/slices/authSlice";
@@ -66,7 +67,44 @@ export default function ClientProvider({
         }
         persistor={persistor}
       >
-        <LanguageProvider>{children}</LanguageProvider>
+        <LanguageProvider>
+          {children}
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: "#363636",
+                color: "#fff",
+                borderRadius: "8px",
+                fontSize: "14px",
+                maxWidth: "400px",
+              },
+              success: {
+                duration: 3000,
+                iconTheme: {
+                  primary: "#4aed88",
+                  secondary: "#fff",
+                },
+                style: {
+                  background: "#10b981",
+                  color: "#fff",
+                },
+              },
+              error: {
+                duration: 5000,
+                iconTheme: {
+                  primary: "#ef4444",
+                  secondary: "#fff",
+                },
+                style: {
+                  background: "#ef4444",
+                  color: "#fff",
+                },
+              },
+            }}
+          />
+        </LanguageProvider>
       </PersistGate>
     </Provider>
   );

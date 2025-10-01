@@ -66,16 +66,36 @@ async function main() {
       provider: "Google Drive",
       targetUrl: "https://drive.google.com/drive/folders/example1",
       label: "Tải từ Google Drive",
+      description: "Link tải chính từ Google Drive với tốc độ cao",
+      isActive: true,
     },
     {
       provider: "Fshare",
       targetUrl: "https://www.fshare.vn/file/example2",
       label: "Tải từ Fshare",
+      description: "Link tải dự phòng từ Fshare",
+      isActive: true,
     },
     {
       provider: "Mega",
       targetUrl: "https://mega.nz/file/example3",
       label: "Tải từ Mega",
+      description: "Link tải từ Mega.nz an toàn",
+      isActive: true,
+    },
+    {
+      provider: "MediaFire",
+      targetUrl: "https://www.mediafire.com/file/example4",
+      label: "Tải từ MediaFire",
+      description: "Link tải từ MediaFire tốc độ ổn định",
+      isActive: true,
+    },
+    {
+      provider: "Dropbox",
+      targetUrl: "https://www.dropbox.com/s/example5",
+      label: "Tải từ Dropbox",
+      description: "Link tải từ Dropbox bảo mật cao",
+      isActive: false, // One inactive for testing
     },
   ];
 
@@ -87,38 +107,112 @@ async function main() {
     createdAffiliateLinks.push(link);
   }
 
+  // Create sample media files
+  const mediaFiles = [
+    {
+      filename: "sample-image-1.jpg",
+      originalName: "Ảnh bìa truyện 1.jpg",
+      mimeType: "image/jpeg",
+      size: 245760, // ~240KB
+      url: "/uploads/images/sample-image-1.jpg",
+      type: "image",
+      isActive: true,
+    },
+    {
+      filename: "sample-image-2.png",
+      originalName: "Ảnh bìa truyện 2.png",
+      mimeType: "image/png",
+      size: 512000, // ~500KB
+      url: "/uploads/images/sample-image-2.png",
+      type: "image",
+      isActive: true,
+    },
+    {
+      filename: "sample-audio-1.mp3",
+      originalName: "Chương 1 - Khởi đầu.mp3",
+      mimeType: "audio/mpeg",
+      size: 5242880, // ~5MB
+      url: "/uploads/audio/sample-audio-1.mp3",
+      type: "audio",
+      isActive: true,
+    },
+    {
+      filename: "sample-audio-2.mp3",
+      originalName: "Chương 2 - Gặp gỡ.mp3",
+      mimeType: "audio/mpeg",
+      size: 4718592, // ~4.5MB
+      url: "/uploads/audio/sample-audio-2.mp3",
+      type: "audio",
+      isActive: true,
+    },
+    {
+      filename: "old-image.jpg",
+      originalName: "Ảnh cũ không dùng.jpg",
+      mimeType: "image/jpeg",
+      size: 102400, // ~100KB
+      url: "/uploads/images/old-image.jpg",
+      type: "image",
+      isActive: false, // Inactive for testing
+    },
+  ];
+
+  const createdMediaFiles = [];
+  for (const mediaData of mediaFiles) {
+    const media = await prisma.media.create({
+      data: mediaData,
+    });
+    createdMediaFiles.push(media);
+  }
+
   // Create sample stories
   const stories = [
     {
       title: "Đấu Phá Thương Khung",
       description:
-        "Thiếu niên tài ba, đánh mất đấu khí bỗng chốc trở thành phế vật của gia tộc...",
+        "Thiếu niên tài ba, đánh mất đấu khí bỗng chốc trở thành phế vật của gia tộc. Nhưng với sự giúp đỡ của Dược Lão, cậu bắt đầu con đường tu luyện gian khó nhưng đầy hào hùng...",
       type: "TEXT",
-      thumbnailUrl: "/uploads/image/toan-chuc-phap-su.jpg",
+      thumbnailUrl: "/uploads/images/sample-image-1.jpg",
       genreIds: [createdGenres[0].id, createdGenres[2].id], // Tiên Hiệp, Huyền Huyễn
     },
     {
       title: "Tôi Là Đại Thần Tiên",
       description:
-        "Trọng sinh về thời đại tu tiên, với kiến thức hiện đại chinh phục thế giới tu tiên...",
+        "Trọng sinh về thời đại tu tiên, với kiến thức hiện đại chinh phục thế giới tu tiên. Từ một kẻ phế vật trở thành đại thần tiên làm chấn động ba giới...",
       type: "AUDIO",
-      thumbnailUrl: "uploads/image/toan-chuc-phap-su.jpgg",
+      thumbnailUrl: "/uploads/images/sample-image-2.png",
       genreIds: [createdGenres[0].id], // Tiên Hiệp
     },
     {
       title: "Toàn Chức Pháp Sư",
       description:
-        "Phép thuật và công nghệ kết hợp, mở ra một thế giới hoàn toàn mới...",
+        "Phép thuật và công nghệ kết hợp, mở ra một thế giới hoàn toàn mới. Trong thế giới mà ma pháp là tất cả, làm thế nào để trở thành pháp sư mạnh nhất?",
       type: "TEXT",
-      thumbnailUrl: "/uploads/image/toan-chuc-phap-su.jpg",
+      thumbnailUrl: "/uploads/images/sample-image-1.jpg",
       genreIds: [createdGenres[2].id, createdGenres[7].id], // Huyền Huyễn, Khoa Huyễn
     },
     {
       title: "Thần Hôn",
-      description: "Câu chuyện tình yêu giữa thần tiên và con người...",
+      description:
+        "Câu chuyện tình yêu giữa thần tiên và con người, vượt qua mọi thử thách của số phận để đến với nhau. Một cuộc tình bất diệt xuyên suốt ba sinh ba thế...",
       type: "AUDIO",
-      thumbnailUrl: "/uploads/image/toan-chuc-phap-su.jpg",
+      thumbnailUrl: "/uploads/images/sample-image-2.png",
       genreIds: [createdGenres[0].id, createdGenres[4].id], // Tiên Hiệp, Ngôn Tình
+    },
+    {
+      title: "Đô Thị Tu Tiên",
+      description:
+        "Tu tiên trong thời đại hiện đại, khi thần thông gặp gỡ công nghệ. Liệu có thể tu luyện thành tiên trong thế giới đầy ô nhiễm này?",
+      type: "TEXT",
+      thumbnailUrl: "/uploads/images/sample-image-1.jpg",
+      genreIds: [createdGenres[1].id, createdGenres[0].id], // Đô Thì, Tiên Hiệp
+    },
+    {
+      title: "Thiên Tài Lập Trình Viên",
+      description:
+        "Từ một lập trình viên bình thường trở thành thiên tài công nghệ, xây dựng đế chế kinh doanh và chinh phục thế giới số...",
+      type: "TEXT",
+      thumbnailUrl: "/uploads/images/sample-image-2.png",
+      genreIds: [createdGenres[1].id, createdGenres[7].id], // Đô Thị, Khoa Huyễn
     },
   ];
 
@@ -154,18 +248,31 @@ async function main() {
 
   // Create chapters for each story
   for (const story of createdStories) {
-    const chapterCount = Math.floor(Math.random() * 50) + 10; // 10-60 chapters
+    const chapterCount = Math.floor(Math.random() * 30) + 15; // 15-45 chapters
 
     for (let i = 1; i <= chapterCount; i++) {
       const isLocked = i > 3; // First 3 chapters are free
       const chapterTitle = `Chương ${i}: ${generateChapterTitle()}`;
 
-      // Use actual uploaded audio file for AUDIO stories
+      // Use sample audio files for AUDIO stories
       let audioUrl = null;
       if (story.type === "AUDIO") {
-        // Use the actual uploaded MP3 file
-        audioUrl = `/uploads/audio/0acd3d2f-729a-4f6f-a38a-0050977821b0.mp3`;
+        // Randomly choose between sample audio files
+        const audioFiles = createdMediaFiles.filter(
+          (media) => media.type === "audio" && media.isActive
+        );
+        if (audioFiles.length > 0) {
+          audioUrl = audioFiles[i % audioFiles.length].url;
+        }
       }
+
+      // Randomly assign affiliate links to some chapters (60% chance)
+      const affiliateId =
+        Math.random() > 0.4 && createdAffiliateLinks.length > 0
+          ? createdAffiliateLinks[
+              Math.floor(Math.random() * createdAffiliateLinks.length)
+            ].id
+          : null;
 
       await prisma.chapter.upsert({
         where: {
@@ -177,6 +284,7 @@ async function main() {
         update: {
           title: chapterTitle,
           audioUrl,
+          affiliateId,
         },
         create: {
           number: i,
@@ -186,6 +294,7 @@ async function main() {
           audioUrl,
           isLocked,
           storyId: story.id,
+          affiliateId,
         },
       });
     }
@@ -243,6 +352,16 @@ async function main() {
   console.log(`📚 Created ${createdStories.length} stories`);
   console.log(`🏷️ Created ${createdGenres.length} genres`);
   console.log(`🔗 Created ${createdAffiliateLinks.length} affiliate links`);
+  console.log(`📁 Created ${createdMediaFiles.length} media files`);
+
+  // Count chapters for summary
+  const totalChapters = await prisma.chapter.count();
+  const chaptersWithAffiliates = await prisma.chapter.count({
+    where: { affiliateId: { not: null } },
+  });
+
+  console.log(`📖 Created ${totalChapters} chapters`);
+  console.log(`🔗 ${chaptersWithAffiliates} chapters have affiliate links`);
 }
 
 function generateChapterTitle() {
@@ -262,6 +381,25 @@ function generateChapterTitle() {
     "Phục Thù",
     "Tình Bạn Thắt Chặt",
     "Thành Công Rực Rỡ",
+    "Tỉnh Ngộ Thần Thông",
+    "Gặp Gỡ Cao Nhân",
+    "Tranh Đo탈 Bảo Vật",
+    "Sinh Tử Một Mình",
+    "Báo Thù Ân Oán",
+    "Tình Duyên Lận Đận",
+    "Tiến Vào Tuyệt Địa",
+    "Phát Hiện Âm Mưu",
+    "Quyết Chiến Sinh Tử",
+    "Đại Thắng Mỹ Mãn",
+    "Chia Tay Bạn Bè",
+    "Khám Phá Thế Giới Mới",
+    "Thần Bí Sư Phụ",
+    "Tranh Giành Ngôi Vị",
+    "Tình Yêu Đầu Đời",
+    "Thảm Kịch Gia Tộc",
+    "Hồi Sinh Từ Tro Tàn",
+    "Chinh Phục Thiên Hạ",
+    "Đại Kết Cục",
   ];
   return titles[Math.floor(Math.random() * titles.length)];
 }

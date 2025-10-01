@@ -4,8 +4,46 @@ const { requireAdmin, authenticateToken } = require("../middleware/auth");
 
 const router = express.Router();
 
-// Affiliate redirect (public)
-router.get("/:affiliateId", affiliateController.redirectAffiliate);
+// Public routes
+router.get("/redirect/:affiliateId", affiliateController.redirectAffiliate);
+
+// Admin CRUD routes
+router.get(
+  "/",
+  authenticateToken,
+  requireAdmin,
+  affiliateController.getAffiliateLinks
+);
+router.get(
+  "/search",
+  authenticateToken,
+  requireAdmin,
+  affiliateController.searchAffiliateLinks
+);
+router.get(
+  "/:id",
+  authenticateToken,
+  requireAdmin,
+  affiliateController.getAffiliateLinkById
+);
+router.post(
+  "/",
+  authenticateToken,
+  requireAdmin,
+  affiliateController.createAffiliateLink
+);
+router.put(
+  "/:id",
+  authenticateToken,
+  requireAdmin,
+  affiliateController.updateAffiliateLink
+);
+router.delete(
+  "/:id",
+  authenticateToken,
+  requireAdmin,
+  affiliateController.deleteAffiliateLink
+);
 
 // Analytics routes (admin only)
 router.get(

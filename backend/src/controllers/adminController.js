@@ -16,6 +16,7 @@ class AdminController {
         totalViews,
         recentUsers,
         recentStories,
+        adminUsers,
         topStories,
       ] = await Promise.all([
         // Basic counts
@@ -49,6 +50,13 @@ class AdminController {
           },
         }),
 
+        // Admin users count
+        prisma.user.count({
+          where: {
+            role: "ADMIN",
+          },
+        }),
+
         // Top 5 stories by views
         prisma.story.findMany({
           take: 5,
@@ -65,16 +73,16 @@ class AdminController {
       ]);
 
       res.json({
-        stats: {
-          totalUsers,
-          totalStories,
-          totalChapters,
-          totalComments,
-          totalViews: totalViews._sum.viewCount || 0,
-          recentUsers,
-          recentStories,
-          topStories,
-        },
+        totalUsers,
+        totalStories,
+        totalChapters,
+        totalComments,
+        totalViews: totalViews._sum.viewCount || 0,
+        activeUsers: totalUsers, // For now, consider all users as active
+        newUsers: recentUsers,
+        adminUsers,
+        recentStories,
+        topStories,
       });
     } catch (error) {
       console.error("Get dashboard stats error:", error);
@@ -219,6 +227,162 @@ class AdminController {
   }
 
   // Manage Stories
+  async getStories(req, res) {
+    try {
+      const {
+        page = 1,
+        limit = 10,
+        search = "",
+        type = "",
+        status = "",
+        authorId = "",
+      } = req.query;
+
+      const skip = (parseInt(page) - 1) * parseInt(limit);
+
+      const where = {
+        ...(search && {
+          OR: [
+            { title: { contains: search, mode: "insensitive" } },
+            { description: { contains: search, mode: "insensitive" } },
+            { author: { name: { contains: search, mode: "insensitive" } } },
+          ],
+        }),
+        ...(type && { type }),
+        ...(status && { status }),
+        ...(authorId && { authorId }),
+      };
+
+      const [stories, total] = await Promise.all([
+        prisma.story.findMany({
+          where,
+          skip,
+          take: parseInt(limit),
+          orderBy: { createdAt: "desc" },
+          include: {
+            author: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+            genres: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            affiliate: {
+              select: {
+                id: true,
+                provider: true,
+                label: true,
+              },
+            },
+            _count: {
+              select: {
+                chapters: true,
+                bookmarks: true,
+                comments: true,
+              },
+            },
+          },
+        }),
+        prisma.story.count({ where }),
+      ]);
+
+      res.json({
+        success: true,
+        data: {
+          stories,
+          pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            total,
+            pages: Math.ceil(total / parseInt(limit)),
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Get stories error:", error);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Có lỗi xảy ra khi lấy danh sách truyện",
+      });
+    }
+  }
+
+  async getStoryById(req, res) {
+    try {
+      const { id } = req.params;
+
+      const story = await prisma.story.findUnique({
+        where: { id },
+        include: {
+          author: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          genres: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          affiliate: {
+            select: {
+              id: true,
+              provider: true,
+              label: true,
+              targetUrl: true,
+            },
+          },
+          chapters: {
+            select: {
+              id: true,
+              title: true,
+              chapterNumber: true,
+              isLocked: true,
+              createdAt: true,
+            },
+            orderBy: {
+              chapterNumber: "asc",
+            },
+          },
+          _count: {
+            select: {
+              chapters: true,
+              bookmarks: true,
+              comments: true,
+            },
+          },
+        },
+      });
+
+      if (!story) {
+        return res.status(404).json({
+          error: "Not Found",
+          message: "Truyện không tồn tại",
+        });
+      }
+
+      res.json({
+        success: true,
+        data: { story },
+      });
+    } catch (error) {
+      console.error("Get story by ID error:", error);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Có lỗi xảy ra khi lấy thông tin truyện",
+      });
+    }
+  }
+
   async createStory(req, res) {
     try {
       const { title, description, type, thumbnailUrl, genreIds, affiliateId } =
@@ -434,6 +598,89 @@ class AdminController {
   }
 
   // Manage Chapters
+  async getChapters(req, res) {
+    try {
+      const {
+        page = 1,
+        limit = 20,
+        search = "",
+        storyId = "",
+        isLocked,
+        hasAffiliate,
+        sort = "createdAt",
+      } = req.query;
+
+      const skip = (parseInt(page) - 1) * parseInt(limit);
+
+      const where = {
+        ...(search && {
+          title: { contains: search, mode: "insensitive" },
+        }),
+        ...(storyId && { storyId }),
+        ...(isLocked !== undefined && { isLocked: isLocked === "true" }),
+        ...(hasAffiliate === "true" && { affiliateId: { not: null } }),
+        ...(hasAffiliate === "false" && { affiliateId: null }),
+      };
+
+      const orderBy = {};
+      if (sort === "number") {
+        orderBy.number = "asc";
+      } else if (sort === "title") {
+        orderBy.title = "asc";
+      } else if (sort === "updatedAt") {
+        orderBy.updatedAt = "desc";
+      } else {
+        orderBy.createdAt = "desc";
+      }
+
+      const [chapters, total] = await Promise.all([
+        prisma.chapter.findMany({
+          where,
+          skip,
+          take: parseInt(limit),
+          orderBy,
+          include: {
+            story: {
+              select: {
+                id: true,
+                title: true,
+                slug: true,
+              },
+            },
+            affiliate: {
+              select: {
+                id: true,
+                provider: true,
+                targetUrl: true,
+                label: true,
+              },
+            },
+          },
+        }),
+        prisma.chapter.count({ where }),
+      ]);
+
+      res.json({
+        success: true,
+        data: {
+          chapters,
+          pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            total,
+            pages: Math.ceil(total / parseInt(limit)),
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Get chapters error:", error);
+      res.status(500).json({
+        error: "Internal Server Error",
+        message: "Có lỗi xảy ra khi lấy danh sách chương",
+      });
+    }
+  }
+
   async createChapter(req, res) {
     try {
       const { storyId } = req.params;
@@ -889,21 +1136,57 @@ class AdminController {
   // Manage Affiliate Links
   async getAffiliateLinks(req, res) {
     try {
-      const affiliateLinks = await prisma.affiliateLink.findMany({
-        include: {
-          _count: {
-            select: {
-              stories: true,
+      const {
+        page = 1,
+        limit = 10,
+        search = "",
+        provider = "",
+        isActive,
+      } = req.query;
+
+      const skip = (parseInt(page) - 1) * parseInt(limit);
+
+      const where = {
+        ...(search && {
+          OR: [
+            { provider: { contains: search, mode: "insensitive" } },
+            { label: { contains: search, mode: "insensitive" } },
+            { description: { contains: search, mode: "insensitive" } },
+          ],
+        }),
+        ...(provider && { provider }),
+        ...(isActive !== undefined && { isActive: isActive === "true" }),
+      };
+
+      const [affiliateLinks, total] = await Promise.all([
+        prisma.affiliateLink.findMany({
+          where,
+          skip,
+          take: parseInt(limit),
+          orderBy: { createdAt: "desc" },
+          include: {
+            _count: {
+              select: {
+                stories: true,
+                chapters: true,
+              },
             },
           },
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-      });
+        }),
+        prisma.affiliateLink.count({ where }),
+      ]);
 
       res.json({
-        affiliateLinks,
+        success: true,
+        data: {
+          affiliateLinks,
+          pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            total,
+            pages: Math.ceil(total / parseInt(limit)),
+          },
+        },
       });
     } catch (error) {
       console.error("Get affiliate links error:", error);
@@ -1311,6 +1594,15 @@ class AdminController {
             orderBy: { viewCount: "desc" },
             include: {
               author: { select: { name: true } },
+              affiliate: {
+                select: {
+                  id: true,
+                  provider: true,
+                  targetUrl: true,
+                  label: true,
+                  isActive: true,
+                },
+              },
               _count: { select: { chapters: true, bookmarks: true } },
             },
           }),

@@ -64,18 +64,35 @@ model Genre {
 }
 
 model AffiliateLink {
-  id        String   @id @default(cuid())
-  provider  String   // "Google Drive", "Fshare", etc.
-  targetUrl String
-  label     String?
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  provider    String   // "Google Drive", "Fshare", "Mega", etc.
+  targetUrl   String
+  label       String?
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   
   // Relations
-  stories   Story[]
+  stories     Story[]
+  chapters    Chapter[]
   
   @@map("affiliate_links")
+}
+
+model Media {
+  id          String   @id @default(cuid())
+  filename    String
+  originalName String
+  mimeType    String
+  size        Int
+  url         String
+  type        String   // "image" or "audio"
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("media")
 }
 
 model Story {
@@ -121,6 +138,10 @@ model Chapter {
   // Story relationship
   storyId  String
   story    Story   @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  
+  // Affiliate relationship
+  affiliateId  String?
+  affiliate    AffiliateLink? @relation(fields: [affiliateId], references: [id], onDelete: SetNull)
   
   // Users who unlocked this chapter
   unlockedBy User[] @relation("ChapterUnlocks")

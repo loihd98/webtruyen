@@ -3,8 +3,11 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import apiClient from "@/utils/api";
+import toast from "react-hot-toast";
 import { getMediaUrl } from "../../utils/media";
 import Image from "next/image";
+import AffiliateLinkSelect from "./AffiliateLinkSelect";
+import { MediaSelectModal } from "./AdminMediaManager";
 
 interface ChapterFormData {
   number: number;
@@ -14,6 +17,7 @@ interface ChapterFormData {
   isLocked: boolean;
   thumbnailUrl?: string;
   duration?: number;
+  affiliateId?: string;
 }
 
 interface AdminChapterFormProps {
@@ -39,6 +43,7 @@ const AdminChapterForm: React.FC<AdminChapterFormProps> = ({
       isLocked: false,
       thumbnailUrl: "",
       duration: undefined,
+      affiliateId: "",
     }
   );
   const [audioPreview, setAudioPreview] = useState<string>("");
@@ -47,6 +52,11 @@ const AdminChapterForm: React.FC<AdminChapterFormProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showImageSelectModal, setShowImageSelectModal] = useState(false);
+  const [showAudioSelectModal, setShowAudioSelectModal] = useState(false);
+  const [activeMediaTab, setActiveMediaTab] = useState<"audio" | "image">(
+    "audio"
+  );
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -145,16 +155,34 @@ const AdminChapterForm: React.FC<AdminChapterFormProps> = ({
       const method = chapter ? "put" : "post";
       const response = await apiClient[method](url, formData);
       if (response.status >= 200 && response.status < 300) {
-        setSuccess(
-          chapter ? "Cập nhật chương thành công!" : "Tạo chương thành công!"
-        );
+        const successMessage = chapter
+          ? "Cập nhật chương thành công!"
+          : "Tạo chương thành công!";
+        toast.success(successMessage);
         if (onSuccess) onSuccess();
+        if (onCloseModal) onCloseModal();
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || "Có lỗi khi lưu chương");
+      const errorMessage =
+        err.response?.data?.message || "Có lỗi khi lưu chương";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Media selection handlers
+  const handleImageSelect = (media: any) => {
+    setFormData((prev) => ({ ...prev, thumbnailUrl: media.url }));
+    setThumbnailPreview(media.url);
+    setShowImageSelectModal(false);
+  };
+
+  const handleAudioSelect = (media: any) => {
+    setFormData((prev) => ({ ...prev, audioUrl: media.url }));
+    setAudioPreview(media.url);
+    setShowAudioSelectModal(false);
   };
 
   return (
@@ -210,59 +238,149 @@ const AdminChapterForm: React.FC<AdminChapterFormProps> = ({
             />
             <label className="text-sm">Khóa chương này</label>
           </div>
+
+          {/* Affiliate Link */}
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Ảnh thumbnail
+            <label className="block text-sm font-medium mb-2">
+              Liên kết affiliate (tùy chọn)
             </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleThumbnailChange}
-              className="w-full px-3 py-2 border rounded-md"
+            <AffiliateLinkSelect
+              value={formData.affiliateId}
+              onChange={(affiliateId) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  affiliateId: affiliateId || "",
+                }))
+              }
+              placeholder="Chọn affiliate link..."
+              className="w-full"
             />
-            {thumbnailPreview && (
-              <div className="mt-2">
-                <Image
-                  src={thumbnailPreview}
-                  alt="Thumbnail preview"
-                  width={160}
-                  height={200}
-                  className="rounded object-cover"
-                />
-              </div>
-            )}
+            <p className="text-xs text-gray-500 mt-1">
+              Người dùng sẽ được chuyển đến link này khi chuyển chương
+            </p>
           </div>
-        </div>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">File audio</label>
-            <input
-              type="file"
-              accept="audio/*"
-              onChange={handleAudioChange}
-              className="w-full px-3 py-2 border rounded-md"
-            />
-            {audioPreview && (
-              <div className="mt-2">
-                <audio controls className="w-full">
-                  <source src={audioPreview} />
-                  Trình duyệt không hỗ trợ phát audio.
-                </audio>
+          {/* Media Library Section with Tabs */}
+          <div className="col-span-full">
+            <div className="border border-gray-200 dark:border-gray-600 rounded-lg">
+              <div className="border-b border-gray-200 dark:border-gray-600">
+                <nav className="-mb-px flex">
+                  <button
+                    type="button"
+                    onClick={() => setActiveMediaTab("audio")}
+                    className={`py-3 px-6 text-sm font-medium border-b-2 transition-colors ${
+                      activeMediaTab === "audio"
+                        ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
+                  >
+                    🎵 Audio Files
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveMediaTab("image")}
+                    className={`py-3 px-6 text-sm font-medium border-b-2 transition-colors ${
+                      activeMediaTab === "image"
+                        ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
+                  >
+                    🖼️ Images
+                  </button>
+                </nav>
               </div>
-            )}
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Thời lượng (giây)
-            </label>
-            <input
-              type="number"
-              name="duration"
-              value={formData.duration || ""}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border rounded-md"
-              min={0}
-            />
+
+              <div className="p-6">
+                {activeMediaTab === "audio" && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Audio File
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="file"
+                          accept="audio/*"
+                          onChange={handleAudioChange}
+                          className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowAudioSelectModal(true)}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors whitespace-nowrap"
+                        >
+                          📁 Library
+                        </button>
+                      </div>
+                      {audioPreview && (
+                        <div className="mt-3">
+                          <audio controls className="w-full">
+                            <source src={audioPreview} />
+                            Your browser does not support audio playback.
+                          </audio>
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Duration (seconds)
+                      </label>
+                      <input
+                        type="number"
+                        name="duration"
+                        value={formData.duration || ""}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                        min={0}
+                        placeholder="Auto-detected or manual entry"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {activeMediaTab === "image" && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Thumbnail Image
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleThumbnailChange}
+                          className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowImageSelectModal(true)}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors whitespace-nowrap"
+                        >
+                          📁 Library
+                        </button>
+                      </div>
+                      {thumbnailPreview && (
+                        <div className="mt-3">
+                          <Image
+                            src={thumbnailPreview}
+                            alt="Thumbnail preview"
+                            width={200}
+                            height={250}
+                            className="rounded-md object-cover border border-gray-200 dark:border-gray-600"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {uploading && (
+                  <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-md text-center">
+                    <div className="animate-spin inline-block w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full mr-2"></div>
+                    Uploading {activeMediaTab} file...
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -295,6 +413,23 @@ const AdminChapterForm: React.FC<AdminChapterFormProps> = ({
           {loading ? "Đang lưu..." : chapter ? "Cập nhật" : "Tạo mới"}
         </button>
       </div>
+
+      {/* Media Selection Modals */}
+      <MediaSelectModal
+        isOpen={showImageSelectModal}
+        onClose={() => setShowImageSelectModal(false)}
+        onSelect={handleImageSelect}
+        type="image"
+        title="Chọn hình ảnh từ thư viện"
+      />
+
+      <MediaSelectModal
+        isOpen={showAudioSelectModal}
+        onClose={() => setShowAudioSelectModal(false)}
+        onSelect={handleAudioSelect}
+        type="audio"
+        title="Chọn audio từ thư viện"
+      />
     </form>
   );
 };

@@ -9,18 +9,22 @@ const nextConfig = {
   },
 
   images: {
-    domains: ["localhost", "127.0.0.1", "yourdomain.com"],
     formats: ["image/webp", "image/avif"],
     remotePatterns: [
       {
         protocol: "http",
         hostname: "localhost",
-        port: "5000",
-        pathname: "/media/**",
+        pathname: "/uploads/**",
+      },
+      {
+        protocol: "http",
+        hostname: "127.0.0.1",
+        pathname: "/uploads/**",
       },
       {
         protocol: "https",
         hostname: "**",
+        pathname: "/uploads/**",
       },
     ],
   },

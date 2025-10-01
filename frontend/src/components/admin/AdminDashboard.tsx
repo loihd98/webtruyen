@@ -8,12 +8,21 @@ import { useLanguage } from "../../contexts/LanguageContext";
 import Layout from "../layout/Layout";
 import AdminStats from "./AdminStats";
 import AdminStoryManager from "./AdminStoryManager";
+import AdminChapterManager from "./AdminChapterManager";
+import AdminAffiliatePage from "./AdminAffiliatePage";
 import AdminUserManager from "./AdminUserManager";
 import AdminMediaUpload from "./AdminMediaUpload";
 import AdminSystemSettings from "./AdminSystemSettings";
 import AdminSidebar from "./AdminSidebar";
 
-type AdminTab = "dashboard" | "stories" | "users" | "media" | "settings";
+type AdminTab =
+  | "dashboard"
+  | "stories"
+  | "chapters"
+  | "affiliate-links"
+  | "users"
+  | "media"
+  | "settings";
 
 const AdminDashboard: React.FC = () => {
   const { user, isAuthenticated } = useSelector(
@@ -63,6 +72,10 @@ const AdminDashboard: React.FC = () => {
         return <AdminStats />;
       case "stories":
         return <AdminStoryManager />;
+      case "chapters":
+        return <AdminChapterManager />;
+      case "affiliate-links":
+        return <AdminAffiliatePage />;
       case "users":
         return <AdminUserManager />;
       case "media":

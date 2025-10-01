@@ -14,8 +14,6 @@ export const getMediaBaseUrl = (): string => {
 
 // Convert a media URL to the correct public URL
 export const getMediaUrl = (url: string): string => {
-  console.log("getMediaUrl", url);
-
   if (!url) return "";
 
   // If it's already a full URL, return as is
@@ -23,7 +21,7 @@ export const getMediaUrl = (url: string): string => {
     return url;
   }
 
-  // If it starts with /uploads/, prepend the base URL
+  // If it starts with /uploads/, prepend the base URL (nginx serves these directly)
   if (url.startsWith("/uploads/")) {
     return `${getMediaBaseUrl()}${url}`;
   }

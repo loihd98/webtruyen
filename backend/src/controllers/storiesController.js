@@ -81,6 +81,15 @@ class StoriesController {
               slug: true,
             },
           },
+          affiliate: {
+            select: {
+              id: true,
+              provider: true,
+              targetUrl: true,
+              label: true,
+              isActive: true,
+            },
+          },
           _count: {
             select: {
               chapters: true,
@@ -240,6 +249,15 @@ class StoriesController {
               slug: true,
             },
           },
+          affiliate: {
+            select: {
+              id: true,
+              provider: true,
+              targetUrl: true,
+              label: true,
+              isActive: true,
+            },
+          },
           _count: {
             select: {
               chapters: true,
@@ -287,6 +305,15 @@ class StoriesController {
             select: {
               name: true,
               slug: true,
+            },
+          },
+          affiliate: {
+            select: {
+              id: true,
+              provider: true,
+              targetUrl: true,
+              label: true,
+              isActive: true,
             },
           },
           _count: {
@@ -386,6 +413,15 @@ class StoriesController {
               slug: true,
             },
           },
+          affiliate: {
+            select: {
+              id: true,
+              provider: true,
+              targetUrl: true,
+              label: true,
+              isActive: true,
+            },
+          },
           _count: {
             select: {
               chapters: true,
@@ -417,6 +453,15 @@ class StoriesController {
               select: {
                 name: true,
                 slug: true,
+              },
+            },
+            affiliate: {
+              select: {
+                id: true,
+                provider: true,
+                targetUrl: true,
+                label: true,
+                isActive: true,
               },
             },
             _count: {
@@ -785,6 +830,15 @@ class StoriesController {
                 id: true,
                 name: true,
                 slug: true,
+              },
+            },
+            affiliate: {
+              select: {
+                id: true,
+                provider: true,
+                targetUrl: true,
+                label: true,
+                isActive: true,
               },
             },
             _count: {

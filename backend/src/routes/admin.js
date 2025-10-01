@@ -16,11 +16,14 @@ router.get("/users", adminController.getUsers);
 router.patch("/users/:id/role", adminController.updateUserRole);
 
 // Story management
+router.get("/stories", adminController.getStories);
+router.get("/stories/:id", adminController.getStoryById);
 router.post("/stories", adminController.createStory);
 router.patch("/stories/:id", adminController.updateStory);
 router.delete("/stories/:id", adminController.deleteStory);
 
 // Chapter management
+router.get("/chapters", adminController.getChapters);
 router.post("/stories/:storyId/chapters", adminController.createChapter);
 router.patch("/chapters/:id", adminController.updateChapter);
 router.delete("/chapters/:id", adminController.deleteChapter);
