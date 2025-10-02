@@ -333,12 +333,12 @@ const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
     }
     console.log(formData);
 
-    if (formData.type === "AUDIO" && !formData.audioUrl) {
-      const errorMsg = "Vui lòng upload file audio";
-      toast.error(errorMsg);
-      setError(errorMsg);
-      return;
-    }
+    // if (formData.type === "AUDIO" && !formData.audioUrl) {
+    //   const errorMsg = "Vui lòng upload file audio";
+    //   toast.error(errorMsg);
+    //   setError(errorMsg);
+    //   return;
+    // }
 
     try {
       setLoading(true);

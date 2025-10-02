@@ -22,6 +22,8 @@ export default function StoriesClient({
   initialPagination,
   searchParams,
 }: StoriesClientProps) {
+  console.log(JSON.stringify(initialStories));
+
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState(
     (searchParams.search as string) || ""

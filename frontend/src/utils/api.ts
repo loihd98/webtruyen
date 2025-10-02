@@ -16,8 +16,7 @@ import {
 } from "../types";
 
 // Base API URL
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://vuaxemohinh.com:5000/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost/api";
 
 // Token management functions (to be set from external store)
 let getAuthToken: (() => string | null) | null = null;
