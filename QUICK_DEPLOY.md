@@ -1,6 +1,16 @@
 # Quick Deploy## �️ Fix Bu## 🛠️ Fix Build & Deployment Errors
 
+``## 🔐 SSL Setup & Fix API Config
+
 ```bash
+chmod +x setup-ssl.sh && ./setup-ssl.sh
+```
+
+## 🧪 Test HTTPS API Calls
+
+```bash
+chmod +x test-https-api.sh && ./test-https-api.sh
+```
 chmod +x fix-build-error.sh && ./fix-build-error.sh
 ```
 
