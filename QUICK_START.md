@@ -60,16 +60,47 @@ webtruyen/
 docker-compose -f docker-compose.dev.yml up --build
 docker-compose -f docker-compose.dev.yml down
 
-# Production
-docker-compose -f docker-compose.prod.yml up --build -d
+# Production (Proper Sequence)
+cp .env.prod .env
 docker-compose -f docker-compose.prod.yml down
+docker-compose -f docker-compose.prod.yml build --no-cache
+docker-compose -f docker-compose.prod.yml up -d
 
-# Logs
-docker-compose -f docker-compose.prod.yml logs -f
+# Check Status
+docker-compose -f docker-compose.prod.yml ps
+docker-compose -f docker-compose.prod.yml logs backend
 docker-compose -f docker-compose.prod.yml logs nginx
+
+# Database Setup (First Time)
+docker-compose -f docker-compose.prod.yml exec backend npx prisma migrate deploy
+docker-compose -f docker-compose.prod.yml exec backend npx prisma generate
 
 # Database Backup
 docker-compose -f docker-compose.prod.yml exec -T postgres pg_dump -U webtruyen_user webtruyen_prod > backup.sql
+```
+
+## Common Issues & Solutions
+
+### Backend Container Unhealthy
+```bash
+# Check backend logs
+docker-compose -f docker-compose.prod.yml logs backend
+
+# Test health endpoint
+docker-compose -f docker-compose.prod.yml exec backend curl -f http://localhost:5000/health
+
+# Fix port issues - ensure .env has PORT=5000
+grep "PORT=" .env
+```
+
+### Nginx Cannot Find Backend
+```bash
+# Error: host not found in upstream "backend:5000"
+# Wait for backend to be healthy first
+docker-compose -f docker-compose.prod.yml ps
+
+# Restart nginx after backend is ready
+docker-compose -f docker-compose.prod.yml restart nginx
 ```
 
 ## Default Admin Account
