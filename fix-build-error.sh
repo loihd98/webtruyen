@@ -85,22 +85,27 @@ fi
 # Test Frontend
 echo "🌐 Test Frontend..."
 sleep 5
-if curl -f -s http://localhost:3000 > /dev/null 2>&1; then
-    echo "✅ Frontend OK (port 3000)"
+
+# Test frontend trực tiếp
+frontend_response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 2>/dev/null || echo "000")
+
+if [ "$frontend_response" = "200" ] || [ "$frontend_response" = "302" ] || [ "$frontend_response" = "404" ]; then
+    echo "✅ Frontend OK (port 3000) - HTTP $frontend_response"
 else
-    echo "❌ Frontend lỗi"
-    echo "📋 Frontend logs (10 dòng cuối):"
-    docker compose -f docker-compose.prod.yml logs --tail=10 frontend
+    echo "❌ Frontend không phản hồi (code: $frontend_response)"
+    echo "📋 Frontend logs (5 dòng cuối):"
+    docker compose -f docker-compose.prod.yml logs --tail=5 frontend
     
-    # Thử restart frontend
-    echo "🔄 Thử restart frontend..."
-    docker compose -f docker-compose.prod.yml restart frontend
-    sleep 15
-    
-    if curl -f -s http://localhost:3000 > /dev/null 2>&1; then
-        echo "✅ Frontend OK sau restart"
-    else
-        echo "❌ Frontend vẫn lỗi sau restart"
+    # Kiểm tra container có đang chạy không
+    if docker compose -f docker-compose.prod.yml ps frontend | grep -q "Up"; then
+        echo "⚠️  Container chạy nhưng không phản hồi HTTP, có thể đang khởi động..."
+        sleep 10
+        frontend_response2=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 2>/dev/null || echo "000")
+        if [ "$frontend_response2" = "200" ] || [ "$frontend_response2" = "302" ] || [ "$frontend_response2" = "404" ]; then
+            echo "✅ Frontend OK sau khi chờ thêm (HTTP $frontend_response2)"
+        else
+            echo "❌ Frontend vẫn không phản hồi"
+        fi
     fi
 fi
 

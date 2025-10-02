@@ -1,4 +1,38 @@
-# Quick Deploy## �️ Fix Build & Deployment Errors
+# Quick Deploy## �️ Fix Bu## 🛠️ Fix Build & Deployment Errors
+
+```bash
+chmod +x fix-build-error.sh && ./fix-build-error.sh
+```
+
+## 🩺 Health Check
+
+```bash
+chmod +x health-check.sh && ./health-check.sh
+```
+
+## 🎉 Success Verification
+
+```bash
+chmod +x success-check.sh && ./success-check.sh
+```
+
+## � Debug Network Issues
+
+```bash
+chmod +x debug-network.sh && ./debug-network.sh
+```
+
+## 🌐 Fix External Access
+
+```bash
+chmod +x fix-external-access.sh && ./fix-external-access.sh
+```
+
+## �🔐 SSL Setup Only
+
+```bash
+chmod +x setup-ssl.sh && ./setup-ssl.sh
+```yment Errors
 
 ```bash
 chmod +x fix-build-error.sh && ./fix-build-error.sh

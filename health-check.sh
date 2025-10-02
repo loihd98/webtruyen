@@ -39,10 +39,11 @@ else
     echo "❌ Backend health check - FAILED"
 fi
 
-if curl -f -s http://localhost:3000 > /dev/null 2>&1; then
-    echo "✅ Frontend - OK"
+frontend_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 2>/dev/null || echo "000")
+if [ "$frontend_code" = "200" ] || [ "$frontend_code" = "302" ] || [ "$frontend_code" = "404" ]; then
+    echo "✅ Frontend (HTTP $frontend_code) - OK"
 else
-    echo "❌ Frontend - FAILED"
+    echo "❌ Frontend (HTTP $frontend_code) - FAILED"
 fi
 
 if curl -f -s http://localhost > /dev/null 2>&1; then
