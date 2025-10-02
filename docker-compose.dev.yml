@@ -2,19 +2,16 @@ services:
   postgres:
     image: postgres:15-alpine
     restart: unless-stopped
-    env_file:
-      - ./.env.dev
     volumes:
       - postgres_data_dev:/var/lib/postgresql/data
-      - ./logs/postgres:/var/log/postgresql
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      POSTGRES_DB: webtruyen_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d webtruyen_dev"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -22,49 +19,45 @@ services:
       - app-network
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: node:18-alpine
+    working_dir: /app
     restart: unless-stopped
-    env_file:
-      - ./.env.dev
     volumes:
+      - ./backend:/app
+      - /app/node_modules
       - ./uploads:/uploads
       - ./logs/backend:/app/logs
-      - ./backend:/app  # Hot reload for development
-      - /app/node_modules  # Exclude node_modules from hot reload
     environment:
-      - NODE_ENV=development
-      - DATABASE_URL=${DATABASE_URL}
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-      - FRONTEND_URL=${FRONTEND_URL}
+      NODE_ENV: development
+      PORT: 5000
+      DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/webtruyen_dev
+      JWT_SECRET: dev-jwt-secret-key-not-for-production
+      JWT_REFRESH_SECRET: dev-refresh-secret-key-not-for-production
+      FRONTEND_URL: http://localhost:3000
     depends_on:
       postgres:
         condition: service_healthy
     ports:
       - "5000:5000"
+    command: sh -c "npm install && npx prisma generate && npm run dev"
     networks:
       - app-network
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: node:18-alpine
+    working_dir: /app
     restart: unless-stopped
-    env_file:
-      - ./.env.dev
     volumes:
-      - ./frontend:/app  # Hot reload for development
-      - /app/node_modules  # Exclude node_modules from hot reload
-      - /app/.next  # Exclude .next from hot reload
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
     environment:
-      - NODE_ENV=development
-      - NEXT_PUBLIC_API_URL=${BACKEND_URL}
-      - NEXT_PUBLIC_FRONTEND_URL=${FRONTEND_URL}
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:5000
+      NEXT_PUBLIC_FRONTEND_URL: http://localhost:3000
+    command: sh -c "npm install && npm run dev"
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
     ports:
       - "3000:3000"
     networks:

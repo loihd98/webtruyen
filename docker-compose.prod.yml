@@ -16,6 +16,12 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
     networks:
       - app-network
 
@@ -45,6 +51,12 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
     networks:
       - app-network
 
@@ -52,6 +64,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - NODE_OPTIONS=--max-old-space-size=2048
     restart: unless-stopped
     env_file:
       - ./.env.prod
@@ -59,9 +73,16 @@ services:
       - NODE_ENV=production
       - NEXT_PUBLIC_API_URL=${BACKEND_URL}
       - NEXT_PUBLIC_FRONTEND_URL=${FRONTEND_URL}
+      - NODE_OPTIONS=--max-old-space-size=1024
     depends_on:
       backend:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
     networks:
       - app-network
 
@@ -84,6 +105,12 @@ services:
         condition: service_started
       backend:
         condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
     networks:
       - app-network
 

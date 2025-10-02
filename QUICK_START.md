@@ -82,6 +82,7 @@ docker-compose -f docker-compose.prod.yml exec -T postgres pg_dump -U webtruyen_
 ## Common Issues & Solutions
 
 ### Backend Container Unhealthy
+
 ```bash
 # Check backend logs
 docker-compose -f docker-compose.prod.yml logs backend
@@ -94,6 +95,7 @@ grep "PORT=" .env
 ```
 
 ### Nginx Cannot Find Backend
+
 ```bash
 # Error: host not found in upstream "backend:5000"
 # Wait for backend to be healthy first
@@ -101,6 +103,25 @@ docker-compose -f docker-compose.prod.yml ps
 
 # Restart nginx after backend is ready
 docker-compose -f docker-compose.prod.yml restart nginx
+```
+
+### Backend "Cannot find module '/app/server.js'" Error
+
+```bash
+# This happens when Docker can't find the correct entry point
+# Check if .env.dev exists
+ls -la .env.dev*
+
+# Create .env.dev if missing
+cp .env.dev.example .env.dev
+
+# Rebuild backend container
+docker compose -f docker-compose.dev.yml down
+docker compose -f docker-compose.dev.yml build --no-cache backend
+docker compose -f docker-compose.dev.yml up -d
+
+# Verify correct start command
+docker compose -f docker-compose.dev.yml exec backend cat package.json | grep '"start"'
 ```
 
 ## Default Admin Account

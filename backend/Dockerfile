@@ -14,8 +14,12 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Build argument for environment
+ARG NODE_ENV=production
+ENV NODE_ENV=$NODE_ENV
+
+# Install dependencies based on environment
+RUN if [ "$NODE_ENV" = "development" ] ; then npm ci ; else npm ci --only=production ; fi
 
 # Copy prisma schema first for generation
 COPY prisma ./prisma/
@@ -28,7 +32,6 @@ COPY src ./src/
 
 # Create uploads directory
 RUN mkdir -p uploads/audio
-
 RUN mkdir -p uploads/image
 
 # Expose port
@@ -38,5 +41,5 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD node src/scripts/healthcheck.js || exit 1
 
-# Start the application
-CMD ["npm", "start"]
+# Start command depends on environment
+CMD ["sh", "-c", "if [ \"$NODE_ENV\" = \"development\" ]; then npm run dev; else node src/index.js; fi"]
