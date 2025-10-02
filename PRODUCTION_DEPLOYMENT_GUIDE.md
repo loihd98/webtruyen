@@ -22,8 +22,78 @@ ssh username@180.93.138.93
 
 ### 1.2 Update System
 ```bash
-# For Ubuntu/Debian
-sudo apt update && sudo apt upgrade -y
+# For Ubuntu/Debi### PostgreSQL Container Health Check Failures
+
+**Problem**: Container shows as unhealthy or fails to start with "dependency failed to start: container webtruyen-postgres-1 is unhealthy"
+
+**Solution**:
+```bash
+# Check PostgreSQL logs
+docker-compose -f docker-compose.prod.yml logs postgres
+
+# Verify database credentials in .env file
+# Ensure POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB are set with actual values
+
+# Check container status
+docker-compose -f docker-compose.prod.yml ps
+
+# Reset database if needed (WARNING: This will delete all data)
+docker-compose -f docker-compose.prod.yml down -v
+docker-compose -f docker-compose.prod.yml --env-file .env.prod up --build -d
+```
+
+### Backend Container Health Check Failures
+
+**Problem**: Backend container fails to start with "dependency failed to start: container webtruyen-backend-1 is unhealthy"
+
+**Solution**:
+```bash
+# Step 1: Check backend container logs
+docker-compose -f docker-compose.prod.yml logs backend
+
+# Step 2: Check if backend container is running
+docker-compose -f docker-compose.prod.yml ps
+
+# Step 3: Common fixes for backend issues:
+
+# A) PORT MISMATCH ISSUE - Check if backend is running on wrong port
+# If logs show "Server running on port 3001" but should be 5000:
+# Check your .env file PORT setting:
+grep "PORT=" .env
+
+# Backend should run on port 5000 in production. If it's running on 3001:
+# 1. Update .env file to set PORT=5000
+# 2. Or update health check to use correct port
+docker-compose -f docker-compose.prod.yml exec backend curl -f http://localhost:3001/health
+
+# B) Database connection issues - run Prisma migrations
+docker-compose -f docker-compose.prod.yml exec backend npx prisma migrate deploy
+docker-compose -f docker-compose.prod.yml exec backend npx prisma generate
+
+# C) Check if DATABASE_URL is correct in .env file
+grep "DATABASE_URL" .env
+
+# D) Restart backend service specifically
+docker-compose -f docker-compose.prod.yml restart backend
+
+# E) If port mismatch, test the actual running port
+# Check what port backend is actually using:
+docker-compose -f docker-compose.prod.yml exec backend curl -f http://localhost:3001/health || \
+docker-compose -f docker-compose.prod.yml exec backend curl -f http://localhost:5000/health
+
+# F) Full restart if needed
+docker-compose -f docker-compose.prod.yml down
+docker-compose -f docker-compose.prod.yml up --build -d
+```
+
+**Check specific backend logs**:
+```bash
+# Real-time backend logs
+docker-compose -f docker-compose.prod.yml logs -f backend
+
+# Last 50 lines of backend logs
+docker-compose -f docker-compose.prod.yml logs --tail=50 backend
+```&& sudo apt upgrade -y
 
 # For CentOS/RHEL
 sudo yum update -y
@@ -34,12 +104,16 @@ sudo dnf update -y
 ### 1.3 Install Required Packages
 ```bash
 # For Ubuntu/Debian
-sudo apt install -y curl wget git vim nano htop ufw
+sudo apt install -y curl wget git vim nano htop ufw cron
 
 # For CentOS/RHEL
-sudo yum install -y curl wget git vim nano htop firewalld
+sudo yum install -y curl wget git vim nano htop firewalld cronie
 # or:
-sudo dnf install -y curl wget git vim nano htop firewalld
+sudo dnf install -y curl wget git vim nano htop firewalld cronie
+
+# Enable and start cron service
+sudo systemctl enable cron 2>/dev/null || sudo systemctl enable crond
+sudo systemctl start cron 2>/dev/null || sudo systemctl start crond
 ```
 
 ## Step 2: Install Docker and Docker Compose
@@ -110,13 +184,13 @@ cp .env.prod.example .env.prod
 nano .env.prod
 ```
 
-**Configure the following variables:**
+**Configure the following variables exactly:**
 ```env
 # Database
-DATABASE_URL="postgresql://webtruyen_user:secure_password_here@postgres:5432/webtruyen_prod"
+DATABASE_URL="postgresql://webtruyen_user:your_secure_db_password@postgres:5432/webtruyen_prod"
 POSTGRES_DB=webtruyen_prod
 POSTGRES_USER=webtruyen_user
-POSTGRES_PASSWORD=secure_password_here
+POSTGRES_PASSWORD=your_secure_db_password
 
 # Application
 NODE_ENV=production
@@ -124,28 +198,79 @@ PORT=5000
 FRONTEND_URL=https://vuaxemohinh.com
 BACKEND_URL=https://vuaxemohinh.com
 
-# JWT
-JWT_SECRET=your_super_secure_jwt_secret_key_here
-JWT_REFRESH_SECRET=your_super_secure_refresh_secret_key_here
+# Next.js Public Variables
+NEXT_PUBLIC_API_URL=https://vuaxemohinh.com
+NEXT_PUBLIC_FRONTEND_URL=https://vuaxemohinh.com
+
+# JWT - Generate secure random strings
+JWT_SECRET=your_super_secure_jwt_secret_key_here_32_chars_minimum
+JWT_REFRESH_SECRET=your_super_secure_refresh_secret_different_key_here
 
 # File Upload
 UPLOAD_DIR=/uploads
+MAX_FILE_SIZE=10485760
 
 # Domain
 DOMAIN=vuaxemohinh.com
+
+# Security
+CORS_ORIGIN=https://vuaxemohinh.com
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX=100
+
+# Logging
+LOG_LEVEL=info
+LOG_FILE=/app/logs/app.log
 ```
 
-### 4.3 Create Required Directories
+**IMPORTANT**: Replace the placeholder values:
+- `your_secure_db_password` → Strong database password
+- `your_super_secure_jwt_secret_key_here_32_chars_minimum` → Random 32+ character string
+- `your_super_secure_refresh_secret_different_key_here` → Different random 32+ character string
+
+### 4.3 Verify Environment File
+```bash
+# Check if .env.prod file exists and has content
+ls -la .env.prod
+echo "Environment file preview (first few lines):"
+head -5 .env.prod
+
+# Verify no empty values (should show no WARN messages)
+docker-compose -f docker-compose.prod.yml config | head -10
+```
+
+### 4.4 Create Required Directories
 ```bash
 mkdir -p uploads/images uploads/audio
 mkdir -p ssl
-mkdir -p logs/nginx
+mkdir -p logs/nginx logs/postgres logs/backend
 sudo chown -R $USER:$USER uploads ssl logs
 ```
 
-## Step 5: SSL Certificate Setup
+## Step 5: DNS Configuration (CRITICAL)
 
-### 5.1 Install Certbot
+### 5.1 Verify DNS Settings
+**IMPORTANT**: Before proceeding, ensure your domain points to your server IP.
+
+```bash
+# Check current DNS resolution
+nslookup vuaxemohinh.com
+ping vuaxemohinh.com
+
+# Should return: 180.93.138.93
+```
+
+**If domain doesn't point to your server IP:**
+1. Login to your domain registrar (GoDaddy, Namecheap, etc.)
+2. Update DNS records:
+   - A Record: `vuaxemohinh.com` → `180.93.138.93`
+   - A Record: `www.vuaxemohinh.com` → `180.93.138.93`
+3. Wait 5-15 minutes for DNS propagation
+4. Verify again with `ping vuaxemohinh.com`
+
+## 8. SSL Certificate Configuration
+
+### 6.1 Install Certbot
 ```bash
 # For Ubuntu/Debian
 sudo apt install -y certbot
@@ -156,12 +281,19 @@ sudo yum install -y certbot
 sudo dnf install -y certbot
 ```
 
-### 5.2 Generate SSL Certificate
+### 6.2 Generate SSL Certificate
 ```bash
 # Stop any services using ports 80/443
 sudo systemctl stop nginx 2>/dev/null || true
 
-# Generate certificate
+# Verify domain points to this server
+echo "Current server IP:"
+curl -s ifconfig.me
+echo ""
+echo "Domain resolves to:"
+nslookup vuaxemohinh.com | grep "Address:" | tail -1
+
+# If domain points correctly, generate certificate
 sudo certbot certonly --standalone -d vuaxemohinh.com -d www.vuaxemohinh.com
 
 # Copy certificates to project directory
@@ -170,29 +302,141 @@ sudo cp /etc/letsencrypt/live/vuaxemohinh.com/privkey.pem ssl/
 sudo chown -R $USER:$USER ssl/
 ```
 
-### 5.3 Setup Auto-renewal
+### 6.3 Alternative: Self-Signed Certificate (for testing)
+If you can't get Let's Encrypt working immediately:
+
 ```bash
-# Add cron job for certificate renewal
-(crontab -l 2>/dev/null; echo "0 12 * * * /usr/bin/certbot renew --quiet && docker-compose -f /opt/webtruyen/docker-compose.prod.yml restart nginx") | crontab -
+# Generate self-signed certificate for testing
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout ssl/privkey.pem \
+  -out ssl/fullchain.pem \
+  -subj "/C=VN/ST=HCM/L=HCM/O=WebTruyen/CN=vuaxemohinh.com"
+
+sudo chown -R $USER:$USER ssl/
 ```
 
-## Step 6: Deploy Application
-
-### 6.1 Build and Start Services
+### 6.4 Setup Auto-renewal (Only for Let's Encrypt)
 ```bash
+# Install crontab if not available
+sudo apt install -y cron 2>/dev/null || sudo yum install -y cronie 2>/dev/null || sudo dnf install -y cronie 2>/dev/null
+
+# Enable and start cron service
+sudo systemctl enable cron 2>/dev/null || sudo systemctl enable crond
+sudo systemctl start cron 2>/dev/null || sudo systemctl start crond
+
+# Add cron job for certificate renewal (skip if using self-signed)
+(crontab -l 2>/dev/null; echo "0 12 * * * /usr/bin/certbot renew --quiet && docker-compose -f /opt/webtruyen/docker-compose.prod.yml restart nginx") | crontab -
+
+# Verify cron job was added
+crontab -l
+```
+
+## Step 7: Deploy Application
+
+## 6. Configure Environment Variables
+
+### 6.1 Generate Secure Passwords and Secrets
+
+Before deploying, generate secure passwords and secrets:
+
+```bash
+# Generate database password
+echo "DB_PASSWORD: $(openssl rand -base64 32)"
+
+# Generate JWT secret
+echo "JWT_SECRET: $(openssl rand -base64 64)"
+
+# Generate JWT refresh secret
+echo "JWT_REFRESH_SECRET: $(openssl rand -base64 64)"
+```
+
+### 6.2 Create Environment File
+
+**IMPORTANT**: Docker Compose requires a `.env` file in the project root directory. Create it with all required variables:
+
+```bash
+# Navigate to project directory
 cd /opt/webtruyen
 
-# Pull latest changes
-git pull origin master
+# Create .env file with all required variables
+cat > .env << 'EOF'
+# Database Configuration
+POSTGRES_DB=webtruyen_prod
+POSTGRES_USER=webtruyen_user
+POSTGRES_PASSWORD=YOUR_GENERATED_DB_PASSWORD_HERE
 
-# Build and start all services
-docker-compose -f docker-compose.prod.yml up --build -d
+# Database URL for Prisma
+DATABASE_URL=postgresql://webtruyen_user:YOUR_GENERATED_DB_PASSWORD_HERE@postgres:5432/webtruyen_prod
 
-# Check service status
-docker-compose -f docker-compose.prod.yml ps
+# JWT Secrets (Use generated values from step 6.1)
+JWT_SECRET=YOUR_GENERATED_JWT_SECRET_HERE
+JWT_REFRESH_SECRET=YOUR_GENERATED_REFRESH_SECRET_HERE
+
+# Application URLs
+FRONTEND_URL=https://vuaxemohinh.com
+BACKEND_URL=https://vuaxemohinh.com
+DOMAIN=vuaxemohinh.com
+
+# Application Configuration
+NODE_ENV=production
+PORT=5000
+
+# Security
+CORS_ORIGIN=https://vuaxemohinh.com
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX=100
+
+# File Upload Configuration
+UPLOAD_DIR=/uploads
+MAX_FILE_SIZE=10485760
+
+# Logging
+LOG_LEVEL=info
+LOG_FILE=/app/logs/app.log
+EOF
 ```
 
-### 6.2 Initialize Database
+### 6.3 Update Environment Values
+
+**Replace the placeholder values** with the secure values generated in step 6.1:
+
+```bash
+# Edit the .env file
+nano .env
+
+# Or use sed to replace values (example):
+sed -i 's/YOUR_GENERATED_DB_PASSWORD_HERE/ActualGeneratedPassword/' .env
+sed -i 's/YOUR_GENERATED_JWT_SECRET_HERE/ActualJWTSecret/' .env
+sed -i 's/YOUR_GENERATED_REFRESH_SECRET_HERE/ActualRefreshSecret/' .env
+```
+
+### 6.4 Verify Environment Configuration
+
+```bash
+# Check if .env file exists
+ls -la .env
+
+# Verify environment variables are loaded (without showing sensitive values)
+echo "Checking environment variables..."
+docker-compose -f docker-compose.prod.yml config | grep -E "POSTGRES_|JWT_|DATABASE_URL" | head -5
+```
+
+## 7. Deploy with Docker Compose
+
+### 7.1 Build and Start Services
+
+```bash
+# Build and start all services in detached mode
+docker-compose -f docker-compose.prod.yml up --build -d
+
+# Check container status
+docker-compose -f docker-compose.prod.yml ps
+
+# View logs
+docker-compose -f docker-compose.prod.yml logs
+```
+
+### 7.2Initialize Database
 ```bash
 # Wait for database to be ready
 sleep 30
@@ -321,7 +565,60 @@ docker-compose -f docker-compose.prod.yml up --build -d
 
 ## Troubleshooting
 
-### Common Issues
+### Environment Variable Issues
+
+**Problem**: Docker shows warnings like "The POSTGRES_DB variable is not set"
+
+**Symptoms**:
+```
+WARN[0000] The "POSTGRES_DB" variable is not set. Defaulting to a blank string.
+WARN[0000] The "POSTGRES_USER" variable is not set. Defaulting to a blank string.
+WARN[0000] The "DATABASE_URL" variable is not set. Defaulting to a blank string.
+```
+
+**Solution**:
+```bash
+# Step 1: Check if .env file exists
+ls -la .env
+
+# Step 2: If missing, create it (follow section 6.2)
+# If exists, verify content:
+cat .env
+
+# Step 3: Ensure all required variables are set
+grep -E "POSTGRES_|JWT_|DATABASE_URL" .env
+
+# Step 4: Restart containers after fixing .env
+docker-compose -f docker-compose.prod.yml down
+docker-compose -f docker-compose.prod.yml up --build -d
+```
+
+**Alternative**: Use explicit env file:
+```bash
+docker-compose -f docker-compose.prod.yml --env-file .env.prod up --build -d
+```
+
+### PostgreSQL Container Health Check Failures
+
+**Problem**: Container shows as unhealthy or fails to start with "dependency failed to start: container webtruyen-postgres-1 is unhealthy"
+
+**Solution**:
+```bash
+# Check PostgreSQL logs
+docker-compose -f docker-compose.prod.yml logs postgres
+
+# Verify database credentials in .env file
+# Ensure POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB are set with actual values
+
+# Check container status
+docker-compose -f docker-compose.prod.yml ps
+
+# Reset database if needed (WARNING: This will delete all data)
+docker-compose -f docker-compose.prod.yml down -v
+docker-compose -f docker-compose.prod.yml up --build -d
+```
+
+### Other Common Issues
 
 1. **Port 80/443 already in use**
    ```bash
@@ -364,6 +661,61 @@ docker-compose -f docker-compose.prod.yml up --build -d
 3. **Regular security updates**
 4. **Monitor logs** for suspicious activity
 5. **Backup regularly** and test restore procedures
+
+## Quick Deployment Commands (Copy-Paste Ready)
+
+### Update Source Code and Deploy
+```bash
+# Navigate to project directory
+cd /opt/webtruyen
+
+# Pull latest changes from GitHub
+git pull origin master
+
+# Copy updated environment file
+cp .env.prod .env
+
+# Stop containers and clear Docker cache
+docker-compose -f docker-compose.prod.yml down
+docker system prune -f
+
+# Force rebuild without cache and start
+docker-compose -f docker-compose.prod.yml build --no-cache
+docker-compose -f docker-compose.prod.yml up -d
+
+# Check status
+docker-compose -f docker-compose.prod.yml ps
+
+# View logs
+docker-compose -f docker-compose.prod.yml logs backend
+```
+
+### Database Setup (First Time Only)
+```bash
+# Wait for containers to start
+sleep 30
+
+# Run database migrations
+docker-compose -f docker-compose.prod.yml exec backend npx prisma migrate deploy
+
+# Generate Prisma client
+docker-compose -f docker-compose.prod.yml exec backend npx prisma generate
+
+# Restart backend after migrations
+docker-compose -f docker-compose.prod.yml restart backend
+```
+
+### Check Deployment
+```bash
+# Check all containers are healthy
+docker-compose -f docker-compose.prod.yml ps
+
+# Test backend health
+docker-compose -f docker-compose.prod.yml exec backend curl -f http://localhost:5000/health
+
+# Test application
+curl -I https://vuaxemohinh.com
+```
 
 ## Support
 
