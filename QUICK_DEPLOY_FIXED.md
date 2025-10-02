@@ -54,6 +54,20 @@ chmod +x simple-ssl.sh
 ./simple-ssl.sh
 ```
 
+### BƯỚC 7: Verify SSL setup
+
+```bash
+chmod +x verify-ssl.sh
+./verify-ssl.sh
+```
+
+### BƯỚC 8: Fix SSL certificate mounting (if needed)
+
+```bash
+chmod +x fix-ssl-final.sh
+./fix-ssl-final.sh
+```
+
 ---
 
 ## 🔧 TROUBLESHOOTING SCRIPTS
