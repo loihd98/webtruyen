@@ -26,6 +26,13 @@ chmod +x fix-build-error.sh
 ./fix-build-error.sh
 ```
 
+### BƯỚC 3.1: Nếu nginx lỗi vì SSL certificate
+
+```bash
+chmod +x fix-ssl-problem.sh
+./fix-ssl-problem.sh
+```
+
 ### BƯỚC 4: Nếu không truy cập được từ external
 
 ```bash
