@@ -60,10 +60,14 @@ export default function ClientProvider({
         hasUser: !!state.auth.user,
         hasAccessToken: !!state.auth.accessToken,
         hasRefreshToken: !!state.auth.refreshToken,
-        userEmail: state.auth.user?.email
+        userEmail: state.auth.user?.email,
       });
-      
-      if (state.auth.isAuthenticated && state.auth.refreshToken && state.auth.user) {
+
+      if (
+        state.auth.isAuthenticated &&
+        state.auth.refreshToken &&
+        state.auth.user
+      ) {
         console.log("🔄 Refreshing token on startup...");
         // Try to refresh the token to validate it's still valid
         store
@@ -88,7 +92,11 @@ export default function ClientProvider({
       } else {
         console.log("⚠️  No valid auth state found, staying logged out");
         // Clear any partial auth state
-        if (state.auth.isAuthenticated || state.auth.accessToken || state.auth.refreshToken) {
+        if (
+          state.auth.isAuthenticated ||
+          state.auth.accessToken ||
+          state.auth.refreshToken
+        ) {
           console.log("🧹 Clearing partial auth state");
           store.dispatch(clearAuth());
         }

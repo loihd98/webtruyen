@@ -1,12 +1,14 @@
 # Web Truyện - Production Deployment Guide
 
 ## Server Information
+
 - **Server IP**: 180.93.138.93
 - **Domain**: vuaxemohinh.com
 - **OS**: Ubuntu/CentOS 8
 - **Architecture**: Docker Compose + Nginx + SSL
 
 ## Prerequisites
+
 - Domain `vuaxemohinh.com` pointing to IP `180.93.138.93`
 - SSH access to the server
 - Root or sudo privileges
@@ -14,6 +16,7 @@
 ## Step 1: Initial Server Setup
 
 ### 1.1 Connect to Server
+
 ```bash
 ssh root@180.93.138.93
 # or if using non-root user:
@@ -21,7 +24,8 @@ ssh username@180.93.138.93
 ```
 
 ### 1.2 Update System
-```bash
+
+````bash
 # For Ubuntu/Debi### PostgreSQL Container Health Check Failures
 
 **Problem**: Container shows as unhealthy or fails to start with "dependency failed to start: container webtruyen-postgres-1 is unhealthy"
@@ -40,13 +44,14 @@ docker-compose -f docker-compose.prod.yml ps
 # Reset database if needed (WARNING: This will delete all data)
 docker-compose -f docker-compose.prod.yml down -v
 docker-compose -f docker-compose.prod.yml --env-file .env.prod up --build -d
-```
+````
 
 ### Backend Container Health Check Failures
 
 **Problem**: Backend container fails to start with "dependency failed to start: container webtruyen-backend-1 is unhealthy"
 
 **Solution**:
+
 ```bash
 # Step 1: Check backend container logs
 docker-compose -f docker-compose.prod.yml logs backend
@@ -87,7 +92,8 @@ docker-compose -f docker-compose.prod.yml up --build -d
 ```
 
 **Check specific backend logs**:
-```bash
+
+````bash
 # Real-time backend logs
 docker-compose -f docker-compose.prod.yml logs -f backend
 
@@ -99,9 +105,10 @@ docker-compose -f docker-compose.prod.yml logs --tail=50 backend
 sudo yum update -y
 # or for newer versions:
 sudo dnf update -y
-```
+````
 
 ### 1.3 Install Required Packages
+
 ```bash
 # For Ubuntu/Debian
 sudo apt install -y curl wget git vim nano htop ufw cron
@@ -119,6 +126,7 @@ sudo systemctl start cron 2>/dev/null || sudo systemctl start crond
 ## Step 2: Install Docker and Docker Compose
 
 ### 2.1 Install Docker
+
 ```bash
 # For Ubuntu/Debian
 curl -fsSL https://get.docker.com -o get-docker.sh
@@ -135,6 +143,7 @@ sudo usermod -aG docker $USER
 ```
 
 ### 2.2 Install Docker Compose
+
 ```bash
 sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
@@ -145,6 +154,7 @@ docker-compose --version
 ```
 
 ### 2.3 Start Docker Service
+
 ```bash
 sudo systemctl start docker
 sudo systemctl enable docker
@@ -171,6 +181,7 @@ sudo firewall-cmd --reload
 ## Step 4: Clone and Setup Project
 
 ### 4.1 Clone Repository
+
 ```bash
 cd /opt
 sudo git clone https://github.com/loihd98/webtruyen.git
@@ -179,12 +190,14 @@ cd /opt/webtruyen
 ```
 
 ### 4.2 Create Production Environment File
+
 ```bash
 cp .env.prod.example .env.prod
 nano .env.prod
 ```
 
 **Configure the following variables exactly:**
+
 ```env
 # Database
 DATABASE_URL="postgresql://webtruyen_user:your_secure_db_password@postgres:5432/webtruyen_prod"
@@ -224,11 +237,13 @@ LOG_FILE=/app/logs/app.log
 ```
 
 **IMPORTANT**: Replace the placeholder values:
+
 - `your_secure_db_password` → Strong database password
 - `your_super_secure_jwt_secret_key_here_32_chars_minimum` → Random 32+ character string
 - `your_super_secure_refresh_secret_different_key_here` → Different random 32+ character string
 
 ### 4.3 Verify Environment File
+
 ```bash
 # Check if .env.prod file exists and has content
 ls -la .env.prod
@@ -240,6 +255,7 @@ docker-compose -f docker-compose.prod.yml config | head -10
 ```
 
 ### 4.4 Create Required Directories
+
 ```bash
 mkdir -p uploads/images uploads/audio
 mkdir -p ssl
@@ -250,6 +266,7 @@ sudo chown -R $USER:$USER uploads ssl logs
 ## Step 5: DNS Configuration (CRITICAL)
 
 ### 5.1 Verify DNS Settings
+
 **IMPORTANT**: Before proceeding, ensure your domain points to your server IP.
 
 ```bash
@@ -261,6 +278,7 @@ ping vuaxemohinh.com
 ```
 
 **If domain doesn't point to your server IP:**
+
 1. Login to your domain registrar (GoDaddy, Namecheap, etc.)
 2. Update DNS records:
    - A Record: `vuaxemohinh.com` → `180.93.138.93`
@@ -271,6 +289,7 @@ ping vuaxemohinh.com
 ## 8. SSL Certificate Configuration
 
 ### 6.1 Install Certbot
+
 ```bash
 # For Ubuntu/Debian
 sudo apt install -y certbot
@@ -282,6 +301,7 @@ sudo dnf install -y certbot
 ```
 
 ### 6.2 Generate SSL Certificate
+
 ```bash
 # Stop any services using ports 80/443
 sudo systemctl stop nginx 2>/dev/null || true
@@ -303,6 +323,7 @@ sudo chown -R $USER:$USER ssl/
 ```
 
 ### 6.3 Alternative: Self-Signed Certificate (for testing)
+
 If you can't get Let's Encrypt working immediately:
 
 ```bash
@@ -316,6 +337,7 @@ sudo chown -R $USER:$USER ssl/
 ```
 
 ### 6.4 Setup Auto-renewal (Only for Let's Encrypt)
+
 ```bash
 # Install crontab if not available
 sudo apt install -y cron 2>/dev/null || sudo yum install -y cronie 2>/dev/null || sudo dnf install -y cronie 2>/dev/null
@@ -437,6 +459,7 @@ docker-compose -f docker-compose.prod.yml logs
 ```
 
 ### 7.2Initialize Database
+
 ```bash
 # Wait for database to be ready
 sleep 30
@@ -454,6 +477,7 @@ docker-compose -f docker-compose.prod.yml exec backend npm run seed
 ## Step 7: Monitoring and Logs
 
 ### 7.1 View Logs
+
 ```bash
 # View all service logs
 docker-compose -f docker-compose.prod.yml logs -f
@@ -465,6 +489,7 @@ docker-compose -f docker-compose.prod.yml logs -f frontend
 ```
 
 ### 7.2 Check Service Health
+
 ```bash
 # Check if all services are running
 docker-compose -f docker-compose.prod.yml ps
@@ -477,11 +502,13 @@ df -h
 ## Step 8: Backup Setup
 
 ### 8.1 Create Backup Directory
+
 ```bash
 mkdir -p /opt/backups/webtruyen
 ```
 
 ### 8.2 Setup Automated Backups
+
 ```bash
 # Create backup script
 sudo tee /opt/backups/backup-webtruyen.sh > /dev/null <<EOF
@@ -511,13 +538,16 @@ sudo chmod +x /opt/backups/backup-webtruyen.sh
 ## Step 9: Domain Configuration
 
 ### 9.1 DNS Settings
+
 Make sure your domain DNS settings point to your server:
+
 ```
 A Record: vuaxemohinh.com → 180.93.138.93
 A Record: www.vuaxemohinh.com → 180.93.138.93
 ```
 
 ### 9.2 Test Domain Access
+
 ```bash
 # Test HTTP redirect to HTTPS
 curl -I http://vuaxemohinh.com
@@ -529,6 +559,7 @@ curl -I https://vuaxemohinh.com
 ## Step 10: Maintenance Commands
 
 ### 10.1 Update Application
+
 ```bash
 cd /opt/webtruyen
 git pull origin master
@@ -536,6 +567,7 @@ docker-compose -f docker-compose.prod.yml up --build -d
 ```
 
 ### 10.2 View Application Status
+
 ```bash
 # Check all services
 docker-compose -f docker-compose.prod.yml ps
@@ -548,6 +580,7 @@ df -h
 ```
 
 ### 10.3 Emergency Commands
+
 ```bash
 # Restart all services
 docker-compose -f docker-compose.prod.yml restart
@@ -570,6 +603,7 @@ docker-compose -f docker-compose.prod.yml up --build -d
 **Problem**: Docker shows warnings like "The POSTGRES_DB variable is not set"
 
 **Symptoms**:
+
 ```
 WARN[0000] The "POSTGRES_DB" variable is not set. Defaulting to a blank string.
 WARN[0000] The "POSTGRES_USER" variable is not set. Defaulting to a blank string.
@@ -577,6 +611,7 @@ WARN[0000] The "DATABASE_URL" variable is not set. Defaulting to a blank string.
 ```
 
 **Solution**:
+
 ```bash
 # Step 1: Check if .env file exists
 ls -la .env
@@ -594,6 +629,7 @@ docker-compose -f docker-compose.prod.yml up --build -d
 ```
 
 **Alternative**: Use explicit env file:
+
 ```bash
 docker-compose -f docker-compose.prod.yml --env-file .env.prod up --build -d
 ```
@@ -603,6 +639,7 @@ docker-compose -f docker-compose.prod.yml --env-file .env.prod up --build -d
 **Problem**: Container shows as unhealthy or fails to start with "dependency failed to start: container webtruyen-postgres-1 is unhealthy"
 
 **Solution**:
+
 ```bash
 # Check PostgreSQL logs
 docker-compose -f docker-compose.prod.yml logs postgres
@@ -621,6 +658,7 @@ docker-compose -f docker-compose.prod.yml up --build -d
 ### Other Common Issues
 
 1. **Port 80/443 already in use**
+
    ```bash
    sudo netstat -tulpn | grep :80
    sudo netstat -tulpn | grep :443
@@ -628,28 +666,31 @@ docker-compose -f docker-compose.prod.yml up --build -d
    ```
 
 2. **SSL certificate issues**
+
    ```bash
    # Check certificate validity
    openssl x509 -in ssl/fullchain.pem -text -noout
-   
+
    # Renew certificate manually
    sudo certbot renew --force-renewal
    ```
 
 3. **Database connection issues**
+
    ```bash
    # Check database container
    docker-compose -f docker-compose.prod.yml logs postgres
-   
+
    # Connect to database directly
    docker-compose -f docker-compose.prod.yml exec postgres psql -U webtruyen_user -d webtruyen_prod
    ```
 
 4. **Out of disk space**
+
    ```bash
    # Clean Docker images
    docker system prune -a
-   
+
    # Check large files
    du -sh /* | sort -rh
    ```
@@ -665,6 +706,7 @@ docker-compose -f docker-compose.prod.yml up --build -d
 ## Quick Deployment Commands (Copy-Paste Ready)
 
 ### Update Source Code and Deploy
+
 ```bash
 # Navigate to project directory
 cd /opt/webtruyen
@@ -691,6 +733,7 @@ docker-compose -f docker-compose.prod.yml logs backend
 ```
 
 ### Database Setup (First Time Only)
+
 ```bash
 # Wait for containers to start
 sleep 30
@@ -706,6 +749,7 @@ docker-compose -f docker-compose.prod.yml restart backend
 ```
 
 ### Check Deployment
+
 ```bash
 # Check all containers are healthy
 docker-compose -f docker-compose.prod.yml ps
@@ -720,6 +764,7 @@ curl -I https://vuaxemohinh.com
 ## Support
 
 For issues or questions:
+
 - Check logs: `docker-compose -f docker-compose.prod.yml logs`
 - GitHub Issues: Create an issue in the repository
 - Server logs: `/var/log/nginx/`, `/var/log/webtruyen-backup.log`

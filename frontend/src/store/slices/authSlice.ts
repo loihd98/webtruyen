@@ -186,11 +186,11 @@ const authSlice = createSlice({
           state.accessToken = authResponse.accessToken;
           state.refreshToken = authResponse.refreshToken;
           state.isAuthenticated = true;
-          
+
           console.log("📝 Auth state updated:", {
             hasUser: !!state.user,
             userEmail: state.user?.email,
-            isAuthenticated: state.isAuthenticated
+            isAuthenticated: state.isAuthenticated,
           });
         }
         state.error = null;
@@ -278,35 +278,39 @@ const authSlice = createSlice({
         (action) => action.type === REHYDRATE,
         (state, action: any) => {
           console.log("🔄 REHYDRATE action received");
-          
+
           // Check localStorage keys
           if (typeof window !== "undefined") {
-            const persistKeys = Object.keys(localStorage).filter(k => k.startsWith('persist'));
+            const persistKeys = Object.keys(localStorage).filter((k) =>
+              k.startsWith("persist")
+            );
             console.log("🗄️ Available persist keys:", persistKeys);
           }
-          
+
           // With root persist, auth data will be in action.payload.auth
           let persistedAuth = null;
-          
+
           // Try both locations for auth data
           if (action.payload?.auth) {
             persistedAuth = action.payload.auth;
             console.log("📍 Found auth data in payload.auth");
-          } else if (action.payload && typeof action.payload === 'object') {
+          } else if (action.payload && typeof action.payload === "object") {
             // Sometimes the auth data might be directly in payload
             if (action.payload.user || action.payload.accessToken) {
               persistedAuth = action.payload;
               console.log("📍 Found auth data directly in payload");
             }
           }
-          
+
           if (persistedAuth) {
             console.log("📦 Persisted auth found:", {
               hasUser: !!persistedAuth.user,
-              hasTokens: !!(persistedAuth.accessToken && persistedAuth.refreshToken),
-              isAuthenticated: persistedAuth.isAuthenticated
+              hasTokens: !!(
+                persistedAuth.accessToken && persistedAuth.refreshToken
+              ),
+              isAuthenticated: persistedAuth.isAuthenticated,
             });
-            
+
             // Validate that we have the required tokens
             if (persistedAuth.accessToken && persistedAuth.refreshToken) {
               console.log("✅ Valid tokens found, restoring auth state");

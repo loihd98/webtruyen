@@ -71,7 +71,7 @@ class AuthController {
           user: userResponse,
           accessToken: tokens.accessToken,
           refreshToken: tokens.refreshToken,
-        }
+        },
       });
     } catch (error) {
       console.error("Register error:", error);
@@ -145,7 +145,7 @@ class AuthController {
           user: userResponse,
           accessToken: tokens.accessToken,
           refreshToken: tokens.refreshToken,
-        }
+        },
       });
     } catch (error) {
       console.error("Login error:", error);

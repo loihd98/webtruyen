@@ -15,12 +15,14 @@ This guide covers comprehensive database backup and restore procedures for the W
 The production deployment includes an automated backup script that runs daily at 2 AM.
 
 #### Location and Schedule
+
 - **Backup Directory**: `/opt/backups/webtruyen/`
 - **Schedule**: Daily at 2 AM via cron job
 - **Retention**: 7 days (older backups are automatically deleted)
 - **Log File**: `/var/log/webtruyen-backup.log`
 
 #### Backup Script Location
+
 ```bash
 /opt/backups/backup-webtruyen.sh
 ```
@@ -28,6 +30,7 @@ The production deployment includes an automated backup script that runs daily at
 ### Manual Backup Commands
 
 #### 1. Database Only Backup
+
 ```bash
 # Navigate to project directory
 cd /opt/webtruyen
@@ -41,6 +44,7 @@ ls -la backup_db_$DATE.sql
 ```
 
 #### 2. Complete Backup (Database + Uploads)
+
 ```bash
 # Navigate to project directory
 cd /opt/webtruyen
@@ -66,6 +70,7 @@ ls -la backups/*$DATE*
 ```
 
 #### 3. Compressed Database Backup
+
 ```bash
 # For large databases, use compression
 DATE=$(date +%Y%m%d_%H%M%S)
@@ -75,6 +80,7 @@ docker-compose -f docker-compose.prod.yml exec -T postgres pg_dump -U webtruyen_
 ### Database Restore
 
 #### 1. Restore from SQL Backup
+
 ```bash
 # Stop the application (but keep database running)
 docker-compose -f docker-compose.prod.yml stop backend frontend nginx
@@ -88,6 +94,7 @@ docker-compose -f docker-compose.prod.yml up -d
 ```
 
 #### 2. Restore from Compressed Backup
+
 ```bash
 # For compressed backups
 BACKUP_FILE="backup_db_20241002_143000.sql.gz"
@@ -95,6 +102,7 @@ gunzip -c $BACKUP_FILE | docker-compose -f docker-compose.prod.yml exec -T postg
 ```
 
 #### 3. Complete System Restore
+
 ```bash
 # Restore database
 docker-compose -f docker-compose.prod.yml exec -T postgres psql -U webtruyen_user -d webtruyen_prod < backups/db_20241002_143000.sql
@@ -111,6 +119,7 @@ docker-compose -f docker-compose.prod.yml restart
 ### Manual Backup Commands
 
 #### 1. Database Backup
+
 ```bash
 # Navigate to project directory
 cd /path/to/webtruyen
@@ -121,6 +130,7 @@ docker-compose -f docker-compose.dev.yml exec -T postgres pg_dump -U webtruyen_d
 ```
 
 #### 2. Database Restore
+
 ```bash
 # Restore database
 docker-compose -f docker-compose.dev.yml exec -T postgres psql -U webtruyen_dev -d webtruyen_dev < backup_dev_20241002_143000.sql
@@ -143,6 +153,7 @@ For critical production environments, consider setting up continuous archiving:
 ### 2. Remote Backup Storage
 
 #### Upload to Cloud Storage (AWS S3 example)
+
 ```bash
 # Install AWS CLI
 pip install awscli
@@ -156,6 +167,7 @@ aws s3 cp backup_db_$DATE.sql s3://your-backup-bucket/webtruyen/
 ```
 
 #### Upload to Another Server (SCP)
+
 ```bash
 # Upload via SCP
 scp backup_db_$DATE.sql user@backup-server:/backups/webtruyen/
@@ -173,6 +185,7 @@ docker-compose -f docker-compose.prod.yml exec postgres pg_basebackup -D /backup
 ## Backup Verification
 
 ### 1. Test Backup Integrity
+
 ```bash
 # Check if backup file is valid SQL
 head -20 backup_db_20241002_143000.sql
@@ -185,6 +198,7 @@ docker-compose -f docker-compose.prod.yml exec -T postgres pg_dump --schema-only
 ```
 
 ### 2. Test Restore in Development
+
 ```bash
 # Create a test database
 docker-compose -f docker-compose.dev.yml exec postgres createdb -U webtruyen_dev test_restore
@@ -199,6 +213,7 @@ docker-compose -f docker-compose.dev.yml exec postgres psql -U webtruyen_dev -d 
 ## Monitoring and Alerting
 
 ### 1. Backup Monitoring Script
+
 ```bash
 #!/bin/bash
 # /opt/scripts/check-backup-status.sh
@@ -221,6 +236,7 @@ echo "OK: Latest backup is recent - $LATEST_BACKUP"
 ```
 
 ### 2. Add to Cron for Daily Checks
+
 ```bash
 # Add to crontab
 crontab -e
@@ -232,6 +248,7 @@ crontab -e
 ## Recovery Scenarios
 
 ### 1. Corrupted Database Recovery
+
 ```bash
 # Stop all services
 docker-compose -f docker-compose.prod.yml down
@@ -253,6 +270,7 @@ docker-compose -f docker-compose.prod.yml up -d
 ```
 
 ### 2. Accidental Data Deletion
+
 ```bash
 # Create backup of current state first
 DATE=$(date +%Y%m%d_%H%M%S)
@@ -277,6 +295,7 @@ docker-compose -f docker-compose.prod.yml exec -T postgres psql -U webtruyen_use
 ### Common Issues
 
 1. **Permission Denied**
+
    ```bash
    # Fix permissions
    sudo chown -R $USER:$USER /opt/backups/
@@ -284,15 +303,17 @@ docker-compose -f docker-compose.prod.yml exec -T postgres psql -U webtruyen_use
    ```
 
 2. **Database Connection Failed**
+
    ```bash
    # Check if PostgreSQL is running
    docker-compose -f docker-compose.prod.yml ps postgres
-   
+
    # Check logs
    docker-compose -f docker-compose.prod.yml logs postgres
    ```
 
 3. **Backup File Too Large**
+
    ```bash
    # Use compression
    docker-compose -f docker-compose.prod.yml exec -T postgres pg_dump -U webtruyen_user webtruyen_prod | gzip > backup_compressed.sql.gz
@@ -307,6 +328,7 @@ docker-compose -f docker-compose.prod.yml exec -T postgres psql -U webtruyen_use
 ## Support
 
 For backup-related issues:
+
 - Check backup logs: `/var/log/webtruyen-backup.log`
 - PostgreSQL logs: `docker-compose logs postgres`
 - Contact system administrator if issues persist
