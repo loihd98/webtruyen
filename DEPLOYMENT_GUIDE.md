@@ -386,6 +386,57 @@ telnet vuaxemohinh.com 80
 telnet vuaxemohinh.com 443
 ```
 
+### ❌ Problem: Frontend "next: not found" error
+**Solution:**
+```bash
+# Frontend Dockerfile có vấn đề với standalone build
+# Chạy script fix:
+chmod +x fix-deployment.sh
+./fix-deployment.sh
+```
+
+### ❌ Problem: Nginx "host not found in upstream frontend"
+**Solutions:**
+1. Frontend chưa khởi động hoàn tất:
+```bash
+# Kiểm tra frontend logs
+docker compose -f docker-compose.prod.yml logs frontend
+
+# Restart frontend
+docker compose -f docker-compose.prod.yml restart frontend
+```
+
+2. Khởi động theo thứ tự:
+```bash
+# Dừng tất cả
+docker compose -f docker-compose.prod.yml down
+
+# Khởi động từng service
+docker compose -f docker-compose.prod.yml up -d postgres
+sleep 10
+docker compose -f docker-compose.prod.yml up -d backend  
+sleep 10
+docker compose -f docker-compose.prod.yml up -d frontend
+sleep 15
+docker compose -f docker-compose.prod.yml up -d nginx
+```
+
+### ❌ Problem: SSL Certificate not found
+**Solutions:**
+1. Sử dụng HTTP first để test:
+```bash
+# Nginx sẽ dùng http-only.conf để test trước
+# Sau khi website chạy OK, setup SSL:
+./setup-ssl.sh
+```
+
+### 🔧 Quick Fix Script
+Nếu gặp nhiều lỗi, chạy script tự động khắc phục:
+```bash
+chmod +x fix-deployment.sh
+./fix-deployment.sh
+```
+
 ---
 
 ## 🎉 DEPLOYMENT CHECKLIST

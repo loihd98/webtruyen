@@ -12,7 +12,13 @@ git clone https://github.com/loihd98/webtruyen.git && cd webtruyen && chmod +x d
 curl -fsSL https://raw.githubusercontent.com/loihd98/webtruyen/master/vps-setup.sh -o vps-setup.sh && chmod +x vps-setup.sh && sudo ./vps-setup.sh
 ```
 
-## 🔐 SSL Setup Only
+## � Fix Deployment Errors (Frontend/Nginx issues)
+
+```bash
+chmod +x fix-deployment.sh && ./fix-deployment.sh
+```
+
+## �🔐 SSL Setup Only
 
 ```bash
 chmod +x setup-ssl.sh && ./setup-ssl.sh
