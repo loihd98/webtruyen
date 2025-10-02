@@ -140,13 +140,86 @@ docker compose -f docker-compose.prod.yml up -d nginx
 
 ---
 
-## 🔐 BƯỚC 4: SETUP SSL CERTIFICATE
+## � BƯỚC 4: TROUBLESHOOTING & SCRIPTS
 
-### 4.1 SSL tự động (đã tích hợp trong deploy.sh)
+### 4.1 Thứ tự chạy scripts khi có lỗi
 
-SSL sẽ được setup tự động khi chạy `./deploy.sh`
+**Nếu deployment bị lỗi:**
 
-### 4.2 SSL manual (nếu cần)
+```bash
+# 1. Fix build errors
+chmod +x fix-build-error.sh
+./fix-build-error.sh
+
+# 2. Fix external access (nếu không truy cập được)
+chmod +x fix-external-access.sh
+./fix-external-access.sh
+
+# 3. Debug network (nếu cần)
+chmod +x debug-network.sh
+./debug-network.sh
+```
+
+**Nếu SSL setup bị lỗi:**
+
+```bash
+# 1. Fix SSL errors trước
+chmod +x fix-ssl-error.sh
+./fix-ssl-error.sh
+
+# 2. Setup SSL đơn giản
+chmod +x simple-ssl.sh
+./simple-ssl.sh
+
+# 3. Test HTTPS API
+chmod +x test-https-api.sh
+./test-https-api.sh
+```
+
+**Scripts verification:**
+
+```bash
+# Health check
+chmod +x health-check.sh
+./health-check.sh
+
+# Success verification
+chmod +x success-check.sh
+./success-check.sh
+```
+
+### 4.2 Workflow hoàn chỉnh
+
+**Deployment lần đầu:**
+
+1. `vps-setup.sh` → Setup VPS
+2. `deploy.sh` → Deploy chính
+3. `simple-ssl.sh` → Setup SSL
+
+**Fix lỗi deployment:**
+
+1. `fix-build-error.sh` → Fix build/container issues
+2. `fix-external-access.sh` → Fix network access
+3. `simple-ssl.sh` → Setup SSL
+
+**Fix lỗi SSL:**
+
+1. `fix-ssl-error.sh` → Clean up SSL errors
+2. `simple-ssl.sh` → Retry SSL setup
+3. `test-https-api.sh` → Verify HTTPS
+
+---
+
+## 🔐 BƯỚC 5: SETUP SSL CERTIFICATE
+
+### 5.1 SSL setup đơn giản (Khuyến nghị)
+
+```bash
+chmod +x simple-ssl.sh
+./simple-ssl.sh
+```
+
+### 5.2 SSL manual (nếu cần)
 
 ```bash
 chmod +x setup-ssl.sh
@@ -387,7 +460,9 @@ telnet vuaxemohinh.com 443
 ```
 
 ### ❌ Problem: Frontend "next: not found" error
+
 **Solution:**
+
 ```bash
 # Frontend Dockerfile có vấn đề với standalone build
 # Chạy script fix:
@@ -396,8 +471,11 @@ chmod +x fix-deployment.sh
 ```
 
 ### ❌ Problem: Nginx "host not found in upstream frontend"
+
 **Solutions:**
+
 1. Frontend chưa khởi động hoàn tất:
+
 ```bash
 # Kiểm tra frontend logs
 docker compose -f docker-compose.prod.yml logs frontend
@@ -407,6 +485,7 @@ docker compose -f docker-compose.prod.yml restart frontend
 ```
 
 2. Khởi động theo thứ tự:
+
 ```bash
 # Dừng tất cả
 docker compose -f docker-compose.prod.yml down
@@ -414,7 +493,7 @@ docker compose -f docker-compose.prod.yml down
 # Khởi động từng service
 docker compose -f docker-compose.prod.yml up -d postgres
 sleep 10
-docker compose -f docker-compose.prod.yml up -d backend  
+docker compose -f docker-compose.prod.yml up -d backend
 sleep 10
 docker compose -f docker-compose.prod.yml up -d frontend
 sleep 15
@@ -422,8 +501,11 @@ docker compose -f docker-compose.prod.yml up -d nginx
 ```
 
 ### ❌ Problem: SSL Certificate not found
+
 **Solutions:**
+
 1. Sử dụng HTTP first để test:
+
 ```bash
 # Nginx sẽ dùng http-only.conf để test trước
 # Sau khi website chạy OK, setup SSL:
@@ -431,7 +513,9 @@ docker compose -f docker-compose.prod.yml up -d nginx
 ```
 
 ### 🔧 Quick Fix Script
+
 Nếu gặp nhiều lỗi, chạy script tự động khắc phục:
+
 ```bash
 chmod +x fix-deployment.sh
 ./fix-deployment.sh

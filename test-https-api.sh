@@ -1,4 +1,4 @@
-#!/bin/bash
+    #!/bin/bash
 
 # Script test API calls và verify không còn gọi localhost:5000
 echo "🔍 TEST API CALLS VÀ VERIFY HTTPS"

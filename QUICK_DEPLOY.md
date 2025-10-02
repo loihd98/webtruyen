@@ -11,14 +11,16 @@ chmod +x setup-ssl.sh && ./setup-ssl.sh
 ```bash
 chmod +x test-https-api.sh && ./test-https-api.sh
 ```
+
 chmod +x fix-build-error.sh && ./fix-build-error.sh
-```
+
+````
 
 ## 🩺 Health Check
 
 ```bash
 chmod +x health-check.sh && ./health-check.sh
-```
+````
 
 ## 🎉 Success Verification
 
@@ -40,13 +42,13 @@ chmod +x fix-external-access.sh && ./fix-external-access.sh
 
 ## �🔐 SSL Setup Only
 
-```bash
+````bash
 chmod +x setup-ssl.sh && ./setup-ssl.sh
 ```yment Errors
 
 ```bash
 chmod +x fix-build-error.sh && ./fix-build-error.sh
-```
+````
 
 ## 🩺 Health Check
 

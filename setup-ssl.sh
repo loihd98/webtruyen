@@ -45,12 +45,19 @@ echo "✅ Created SSL setup config"
 
 echo ""
 echo "📝 3. Update docker-compose để dùng SSL setup config..."
-sed -i.bak 's|default.conf|ssl-setup.conf|g' docker-compose.prod.yml
+# Backup current config
+cp docker-compose.prod.yml docker-compose.prod.yml.bak
+sed -i 's|default.conf|ssl-setup.conf|g' docker-compose.prod.yml
 
 echo ""
-echo "🚀 4. Restart nginx với config tạm..."
-docker compose -f docker-compose.prod.yml restart nginx
-sleep 5
+echo "🚀 4. Stop nginx và restart với config tạm..."
+docker compose -f docker-compose.prod.yml stop nginx
+sleep 2
+docker compose -f docker-compose.prod.yml up -d nginx
+sleep 10
+
+echo "🔍 Check nginx status..."
+docker compose -f docker-compose.prod.yml ps nginx
 
 echo ""
 echo "🔐 5. Lấy SSL certificate từ Let's Encrypt..."
@@ -100,6 +107,20 @@ if [ $? -eq 0 ]; then
 else
     echo "❌ Lỗi khi tạo SSL certificate"
     echo "Restore config..."
-    sed -i 's|ssl-setup.conf|default.conf|g' docker-compose.prod.yml
-    echo "Vui lòng kiểm tra network và thử lại"
+    cp docker-compose.prod.yml.bak docker-compose.prod.yml
+    docker compose -f docker-compose.prod.yml restart nginx
+    
+    echo ""
+    echo "🔍 DEBUG INFO:"
+    echo "Nginx status:"
+    docker compose -f docker-compose.prod.yml ps nginx
+    echo ""
+    echo "Test HTTP access:"
+    curl -I http://localhost 2>/dev/null | head -3 || echo "Cannot access nginx"
+    echo ""
+    echo "🛠️  TROUBLESHOOTING:"
+    echo "1. Make sure nginx is running: docker compose -f docker-compose.prod.yml ps"
+    echo "2. Test HTTP: curl http://180.93.138.93"
+    echo "3. Check nginx logs: docker compose -f docker-compose.prod.yml logs nginx"
+    echo "4. Try manual SSL later when HTTP is working"
 fi
