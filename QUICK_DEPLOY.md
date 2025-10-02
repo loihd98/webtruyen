@@ -1,4 +1,16 @@
-# Quick Deploy Commands
+# Quick Deploy## �️ Fix Build & Deployment Errors
+
+```bash
+chmod +x fix-build-error.sh && ./fix-build-error.sh
+```
+
+## 🩺 Health Check
+
+```bash
+chmod +x health-check.sh && ./health-check.sh
+```
+
+## 🔐 SSL Setup Onlyds
 
 ## 🚀 One-line deployment (after VPS setup)
 
