@@ -46,6 +46,18 @@ docker compose -f docker-compose.prod.yml up -d frontend
 echo "⏳ Chờ Frontend sẵn sàng..."
 sleep 20
 
+# Fix SSL configuration - use HTTP-only first
+echo "🔧 Cấu hình HTTP-only cho Nginx..."
+if [ -f "nginx/default.conf.ssl-backup" ]; then
+    echo "📁 SSL backup đã tồn tại"
+else
+    echo "📁 Backup cấu hình SSL hiện tại"
+    cp nginx/default.conf nginx/default.conf.ssl-backup
+fi
+
+echo "🔄 Chuyển sang cấu hình HTTP-only"
+cp nginx/http-only.conf nginx/default.conf
+
 # Nginx
 echo "🔀 Khởi động Nginx..."
 docker compose -f docker-compose.prod.yml up -d nginx
@@ -127,6 +139,14 @@ echo "🌐 Website local: http://localhost"
 echo "🌐 Website IP: http://180.93.138.93"
 echo "📊 Monitor: docker compose -f docker-compose.prod.yml logs -f"
 echo "🔄 Restart service: docker compose -f docker-compose.prod.yml restart [service]"
+
+echo ""
+echo "🔒 THIẾT LẬP SSL (sau khi website hoạt động):"
+echo "============================================"
+echo "1. Chạy: ./simple-ssl.sh"
+echo "2. Hoặc: certbot certonly --webroot -w /var/www/certbot -d vuaxemohinh.com"
+echo "3. Sau đó: cp nginx/default.conf.ssl-backup nginx/default.conf"
+echo "4. Cuối cùng: docker compose -f docker-compose.prod.yml restart nginx"
 
 # Final check
 echo ""
