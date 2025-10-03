@@ -12,7 +12,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED 1
-ARG NODE_OPTIONS=--max-old-space-size=2048
+ARG NODE_OPTIONS=--max-old-space-size=1048
 ENV NODE_OPTIONS=$NODE_OPTIONS
 RUN npm run build
 

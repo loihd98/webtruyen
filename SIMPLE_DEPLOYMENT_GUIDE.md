@@ -20,7 +20,7 @@ cd webtruyen
 ```bash
 # Environment file đã có sẵn .env.dev với config:
 # - NEXT_PUBLIC_API_URL=http://localhost/api
-# - NEXT_PUBLIC_FRONTEND_URL=http://localhost  
+# - NEXT_PUBLIC_FRONTEND_URL=http://localhost
 # - NEXT_PUBLIC_MEDIA_URL=http://localhost
 # - All traffic goes through nginx on port 80
 ```
@@ -42,7 +42,7 @@ docker compose -f docker-compose.dev.yml logs -f
 
 - **Website:** http://localhost (nginx reverse proxy)
 - **API:** http://localhost/api (nginx → backend:5000)
-- **Uploads:** http://localhost/uploads/* (nginx static files)
+- **Uploads:** http://localhost/uploads/\* (nginx static files)
 - **Direct Backend:** http://localhost:5000 (dev debug only)
 - **Direct Frontend:** http://localhost:3000 (dev debug only)
 - **Database:** PostgreSQL localhost:5432
@@ -94,6 +94,7 @@ docker compose version
 ```
 
 ### 3. Clone project trên VPS
+
 ```bash
 cd /opt
 sudo git clone https://github.com/loihd98/webtruyen.git
@@ -105,6 +106,7 @@ mkdir -p uploads
 ```
 
 ### 4. Setup production environment
+
 ```bash
 # Environment file .env.prod đã có config:
 # - NEXT_PUBLIC_API_URL=https://vuaxemohinh.com/api
@@ -117,23 +119,27 @@ mkdir -p uploads
 nano .env.prod
 # Thay đổi:
 # - JWT_SECRET=your-new-strong-secret-min-32-chars
-# - JWT_REFRESH_SECRET=your-new-refresh-secret-min-32-chars  
+# - JWT_REFRESH_SECRET=your-new-refresh-secret-min-32-chars
 # - NEXTAUTH_SECRET=your-nextauth-secret-min-32-chars
 # - POSTGRES_PASSWORD=your-strong-db-password
 ```
 
 ### 5. Configure DNS
+
 Trong domain registrar của bạn, set A record:
+
 - **@** → 180.93.138.93
 - **www** → 180.93.138.93
 
 Verify DNS:
+
 ```bash
 dig +short vuaxemohinh.com
 # Phải trả về: 180.93.138.93
 ```
 
 ### 6. Start production containers
+
 ```bash
 # Build và start production
 docker compose -f docker-compose.prod.yml up -d --build
@@ -212,7 +218,7 @@ docker compose -f docker-compose.prod.yml run --rm backend npx prisma migrate de
 ### 10. Verify production website
 
 - **HTTPS:** https://vuaxemohinh.com
-- **HTTP redirect:** http://vuaxemohinh.com → https://vuaxemohinh.com  
+- **HTTP redirect:** http://vuaxemohinh.com → https://vuaxemohinh.com
 - **API:** https://vuaxemohinh.com/api/health
 - **Uploads:** https://vuaxemohinh.com/uploads/* (static files)
 
@@ -222,7 +228,7 @@ docker compose -f docker-compose.prod.yml run --rm backend npx prisma migrate de
 Browser → nginx:443/80 → {
   HTTP → HTTPS redirect
   /api/* → backend:5000
-  /uploads/* → static files  
+  /uploads/* → static files
   /* → frontend:3000
 }
 ```
@@ -320,38 +326,42 @@ docker compose -f docker-compose.prod.yml logs postgres
 ## 🎯 API ENDPOINTS MAPPING
 
 ### Development (localhost)
-| URL | Proxy To | Description |
-|-----|----------|-------------|
-| `http://localhost/` | `frontend:3000` | Next.js website |
-| `http://localhost/api/*` | `backend:5000/api/*` | API endpoints |
-| `http://localhost/uploads/*` | `/uploads/*` | Static files |
+
+| URL                          | Proxy To             | Description     |
+| ---------------------------- | -------------------- | --------------- |
+| `http://localhost/`          | `frontend:3000`      | Next.js website |
+| `http://localhost/api/*`     | `backend:5000/api/*` | API endpoints   |
+| `http://localhost/uploads/*` | `/uploads/*`         | Static files    |
 
 ### Production (vuaxemohinh.com)
-| URL | Proxy To | Description |
-|-----|----------|-------------|
-| `https://vuaxemohinh.com/` | `frontend:3000` | Next.js website |
-| `https://vuaxemohinh.com/api/*` | `backend:5000/api/*` | API endpoints |
-| `https://vuaxemohinh.com/uploads/*` | `/uploads/*` | Static files |
+
+| URL                                 | Proxy To             | Description     |
+| ----------------------------------- | -------------------- | --------------- |
+| `https://vuaxemohinh.com/`          | `frontend:3000`      | Next.js website |
+| `https://vuaxemohinh.com/api/*`     | `backend:5000/api/*` | API endpoints   |
+| `https://vuaxemohinh.com/uploads/*` | `/uploads/*`         | Static files    |
 
 ### Frontend API calls:
+
 ```javascript
 // ✅ Production
-const response = await fetch('https://vuaxemohinh.com/api/stories');
+const response = await fetch("https://vuaxemohinh.com/api/stories");
 
 // ✅ Development (updated - via nginx)
-const response = await fetch('http://localhost/api/stories');
+const response = await fetch("http://localhost/api/stories");
 
 // ❌ Old way (direct backend - don't use)
-const response = await fetch('http://localhost:5000/api/stories');
+const response = await fetch("http://localhost:5000/api/stories");
 ```
 
 ### Environment Variables Summary:
+
 ```bash
 # Development (.env.dev)
 NEXT_PUBLIC_API_URL=http://localhost/api
 NEXT_PUBLIC_MEDIA_URL=http://localhost
 
-# Production (.env.prod)  
+# Production (.env.prod)
 NEXT_PUBLIC_API_URL=https://vuaxemohinh.com/api
 NEXT_PUBLIC_MEDIA_URL=https://vuaxemohinh.com
 ```
