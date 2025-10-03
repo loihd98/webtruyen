@@ -57,6 +57,7 @@ services:
       - .env.prod
     environment:
       - NODE_OPTIONS=--max-old-space-size=1024
+      - PORT=3000
     depends_on:
       backend:
         condition: service_healthy
