@@ -52,6 +52,9 @@ services:
       args:
         - NODE_OPTIONS=--max-old-space-size=2048
         - NODE_ENV=production
+        - NEXT_PUBLIC_API_URL=https://103.199.16.250/api
+        - NEXT_PUBLIC_BASE_URL=https://103.199.16.250
+        - NEXT_PUBLIC_MEDIA_URL=https://103.199.16.250
     restart: unless-stopped
     env_file:
       - .env.prod
