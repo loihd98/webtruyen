@@ -12,7 +12,7 @@ import AdminChapterManager from "./AdminChapterManager";
 import AdminAffiliatePage from "./AdminAffiliatePage";
 import AdminUserManager from "./AdminUserManager";
 import AdminCommentManager from "./AdminCommentManager";
-import AdminMediaUpload from "./AdminMediaUpload";
+import MediaManager from "./MediaManager";
 import AdminSystemSettings from "./AdminSystemSettings";
 import AdminGenresManager from "./AdminGenresManager";
 import AdminSidebar from "./AdminSidebar";
@@ -111,7 +111,7 @@ const AdminDashboard: React.FC = () => {
       case "comments":
         return <AdminCommentManager />;
       case "media":
-        return <AdminMediaUpload />;
+        return <MediaManager />;
       case "settings":
         return <AdminSystemSettings />;
       default:

@@ -1687,7 +1687,7 @@ class AdminController {
           description:
             "Đây là một thế giới thuộc về Đấu Khí, không hề có ma pháp hoa tiếu diệm lệ, chỉ có đấu khí cương mãnh phồn thịnh! Tại đây, muốn trở thành nhà cường giả hơn người, phải tu luyện...",
           thumbnailUrl:
-            "https://img.dtruyen.com/uploads/images/dau-pha-thuong-khung.jpg",
+            "https://img.dtruyen.com/uploads/image/dau-pha-thuong-khung.jpg",
           type: "TEXT",
           status: "PUBLISHED",
           viewCount: 15420,
@@ -1699,7 +1699,7 @@ class AdminController {
           description:
             "Tiếc thay thiên địa chi gian tu la chi đạo, nhị thập niên tiền nhất trường đại chiến, tu la môn diệt, từ đó thần châu đại địa tái vô tu la...",
           thumbnailUrl:
-            "https://img.dtruyen.com/uploads/images/tu-la-vo-than.jpg",
+            "https://img.dtruyen.com/uploads/image/tu-la-vo-than.jpg",
           type: "AUDIO",
           status: "PUBLISHED",
           viewCount: 8930,
@@ -1711,7 +1711,7 @@ class AdminController {
           description:
             "Cười ngạo giang hồ, ai địch được ta? Thiên địa vô cực, ta tâm vô biên! Tỷ kiếm tại tay, vấn thiên hạ anh hùng ai là địch thủ?",
           thumbnailUrl:
-            "https://img.dtruyen.com/uploads/images/ngao-the-cuu-trung-thien.jpg",
+            "https://img.dtruyen.com/uploads/image/ngao-the-cuu-trung-thien.jpg",
           type: "TEXT",
           status: "PUBLISHED",
           viewCount: 12560,
@@ -1723,7 +1723,7 @@ class AdminController {
           description:
             "Cô là thiên tài y học của thế kỷ 21, nhất đại độc nữ vương, một khi xuyên qua trở thành tướng phủ cô nữ...",
           thumbnailUrl:
-            "https://img.dtruyen.com/uploads/images/than-y-doc-phi.jpg",
+            "https://img.dtruyen.com/uploads/image/than-y-doc-phi.jpg",
           type: "TEXT",
           status: "PUBLISHED",
           viewCount: 9870,
@@ -1735,7 +1735,7 @@ class AdminController {
           description:
             "Thiếu niên mang theo lò luyện đan dược cổ xưa và tiểu long nữ bé bỏng phiêu lưu đại lục. Bách luyện thành thần, bách chiến thành vương!",
           thumbnailUrl:
-            "https://img.dtruyen.com/uploads/images/bach-luyen-thanh-than.jpg",
+            "https://img.dtruyen.com/uploads/image/bach-luyen-thanh-than.jpg",
           type: "AUDIO",
           status: "PUBLISHED",
           viewCount: 11230,

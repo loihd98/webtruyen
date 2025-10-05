@@ -60,7 +60,16 @@ const AdminStoryManager: React.FC = () => {
 
   const handleDelete = async (storyId: string) => {
     if (window.confirm(t("admin.stories.confirm_delete"))) {
-      setStories((prev) => prev.filter((story) => story.id !== storyId));
+      try {
+        await apiClient.delete(`/admin/stories/${storyId}`);
+        setStories((prev) => prev.filter((story) => story.id !== storyId));
+        // Show success message (you can add toast notification here)
+        console.log("Story deleted successfully");
+      } catch (error) {
+        console.error("Error deleting story:", error);
+        // Show error message (you can add toast notification here)
+        alert(t("admin.stories.delete_error"));
+      }
     }
   };
 

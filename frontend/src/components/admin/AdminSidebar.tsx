@@ -162,7 +162,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
     },
     {
       id: "media" as AdminTab,
-      label: t("admin.media.title"),
+      label: t("admin.media.title1"),
       icon: (
         <svg
           className="w-5 h-5"

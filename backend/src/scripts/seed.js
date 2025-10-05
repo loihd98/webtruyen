@@ -114,7 +114,7 @@ async function main() {
       originalName: "Ảnh bìa truyện 1.jpg",
       mimeType: "image/jpeg",
       size: 245760, // ~240KB
-      url: "/uploads/images/sample-image-1.jpg",
+      url: "/uploads/image/sample-image-1.jpg",
       type: "image",
       isActive: true,
     },
@@ -123,7 +123,7 @@ async function main() {
       originalName: "Ảnh bìa truyện 2.png",
       mimeType: "image/png",
       size: 512000, // ~500KB
-      url: "/uploads/images/sample-image-2.png",
+      url: "/uploads/image/sample-image-2.png",
       type: "image",
       isActive: true,
     },
@@ -150,7 +150,7 @@ async function main() {
       originalName: "Ảnh cũ không dùng.jpg",
       mimeType: "image/jpeg",
       size: 102400, // ~100KB
-      url: "/uploads/images/old-image.jpg",
+      url: "/uploads/image/old-image.jpg",
       type: "image",
       isActive: false, // Inactive for testing
     },
@@ -171,7 +171,7 @@ async function main() {
       description:
         "Thiếu niên tài ba, đánh mất đấu khí bỗng chốc trở thành phế vật của gia tộc. Nhưng với sự giúp đỡ của Dược Lão, cậu bắt đầu con đường tu luyện gian khó nhưng đầy hào hùng...",
       type: "TEXT",
-      thumbnailUrl: "/uploads/images/sample-image-1.jpg",
+      thumbnailUrl: "/uploads/image/sample-image-1.jpg",
       genreIds: [createdGenres[0].id, createdGenres[2].id], // Tiên Hiệp, Huyền Huyễn
     },
     {
@@ -179,7 +179,7 @@ async function main() {
       description:
         "Trọng sinh về thời đại tu tiên, với kiến thức hiện đại chinh phục thế giới tu tiên. Từ một kẻ phế vật trở thành đại thần tiên làm chấn động ba giới...",
       type: "AUDIO",
-      thumbnailUrl: "/uploads/images/sample-image-2.png",
+      thumbnailUrl: "/uploads/image/sample-image-2.png",
       genreIds: [createdGenres[0].id], // Tiên Hiệp
     },
     {
@@ -187,7 +187,7 @@ async function main() {
       description:
         "Phép thuật và công nghệ kết hợp, mở ra một thế giới hoàn toàn mới. Trong thế giới mà ma pháp là tất cả, làm thế nào để trở thành pháp sư mạnh nhất?",
       type: "TEXT",
-      thumbnailUrl: "/uploads/images/sample-image-1.jpg",
+      thumbnailUrl: "/uploads/image/sample-image-1.jpg",
       genreIds: [createdGenres[2].id, createdGenres[7].id], // Huyền Huyễn, Khoa Huyễn
     },
     {
@@ -195,7 +195,7 @@ async function main() {
       description:
         "Câu chuyện tình yêu giữa thần tiên và con người, vượt qua mọi thử thách của số phận để đến với nhau. Một cuộc tình bất diệt xuyên suốt ba sinh ba thế...",
       type: "AUDIO",
-      thumbnailUrl: "/uploads/images/sample-image-2.png",
+      thumbnailUrl: "/uploads/image/sample-image-2.png",
       genreIds: [createdGenres[0].id, createdGenres[4].id], // Tiên Hiệp, Ngôn Tình
     },
     {
@@ -203,7 +203,7 @@ async function main() {
       description:
         "Tu tiên trong thời đại hiện đại, khi thần thông gặp gỡ công nghệ. Liệu có thể tu luyện thành tiên trong thế giới đầy ô nhiễm này?",
       type: "TEXT",
-      thumbnailUrl: "/uploads/images/sample-image-1.jpg",
+      thumbnailUrl: "/uploads/image/sample-image-1.jpg",
       genreIds: [createdGenres[1].id, createdGenres[0].id], // Đô Thì, Tiên Hiệp
     },
     {
@@ -211,7 +211,7 @@ async function main() {
       description:
         "Từ một lập trình viên bình thường trở thành thiên tài công nghệ, xây dựng đế chế kinh doanh và chinh phục thế giới số...",
       type: "TEXT",
-      thumbnailUrl: "/uploads/images/sample-image-2.png",
+      thumbnailUrl: "/uploads/image/sample-image-2.png",
       genreIds: [createdGenres[1].id, createdGenres[7].id], // Đô Thị, Khoa Huyễn
     },
   ];

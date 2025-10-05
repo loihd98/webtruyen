@@ -30,7 +30,7 @@ const audioStorage = multer.diskStorage({
 // Configure multer for image files
 const imageStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadDir = path.join(config.uploadPath || "uploads", "images");
+    const uploadDir = path.join(config.uploadPath || "uploads", "image");
 
     // Create directory if it doesn't exist
     if (!fs.existsSync(uploadDir)) {
@@ -107,7 +107,7 @@ const imageUpload = multer({
 // Universal upload for both image and audio
 const universalStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const type = file.mimetype.startsWith("image/") ? "images" : "audio";
+    const type = file.mimetype.startsWith("image/") ? "image" : "audio";
     const uploadDir = path.join(config.uploadPath || "uploads", type);
 
     // Create directory if it doesn't exist
@@ -127,7 +127,7 @@ const universalStorage = multer.diskStorage({
 
 const universalFilter = (req, file, cb) => {
   const allowedMimes = [
-    // Images
+    // image
     "image/jpeg",
     "image/jpg",
     "image/png",
@@ -204,7 +204,7 @@ class MediaController {
         });
       }
 
-      const imageUrl = `/uploads/images/${req.file.filename}`;
+      const imageUrl = `/uploads/image/${req.file.filename}`;
 
       res.json({
         message: "Upload thành công",
