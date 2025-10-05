@@ -644,7 +644,7 @@ export default function StoryPage({ params }: StoryPageProps) {
                   </div>
                 ) : (
                   <div>
-                    {story.type === "AUDIO" && currentChapter.audioUrl ? (
+                    {currentChapter.audioUrl ? (
                       <div className="mb-6">
                         <SimpleAudioPlayer
                           src={getMediaUrl(currentChapter.audioUrl)}
