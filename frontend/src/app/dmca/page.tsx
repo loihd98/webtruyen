@@ -4,13 +4,13 @@ import Layout from "../../components/layout/Layout";
 
 // Generate metadata for SEO
 export const metadata: Metadata = {
-  title: "DMCA - Báo cáo vi phạm bản quyền - Web Truyện",
+  title: "DMCA - Báo cáo vi phạm bản quyền - khotruyen.vn",
   description:
-    "Chính sách DMCA và hướng dẫn báo cáo vi phạm bản quyền tại Web Truyện. Chúng tôi tôn trọng quyền sở hữu trí tuệ.",
+    "Chính sách DMCA và hướng dẫn báo cáo vi phạm bản quyền tại khotruyen.vn. Chúng tôi tôn trọng quyền sở hữu trí tuệ.",
   openGraph: {
-    title: "DMCA - Báo cáo vi phạm bản quyền - Web Truyện",
+    title: "DMCA - Báo cáo vi phạm bản quyền - khotruyen.vn",
     description:
-      "Chính sách DMCA và hướng dẫn báo cáo vi phạm bản quyền tại Web Truyện. Chúng tôi tôn trọng quyền sở hữu trí tuệ.",
+      "Chính sách DMCA và hướng dẫn báo cáo vi phạm bản quyền tại khotruyen.vn. Chúng tôi tôn trọng quyền sở hữu trí tuệ.",
     type: "website",
     locale: "vi_VN",
   },
@@ -29,7 +29,7 @@ export default function DMCAPage() {
             Chính sách DMCA
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto animate-slide-up animation-delay-200">
-            Web Truyện tôn trọng quyền sở hữu trí tuệ và tuân thủ Đạo luật Bản
+            khotruyen.vn tôn trọng quyền sở hữu trí tuệ và tuân thủ Đạo luật Bản
             quyền Thiên niên kỷ số (DMCA)
           </p>
         </div>
@@ -68,7 +68,7 @@ export default function DMCAPage() {
                 1. Cam kết của chúng tôi
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                Web Truyện cam kết tôn trọng quyền tác giả và quyền sở hữu trí
+                khotruyen.vn cam kết tôn trọng quyền tác giả và quyền sở hữu trí
                 tuệ. Chúng tôi nghiêm túc đối phó với mọi vi phạm bản quyền và
                 sẽ xử lý nhanh chóng các báo cáo hợp lệ theo DMCA.
               </p>
@@ -150,7 +150,7 @@ export default function DMCAPage() {
               </h2>
               <div className="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg">
                 <p className="text-gray-600 dark:text-gray-400 mb-2">
-                  <strong>DMCA Agent:</strong> Web Truyện Legal Team
+                  <strong>DMCA Agent:</strong> khotruyen.vn Legal Team
                 </p>
                 <p className="text-gray-600 dark:text-gray-400 mb-2">
                   <strong>Email:</strong> dmca@webtruyen.com

@@ -161,17 +161,17 @@ export default function StoriesClient({
         <div className="space-y-4">
           {/* Search Bar */}
           <div>
-            <form onSubmit={handleSearch} className="flex">
+            <form onSubmit={handleSearch} className="flex ">
               <input
                 type="text"
                 placeholder="🔍 Tìm kiếm truyện..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-l-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-l-lg  bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
               />
               <button
                 type="submit"
-                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-r-lg font-medium transition-colors duration-200 hover:shadow-lg"
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-r-lg  font-medium transition-colors duration-200 hover:shadow-lg"
               >
                 Tìm
               </button>
@@ -181,7 +181,7 @@ export default function StoriesClient({
           {/* Filter Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Type Filter */}
-            <div>
+            <div className="sm:block hidden">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Loại truyện
               </label>
@@ -218,7 +218,7 @@ export default function StoriesClient({
             </div>
 
             {/* Sort Filter */}
-            <div>
+            <div className="sm:block hidden">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Sắp xếp
               </label>
@@ -235,7 +235,7 @@ export default function StoriesClient({
             </div>
 
             {/* Clear Filters */}
-            <div className="flex items-end">
+            <div className=" items-end sm:flex hidden">
               <button
                 onClick={clearFilters}
                 className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-500 transition-colors duration-200"
@@ -250,7 +250,7 @@ export default function StoriesClient({
             selectedType ||
             selectedGenre ||
             sortBy !== "createdAt") && (
-            <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+            <div className="hidden sm:flex flex-wrap gap-2 pt-2 border-t border-gray-200 dark:border-gray-600">
               <span className="text-sm text-gray-600 dark:text-gray-400">
                 Bộ lọc đang áp dụng:
               </span>

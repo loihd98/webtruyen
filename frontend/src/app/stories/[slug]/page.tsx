@@ -267,6 +267,188 @@ export default function StoryPage({ params }: StoryPageProps) {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-6xl mx-auto">
+            {/* Chapter Content */}
+            {currentChapter && story.type === "AUDIO" && (
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-5">
+                <div className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    Chương {currentChapter.number}: {currentChapter.title}
+                  </h2>
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                    📅{" "}
+                    {new Date(currentChapter.createdAt).toLocaleDateString(
+                      "vi-VN"
+                    )}
+                  </div>
+                </div>
+
+                {currentChapter.isLocked && !user ? (
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4">🔒</div>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                      Chương này cần đăng nhập
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                      Vui lòng đăng nhập để đọc chương này
+                    </p>
+                    <button
+                      onClick={() => router.push("/auth/login")}
+                      className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Đăng nhập
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    {story.type === "AUDIO" && currentChapter.audioUrl ? (
+                      <div className="mb-6">
+                        <SimpleAudioPlayer
+                          src={getMediaUrl(currentChapter.audioUrl)}
+                          title={`${story.title} - Chương ${currentChapter.number}`}
+                        />
+                      </div>
+                    ) : null}
+
+                    {currentChapter.content && (
+                      <div className="prose prose-lg dark:prose-invert max-w-none">
+                        <div
+                          className="text-gray-700 dark:text-gray-300 leading-relaxed"
+                          dangerouslySetInnerHTML={{
+                            __html: currentChapter.content.replace(
+                              /\n/g,
+                              "<br />"
+                            ),
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+                {/* Chapter Navigation */}
+                {story.chapters.length > 0 && (
+                  <div className="bg-white dark:bg-gray-800 rounded-lg mt-2 mb-6">
+                    {/* <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                      Danh sách chương
+                    </h2> */}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Chapter selector */}
+                      <div>
+                        <select
+                          value={selectedChapter}
+                          onChange={(e) =>
+                            handleChapterChange(Number(e.target.value))
+                          }
+                          className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                        >
+                          {story.chapters.map((chapter) => (
+                            <option key={chapter.id} value={chapter.number}>
+                              Chương {chapter.number}: {chapter.title}
+                              {chapter.isLocked && !user ? " 🔒" : ""}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Navigation buttons */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handlePrevChapter}
+                          disabled={selectedChapter <= 1}
+                          className=" text-sm sm:text-base flex-1 py-2 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          ← Chương trước
+                        </button>
+                        <button
+                          onClick={handleNextChapter}
+                          disabled={selectedChapter >= story.chapters.length}
+                          className=" text-sm sm:text-baseflex-1 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          Chương tiếp →
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Affiliate Link Section */}
+                {currentChapter.affiliate?.isActive && (
+                  <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-blue-600 dark:text-blue-400">
+                        📥
+                      </span>
+                      <h4 className="font-medium text-blue-900 dark:text-blue-200">
+                        Link tải chương này
+                      </h4>
+                    </div>
+                    <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
+                      {currentChapter.affiliate.label ||
+                        `Tải từ ${currentChapter.affiliate.provider}`}
+                    </p>
+                    <a
+                      href={currentChapter.affiliate.targetUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                    >
+                      <span>📥</span>
+                      Tải về
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                        />
+                      </svg>
+                    </a>
+                  </div>
+                )}
+
+                {/* Chapter Navigation Footer */}
+                {/* <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+                  <button
+                    onClick={handlePrevChapter}
+                    disabled={selectedChapter <= 1}
+                    className="flex items-center gap-2 py-2 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    ← Chương trước
+                  </button>
+
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    {selectedChapter} / {story.chapters.length}
+                  </span>
+
+                  <button
+                    onClick={handleNextChapter}
+                    disabled={selectedChapter >= story.chapters.length}
+                    className="flex items-center gap-2 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {(() => {
+                      const nextChapter = story.chapters.find(
+                        (c) => c.number === selectedChapter + 1
+                      );
+                      return nextChapter?.affiliate?.isActive ? (
+                        <>
+                          Chương tiếp →
+                          <span className="text-xs bg-yellow-400 text-yellow-900 px-1 rounded">
+                            📥
+                          </span>
+                        </>
+                      ) : (
+                        "Chương tiếp →"
+                      );
+                    })()}
+                  </button>
+                </div> */}
+              </div>
+            )}
             {/* Story Header */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
               <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -382,9 +564,8 @@ export default function StoryPage({ params }: StoryPageProps) {
                 </div>
               </div>
             </div>
-
             {/* Chapter Navigation */}
-            {story.chapters.length > 0 && (
+            {story.chapters.length > 0 && story.type === "TEXT" && (
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
                   Danh sách chương
@@ -414,14 +595,14 @@ export default function StoryPage({ params }: StoryPageProps) {
                     <button
                       onClick={handlePrevChapter}
                       disabled={selectedChapter <= 1}
-                      className="flex-1 py-2 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="text-sm sm:text-base flex-1 py-2 px-4 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       ← Chương trước
                     </button>
                     <button
                       onClick={handleNextChapter}
                       disabled={selectedChapter >= story.chapters.length}
-                      className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="text-sm sm:text-base flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       Chương tiếp →
                     </button>
@@ -431,7 +612,7 @@ export default function StoryPage({ params }: StoryPageProps) {
             )}
 
             {/* Chapter Content */}
-            {currentChapter && (
+            {currentChapter && story.type === "TEXT" && (
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
                 <div className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-6">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">

@@ -1,6 +1,6 @@
 # Database Backup and Restore Guide
 
-This guide covers comprehensive database backup and restore procedures for the Web Truyện project.
+This guide covers comprehensive database backup and restore procedures for the khotruyen.vn project.
 
 ## Prerequisites
 

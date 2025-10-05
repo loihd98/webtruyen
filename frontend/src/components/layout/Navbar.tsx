@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { RootState } from "../../store";
 import { toggleSidebar, toggleTheme } from "../../store/slices/uiSlice";
 import { logoutUser } from "../../store/slices/authSlice";
@@ -14,7 +14,8 @@ import { useAuth } from "@/hooks/useAuth";
 
 const Navbar: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const router = useRouter();
+  const router: any = useRouter();
+  const pathName = usePathname();
   const { t, language } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -25,6 +26,10 @@ const Navbar: React.FC = () => {
   const { user, isAuthenticated, isAdmin, isReady } = useAuth();
 
   const { theme } = useSelector((state: RootState) => state.ui);
+
+  const isStoriesPage = useMemo(() => {
+    return pathName?.startsWith("/stories");
+  }, [pathName]);
 
   // Close user menu when clicking outside
   useEffect(() => {
@@ -132,7 +137,7 @@ const Navbar: React.FC = () => {
                 <span className="inline-block group-hover:animate-bounce">
                   📚
                 </span>{" "}
-                Web Truyện
+                khotruyen.vn
               </div>
             </Link>
 
@@ -178,49 +183,18 @@ const Navbar: React.FC = () => {
           </div>
 
           {/* Search bar - Desktop */}
-          <div className=" flex flex-1 justify-center item-center px-2 lg:ml-6 lg:justify-end ">
-            <div className="max-w-lg w-full lg:max-w-xs flex items-center">
-              <label htmlFor="search" className="sr-only">
-                Tìm kiếm
-              </label>
-              <form onSubmit={handleSearch} className="relative sm:w-full">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg
-                    className={`h-5 w-5 transition-colors duration-200 ${
-                      isSearchFocused ? "text-blue-500" : "text-gray-400"
-                    }`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                </div>
-                <input
-                  id="search"
-                  name="search"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setIsSearchFocused(true)}
-                  onBlur={() => setIsSearchFocused(false)}
-                  onKeyDown={handleSearchKeyDown}
-                  className="block w-full pl-10 pr-12 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-200"
-                  placeholder={t("nav.search.placeholder")}
-                  // type="search"
-                />
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery("")}
-                    className="absolute inset-y-0 right-8 flex items-center pr-1"
-                  >
+          {!isStoriesPage && (
+            <div className=" flex flex-1 justify-center item-center px-2 lg:ml-6 lg:justify-end ">
+              <div className="max-w-lg w-full lg:max-w-xs flex items-center">
+                <label htmlFor="search" className="sr-only">
+                  Tìm kiếm
+                </label>
+                <form onSubmit={handleSearch} className="relative sm:w-full">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <svg
-                      className="h-4 w-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      className={`h-5 w-5 transition-colors duration-200 ${
+                        isSearchFocused ? "text-blue-500" : "text-gray-400"
+                      }`}
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -229,32 +203,78 @@ const Navbar: React.FC = () => {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                  </div>
+                  <input
+                    id="search"
+                    name="search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => setIsSearchFocused(true)}
+                    onBlur={() => setIsSearchFocused(false)}
+                    onKeyDown={handleSearchKeyDown}
+                    className="block w-full pl-10 pr-12 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-200"
+                    placeholder={t("nav.search.placeholder")}
+                    // type="search"
+                  />
+
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery("")}
+                      className="absolute inset-y-0 right-8 flex items-center pr-1"
+                    >
+                      <svg
+                        className="h-4 w-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  )}
+                  <button
+                    type="submit"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3"
+                  >
+                    <svg
+                      className="h-4 w-4 text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-200"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M13 7l5 5m0 0l-5 5m5-5H6"
                       />
                     </svg>
                   </button>
-                )}
-                <button
-                  type="submit"
-                  className="absolute inset-y-0 right-0 flex items-center pr-3"
-                >
-                  <svg
-                    className="h-4 w-4 text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors duration-200"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 7l5 5m0 0l-5 5m5-5H6"
-                    />
-                  </svg>
-                </button>
-              </form>
+                </form>
+              </div>
             </div>
-          </div>
+          )}
+          {/* Logo */}
+          <Link
+            href="/"
+            className="flex-shrink-0 flex items-center ml-4 md:ml-0 group"
+          >
+            <div className="block sm:hidden text-lg font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 dark:from-blue-400 dark:via-purple-400 dark:to-indigo-400 bg-clip-text text-transparent group-hover:scale-105 transition-transform duration-300">
+              <span className="inline-block group-hover:animate-bounce">
+                📚
+              </span>{" "}
+              khotruyen.vn
+            </div>
+          </Link>
 
           {/* Right side - Desktop */}
           <div className="hidden lg:flex items-center space-x-4">

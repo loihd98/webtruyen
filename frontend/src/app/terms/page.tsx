@@ -4,13 +4,13 @@ import Layout from "../../components/layout/Layout";
 
 // Generate metadata for SEO
 export const metadata: Metadata = {
-  title: "Điều khoản sử dụng - Web Truyện",
+  title: "Điều khoản sử dụng - khotruyen.vn",
   description:
-    "Điều khoản và điều kiện sử dụng dịch vụ Web Truyện. Vui lòng đọc kỹ trước khi sử dụng trang web.",
+    "Điều khoản và điều kiện sử dụng dịch vụ khotruyen.vn. Vui lòng đọc kỹ trước khi sử dụng trang web.",
   openGraph: {
-    title: "Điều khoản sử dụng - Web Truyện",
+    title: "Điều khoản sử dụng - khotruyen.vn",
     description:
-      "Điều khoản và điều kiện sử dụng dịch vụ Web Truyện. Vui lòng đọc kỹ trước khi sử dụng trang web.",
+      "Điều khoản và điều kiện sử dụng dịch vụ khotruyen.vn. Vui lòng đọc kỹ trước khi sử dụng trang web.",
     type: "website",
     locale: "vi_VN",
   },
@@ -29,7 +29,7 @@ export default function TermsPage() {
             Điều khoản sử dụng
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-3xl mx-auto animate-slide-up animation-delay-200">
-            Điều khoản và điều kiện sử dụng dịch vụ Web Truyện
+            Điều khoản và điều kiện sử dụng dịch vụ khotruyen.vn
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-500 mt-2 animate-slide-up animation-delay-300">
             Cập nhật lần cuối: {new Date().toLocaleDateString("vi-VN")}
@@ -76,7 +76,7 @@ export default function TermsPage() {
                 1. Chấp nhận điều khoản
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                Bằng việc truy cập và sử dụng trang web Web Truyện, bạn đồng ý
+                Bằng việc truy cập và sử dụng trang web khotruyen.vn, bạn đồng ý
                 tuân thủ các điều khoản và điều kiện được nêu trong tài liệu
                 này. Nếu bạn không đồng ý với bất kỳ phần nào của các điều khoản
                 này, vui lòng không sử dụng dịch vụ của chúng tôi.
@@ -86,7 +86,7 @@ export default function TermsPage() {
                 2. Mô tả dịch vụ
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Web Truyện cung cấp nền tảng đọc và nghe truyện online với các
+                khotruyen.vn cung cấp nền tảng đọc và nghe truyện online với các
                 tính năng:
               </p>
               <ul className="list-disc list-inside text-gray-600 dark:text-gray-400 mb-6 space-y-2">
@@ -150,7 +150,7 @@ export default function TermsPage() {
                 5. Quyền sở hữu trí tuệ
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                Tất cả nội dung trên Web Truyện, bao gồm văn bản, hình ảnh,
+                Tất cả nội dung trên khotruyen.vn, bao gồm văn bản, hình ảnh,
                 audio, và thiết kế, đều được bảo vệ bởi luật bản quyền. Người
                 dùng không được sao chép, phân phối lại hoặc sử dụng thương mại
                 mà không có sự cho phép bằng văn bản.
@@ -160,7 +160,7 @@ export default function TermsPage() {
                 6. Điều khoản tài chính
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                Web Truyện hiện tại cung cấp dịch vụ hoàn toàn miễn phí. Chúng
+                khotruyen.vn hiện tại cung cấp dịch vụ hoàn toàn miễn phí. Chúng
                 tôi có quyền giới thiệu các gói dịch vụ trả phí trong tương lai
                 với thông báo trước ít nhất 30 ngày.
               </p>
@@ -169,9 +169,9 @@ export default function TermsPage() {
                 7. Giới hạn trách nhiệm
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                Web Truyện không chịu trách nhiệm cho bất kỳ thiệt hại trực tiếp
-                hoặc gián tiếp nào phát sinh từ việc sử dụng dịch vụ. Chúng tôi
-                cũng không đảm bảo dịch vụ hoạt động liên tục không bị gián
+                khotruyen.vn không chịu trách nhiệm cho bất kỳ thiệt hại trực
+                tiếp hoặc gián tiếp nào phát sinh từ việc sử dụng dịch vụ. Chúng
+                tôi cũng không đảm bảo dịch vụ hoạt động liên tục không bị gián
                 đoạn.
               </p>
 
@@ -188,9 +188,9 @@ export default function TermsPage() {
                 9. Thay đổi điều khoản
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                Web Truyện có quyền cập nhật các điều khoản này bất cứ lúc nào.
-                Những thay đổi quan trọng sẽ được thông báo qua email hoặc thông
-                báo trên trang web ít nhất 7 ngày trước khi có hiệu lực.
+                khotruyen.vn có quyền cập nhật các điều khoản này bất cứ lúc
+                nào. Những thay đổi quan trọng sẽ được thông báo qua email hoặc
+                thông báo trên trang web ít nhất 7 ngày trước khi có hiệu lực.
               </p>
 
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
@@ -223,7 +223,7 @@ export default function TermsPage() {
               <span className="mr-2">🤝</span>Xác nhận đồng ý
             </h3>
             <p className="text-blue-700 dark:text-blue-300 text-sm leading-relaxed">
-              Bằng việc tiếp tục sử dụng Web Truyện, bạn xác nhận đã đọc, hiểu
+              Bằng việc tiếp tục sử dụng khotruyen.vn, bạn xác nhận đã đọc, hiểu
               và đồng ý tuân thủ tất cả các điều khoản và điều kiện được nêu ở
               trên.
             </p>

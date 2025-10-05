@@ -10,7 +10,7 @@ const Footer: React.FC = () => {
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center">
               <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                📚 Web Truyện
+                📚 khotruyen.vn
               </div>
             </div>
             <p className="mt-4 text-gray-600 dark:text-gray-400 text-sm max-w-md">
@@ -175,7 +175,7 @@ const Footer: React.FC = () => {
         <div className="mt-12 border-t border-gray-200 dark:border-gray-700 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-base text-gray-400 dark:text-gray-500">
-              &copy; 2024 Web Truyện. Tất cả quyền được bảo lưu.
+              &copy; 2024 khotruyen.vn. Tất cả quyền được bảo lưu.
             </p>
             <div className="mt-4 md:mt-0 flex space-x-6">
               <Link

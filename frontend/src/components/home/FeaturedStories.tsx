@@ -101,10 +101,53 @@ const FeaturedStories: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Main Content */}
         <div className="lg:col-span-3 space-y-12">
+          {/* Audio Stories Section */}
+          <section>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+                🎧 <span className="ml-2">{t("home.featured.audio")}</span>
+              </h2>
+              <Link
+                href="/stories?type=AUDIO"
+                className="text-blue-600 hover:text-blue-500 font-medium text-sm flex items-center"
+              >
+                {t("common.view_all")}
+                <svg
+                  className="w-4 h-4 ml-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </Link>
+            </div>
+
+            {audioStories.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {audioStories.map((story) => (
+                  <StoryCard key={story.id} story={story} variant="card" />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="text-gray-400 text-4xl mb-4">🎧</div>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Chưa có truyện audio nào.
+                </p>
+              </div>
+            )}
+          </section>
+
           {/* Text Stories Section */}
           <section>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center">
                 📖 <span className="ml-2">{t("home.featured.text")}</span>
               </h2>
               <Link
@@ -218,53 +261,10 @@ const FeaturedStories: React.FC = () => {
             )}
           </section>
 
-          {/* Audio Stories Section */}
-          <section>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
-                🎧 <span className="ml-2">{t("home.featured.audio")}</span>
-              </h2>
-              <Link
-                href="/stories?type=AUDIO"
-                className="text-blue-600 hover:text-blue-500 font-medium text-sm flex items-center"
-              >
-                {t("common.view_all")}
-                <svg
-                  className="w-4 h-4 ml-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </Link>
-            </div>
-
-            {audioStories.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {audioStories.map((story) => (
-                  <StoryCard key={story.id} story={story} variant="card" />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <div className="text-gray-400 text-4xl mb-4">🎧</div>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Chưa có truyện audio nào.
-                </p>
-              </div>
-            )}
-          </section>
-
           {/* Recently Updated Section */}
           <section>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center">
                 🆕 <span className="ml-2">{t("home.featured.recent")}</span>
               </h2>
             </div>

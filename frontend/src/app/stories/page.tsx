@@ -66,7 +66,7 @@ export async function generateMetadata({
   const search = searchParams.search as string;
   const genre = searchParams.genre as string;
 
-  let title = "Kho Truyện - Web Truyện";
+  let title = "Kho Truyện - khotruyen.vn";
   let description =
     "Khám phá hàng ngàn câu chuyện hay từ các tác giả tài năng. Đọc truyện chữ và nghe truyện audio miễn phí.";
 
@@ -160,7 +160,7 @@ export default async function StoriesPage({
     <Layout>
       <div className="container mx-auto px-4 py-8">
         {/* Header with animation */}
-        <div className="text-center mb-8 animate-fade-in">
+        <div className="text-center mb-8 animate-fade-in hidden sm:block">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4 animate-slide-up">
             Kho Truyện
           </h1>

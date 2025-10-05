@@ -8,7 +8,7 @@ import ThemeProvider from "@/components/layout/ThemeProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Web Truyện - Đọc truyện online",
+  title: "khotruyen.vn - Đọc truyện online",
   description: "Website đọc truyện văn bản và audio miễn phí",
 };
 

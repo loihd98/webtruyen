@@ -4,13 +4,13 @@ import Layout from "../../components/layout/Layout";
 
 // Generate metadata for SEO
 export const metadata: Metadata = {
-  title: "Trợ Giúp - Web Truyện",
+  title: "Trợ Giúp - khotruyen.vn",
   description:
-    "Hướng dẫn sử dụng Web Truyện, câu hỏi thường gặp và cách thức hoạt động của trang web đọc truyện online.",
+    "Hướng dẫn sử dụng khotruyen.vn, câu hỏi thường gặp và cách thức hoạt động của trang web đọc truyện online.",
   openGraph: {
-    title: "Trợ Giúp - Web Truyện",
+    title: "Trợ Giúp - khotruyen.vn",
     description:
-      "Hướng dẫn sử dụng Web Truyện, câu hỏi thường gặp và cách thức hoạt động của trang web đọc truyện online.",
+      "Hướng dẫn sử dụng khotruyen.vn, câu hỏi thường gặp và cách thức hoạt động của trang web đọc truyện online.",
     type: "website",
     locale: "vi_VN",
   },
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 const faqData = [
   {
     id: 1,
-    question: "Làm thế nào để đọc truyện trên Web Truyện?",
+    question: "Làm thế nào để đọc truyện trên khotruyen.vn?",
     answer:
       "Bạn có thể duyệt qua kho truyện từ trang chủ, tìm kiếm theo tên truyện hoặc thể loại. Nhấp vào truyện muốn đọc và chọn chương để bắt đầu đọc.",
     category: "Cơ bản",
@@ -73,7 +73,7 @@ const faqData = [
     id: 8,
     question: "Trang web có thu phí không?",
     answer:
-      "Web Truyện hoàn toàn miễn phí. Chúng tôi không thu phí đọc truyện hay nghe audio. Chi phí duy trì được trang trải từ quảng cáo và tài trợ.",
+      "khotruyen.vn hoàn toàn miễn phí. Chúng tôi không thu phí đọc truyện hay nghe audio. Chi phí duy trì được trang trải từ quảng cáo và tài trợ.",
     category: "Chi phí",
   },
 ];
@@ -88,7 +88,7 @@ export default function HelpPage() {
             Trợ Giúp
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto animate-slide-up animation-delay-200">
-            Tìm hiểu cách sử dụng Web Truyện một cách hiệu quả nhất
+            Tìm hiểu cách sử dụng khotruyen.vn một cách hiệu quả nhất
           </p>
         </div>
 

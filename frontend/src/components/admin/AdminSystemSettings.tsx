@@ -30,7 +30,7 @@ interface SystemSettings {
 const AdminSystemSettings: React.FC = () => {
   const { t } = useLanguage();
   const [settings, setSettings] = useState<SystemSettings>({
-    siteName: "Web Truyện",
+    siteName: "khotruyen.vn",
     siteDescription: "Nền tảng đọc truyện online hàng đầu",
     contactEmail: "admin@webtruyen.com",
     maxFileSize: 10,
@@ -47,7 +47,7 @@ const AdminSystemSettings: React.FC = () => {
       discord: "",
     },
     seoSettings: {
-      metaTitle: "Web Truyện - Đọc truyện online miễn phí",
+      metaTitle: "khotruyen.vn - Đọc truyện online miễn phí",
       metaDescription:
         "Đọc truyện online miễn phí với hàng ngàn đầu truyện hay nhất",
       keywords: ["truyện", "đọc truyện", "truyện online", "light novel"],

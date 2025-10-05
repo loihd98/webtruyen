@@ -1,10 +1,11 @@
-# 📚 Web Truyện - Modern Story Reading Platform
+# 📚 khotruyen.vn - Modern Story Reading Platform
 
 A comprehensive web application for reading stories and novels online with advanced features and professional UI/UX.
 
 ## 🌟 Features
 
 ### User Features
+
 - 🔐 **Secure Authentication** - JWT-based login/register with refresh tokens
 - 📖 **Story Reading** - Clean, responsive reading interface
 - 🔊 **Audio Support** - Listen to stories with built-in audio player
@@ -14,6 +15,7 @@ A comprehensive web application for reading stories and novels online with advan
 - 📱 **Mobile Responsive** - Optimized for all devices
 
 ### Admin Features
+
 - 📊 **Admin Dashboard** - Comprehensive content management
 - ✍️ **Story Management** - Create, edit, and manage stories
 - 📝 **Chapter Editor** - Rich text editor with media support
@@ -22,6 +24,7 @@ A comprehensive web application for reading stories and novels online with advan
 - 📈 **Analytics** - View counts and user engagement
 
 ### Technical Features
+
 - ⚡ **High Performance** - Optimized caching and lazy loading
 - 🔒 **Security** - Rate limiting, CORS, and input validation
 - 🐳 **Docker Ready** - Full containerization support
@@ -32,6 +35,7 @@ A comprehensive web application for reading stories and novels online with advan
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **Next.js 14** - React framework with App Router
 - **TypeScript** - Type-safe development
 - **Tailwind CSS** - Utility-first styling
@@ -39,6 +43,7 @@ A comprehensive web application for reading stories and novels online with advan
 - **Redux Persist** - State persistence
 
 ### Backend
+
 - **Node.js + Express** - Server framework
 - **PostgreSQL** - Primary database
 - **Prisma ORM** - Database toolkit
@@ -46,6 +51,7 @@ A comprehensive web application for reading stories and novels online with advan
 - **Multer** - File upload handling
 
 ### Infrastructure
+
 - **Docker** - Containerization
 - **Nginx** - Reverse proxy & load balancer
 - **SSL/TLS** - HTTPS security
@@ -54,6 +60,7 @@ A comprehensive web application for reading stories and novels online with advan
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Docker & Docker Compose
 - Git
 - Domain name (for production)
@@ -61,18 +68,21 @@ A comprehensive web application for reading stories and novels online with advan
 ### Local Development
 
 1. **Clone Repository**
+
    ```bash
    git clone https://github.com/loihd98/webtruyen.git
    cd webtruyen
    ```
 
 2. **Setup Environment**
+
    ```bash
    cp .env.dev.example .env.dev
    # Edit .env.dev with your local settings
    ```
 
 3. **Start Development Server**
+
    ```bash
    docker-compose -f docker-compose.dev.yml up --build
    ```
@@ -88,7 +98,9 @@ A comprehensive web application for reading stories and novels online with advan
 See [PRODUCTION_DEPLOYMENT_GUIDE.md](./PRODUCTION_DEPLOYMENT_GUIDE.md) for detailed production setup instructions.
 
 **Quick Production Setup:**
+
 1. **Setup Environment**
+
    ```bash
    cp .env.prod.example .env.prod
    # Configure production values
@@ -134,6 +146,7 @@ webtruyen/
 ### Environment Variables
 
 #### Production (.env.prod)
+
 - `DATABASE_URL` - PostgreSQL connection string
 - `JWT_SECRET` - JWT signing secret
 - `DOMAIN` - Your domain name
@@ -141,6 +154,7 @@ webtruyen/
 - `BACKEND_URL` - Backend API URL
 
 #### Development (.env.dev)
+
 - Same as production but with localhost URLs
 - Relaxed security settings for development
 
@@ -153,28 +167,33 @@ webtruyen/
 ## 📊 API Documentation
 
 ### Authentication
+
 - `POST /api/auth/login` - User login
 - `POST /api/auth/register` - User registration
 - `POST /api/auth/refresh` - Refresh access token
 
 ### Stories
+
 - `GET /api/stories` - List stories with pagination
 - `GET /api/stories/:slug` - Get story details
 - `POST /api/stories` - Create story (admin)
 - `PUT /api/stories/:id` - Update story (admin)
 
 ### Chapters
+
 - `GET /api/chapters/:id` - Get chapter content
 - `POST /api/chapters` - Create chapter (admin)
 - `PUT /api/chapters/:id` - Update chapter (admin)
 
 ### Comments
+
 - `GET /api/comments/chapter/:chapterId` - Get chapter comments
 - `POST /api/comments` - Create comment
 - `POST /api/comments/:id/reply` - Reply to comment
 - `PUT /api/comments/:id/approve` - Approve comment (admin)
 
 ### Admin
+
 - `GET /api/admin/stats` - Dashboard statistics
 - `GET /api/admin/users` - User management
 - `GET /api/admin/comments` - Comment moderation
@@ -192,16 +211,19 @@ webtruyen/
 ## 📈 Monitoring & Maintenance
 
 ### Health Checks
+
 - `GET /health` - Application health status
 - Docker health checks for all services
 - Automated service restart on failure
 
 ### Backups
+
 - **Automated Daily Backups** - Database and uploads
 - **7-day Retention** - Automatic cleanup
 - **Manual Backup Commands** - See [DATABASE_BACKUP_GUIDE.md](./DATABASE_BACKUP_GUIDE.md)
 
 ### Logs
+
 - Application logs: `logs/backend/`
 - Nginx logs: `logs/nginx/`
 - PostgreSQL logs: `logs/postgres/`
@@ -234,10 +256,11 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 🆘 Support
 
 For issues and questions:
+
 - Create GitHub issue for bugs
 - Check logs for troubleshooting
 - Review documentation guides
 
 ---
 
-**Built with ❤️ by the Web Truyện Team**
+**Built with ❤️ by the khotruyen.vn Team**

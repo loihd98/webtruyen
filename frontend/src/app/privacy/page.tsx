@@ -4,13 +4,13 @@ import Layout from "../../components/layout/Layout";
 
 // Generate metadata for SEO
 export const metadata: Metadata = {
-  title: "Chính sách bảo mật - Web Truyện",
+  title: "Chính sách bảo mật - khotruyen.vn",
   description:
-    "Chính sách bảo mật và xử lý dữ liệu cá nhân của Web Truyện. Tìm hiểu cách chúng tôi thu thập, sử dụng và bảo vệ thông tin của bạn.",
+    "Chính sách bảo mật và xử lý dữ liệu cá nhân của khotruyen.vn. Tìm hiểu cách chúng tôi thu thập, sử dụng và bảo vệ thông tin của bạn.",
   openGraph: {
-    title: "Chính sách bảo mật - Web Truyện",
+    title: "Chính sách bảo mật - khotruyen.vn",
     description:
-      "Chính sách bảo mật và xử lý dữ liệu cá nhân của Web Truyện. Tìm hiểu cách chúng tôi thu thập, sử dụng và bảo vệ thông tin của bạn.",
+      "Chính sách bảo mật và xử lý dữ liệu cá nhân của khotruyen.vn. Tìm hiểu cách chúng tôi thu thập, sử dụng và bảo vệ thông tin của bạn.",
     type: "website",
     locale: "vi_VN",
   },
@@ -174,7 +174,7 @@ export default function PrivacyPage() {
               </p>
               <ul className="list-disc list-inside text-gray-600 dark:text-gray-400 mb-6 space-y-1">
                 <li>Có lệnh của cơ quan pháp luật có thẩm quyền</li>
-                <li>Bảo vệ quyền lợi hợp pháp của Web Truyện</li>
+                <li>Bảo vệ quyền lợi hợp pháp của khotruyen.vn</li>
                 <li>Ngăn chặn gian lận hoặc tội phạm mạng</li>
                 <li>Bảo vệ an toàn của người dùng khác</li>
               </ul>
@@ -325,9 +325,9 @@ export default function PrivacyPage() {
                 8. Dữ liệu trẻ em
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                Web Truyện không cố ý thu thập thông tin cá nhân từ trẻ em dưới
-                13 tuổi. Nếu chúng tôi phát hiện đã thu thập thông tin như vậy,
-                chúng tôi sẽ xóa ngay lập tức. Phụ huynh có thể liên hệ với
+                khotruyen.vn không cố ý thu thập thông tin cá nhân từ trẻ em
+                dưới 13 tuổi. Nếu chúng tôi phát hiện đã thu thập thông tin như
+                vậy, chúng tôi sẽ xóa ngay lập tức. Phụ huynh có thể liên hệ với
                 chúng tôi nếu cho rằng con em mình đã cung cấp thông tin cá
                 nhân.
               </p>
