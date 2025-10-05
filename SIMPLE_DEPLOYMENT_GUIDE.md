@@ -1,6 +1,6 @@
 # 🚀 SIMPLE DEPLOYMENT GUIDE - WebTruyen
 
-**Domain:** vuaxemohinh.com  
+**Domain:** khotruyen.vn  
 **VPS IP:** 180.93.138.93  
 **Stack:** Docker + Nginx + PostgreSQL + Node.js + Next.js
 
@@ -134,7 +134,7 @@ Trong domain registrar của bạn, set A record:
 Verify DNS:
 
 ```bash
-dig +short vuaxemohinh.com
+dig +short khotruyen.vn
 # Phải trả về: 180.93.138.93
 ```
 
@@ -161,7 +161,7 @@ Trong domain registrar của bạn, set A record:
 Verify DNS:
 
 ```bash
-dig +short vuaxemohinh.com
+dig +short khotruyen.vn
 # Phải trả về: 180.93.138.93
 ```
 
@@ -195,7 +195,7 @@ curl http://180.93.138.93/api/health
 # Get SSL certificates
 docker compose -f docker-compose.prod.yml run --rm certbot certonly \
   --webroot --webroot-path=/var/www/certbot \
-  -d vuaxemohinh.com -d www.vuaxemohinh.com \
+  -d khotruyen.vn -d www.khotruyen.vn \
   --email your@email.com --agree-tos --no-eff-email
 
 # Restart nginx để load SSL
@@ -301,7 +301,7 @@ docker compose -f docker-compose.prod.yml restart backend
 
 ```bash
 # Check certificate files
-docker compose -f docker-compose.prod.yml exec nginx ls -la /etc/letsencrypt/live/vuaxemohinh.com/
+docker compose -f docker-compose.prod.yml exec nginx ls -la /etc/letsencrypt/live/khotruyen.vn/
 
 # Restart nginx
 docker compose -f docker-compose.prod.yml restart nginx
@@ -333,7 +333,7 @@ docker compose -f docker-compose.prod.yml logs postgres
 | `http://localhost/api/*`     | `backend:5000/api/*` | API endpoints   |
 | `http://localhost/uploads/*` | `/uploads/*`         | Static files    |
 
-### Production (vuaxemohinh.com)
+### Production (khotruyen.vn)
 
 | URL                              | Proxy To             | Description     |
 | -------------------------------- | -------------------- | --------------- |

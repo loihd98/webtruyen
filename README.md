@@ -244,7 +244,7 @@ webtruyen/
 
 ## 🔗 Production Instance
 
-- **Domain:** [vuaxemohinh.com](https://khotruyen.vn)
+- **Domain:** [khotruyen.vn](https://khotruyen.vn)
 - **Server:** VPS at 180.93.138.93
 - **SSL:** Let's Encrypt certificates
 - **CDN:** Nginx static file serving
