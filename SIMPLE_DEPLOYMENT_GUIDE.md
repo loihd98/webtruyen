@@ -109,11 +109,11 @@ mkdir -p uploads
 
 ```bash
 # Environment file .env.prod đã có config:
-# - NEXT_PUBLIC_API_URL=https://vuaxemohinh.com/api
-# - NEXT_PUBLIC_BASE_URL=https://vuaxemohinh.com
-# - NEXT_PUBLIC_MEDIA_URL=https://vuaxemohinh.com
-# - BASE_URL=https://vuaxemohinh.com
-# - CORS_ORIGIN=https://vuaxemohinh.com
+# - NEXT_PUBLIC_API_URL=https://khotruyen.vn/api
+# - NEXT_PUBLIC_BASE_URL=https://khotruyen.vn
+# - NEXT_PUBLIC_MEDIA_URL=https://khotruyen.vn
+# - BASE_URL=https://khotruyen.vn
+# - CORS_ORIGIN=https://khotruyen.vn
 
 # ⚠️ QUAN TRỌNG: Đổi các secrets trong .env.prod
 nano .env.prod
@@ -179,11 +179,11 @@ docker compose -f docker-compose.prod.yml ps
 
 ```bash
 # Test website HTTP access
-curl -I http://vuaxemohinh.com
+curl -I http://khotruyen.vn
 curl -I http://180.93.138.93
 
 # Test API
-curl http://vuaxemohinh.com/api/health
+curl http://khotruyen.vn/api/health
 curl http://180.93.138.93/api/health
 
 # If works, proceed to SSL setup
@@ -217,10 +217,10 @@ docker compose -f docker-compose.prod.yml run --rm backend npx prisma migrate de
 
 ### 10. Verify production website
 
-- **HTTPS:** https://vuaxemohinh.com
-- **HTTP redirect:** http://vuaxemohinh.com → https://vuaxemohinh.com
-- **API:** https://vuaxemohinh.com/api/health
-- **Uploads:** https://vuaxemohinh.com/uploads/* (static files)
+- **HTTPS:** https://khotruyen.vn
+- **HTTP redirect:** http://khotruyen.vn → https://khotruyen.vn
+- **API:** https://khotruyen.vn/api/health
+- **Uploads:** https://khotruyen.vn/uploads/* (static files)
 
 ### 11. Production Architecture
 
@@ -253,10 +253,10 @@ docker compose -f docker-compose.prod.yml logs -f frontend
 
 ```bash
 # Health check
-curl -i https://vuaxemohinh.com/api/health
+curl -i https://khotruyen.vn/api/health
 
 # From browser console
-fetch('https://vuaxemohinh.com/api/health')
+fetch('https://khotruyen.vn/api/health')
 ```
 
 ### Restart services
@@ -309,8 +309,8 @@ docker compose -f docker-compose.prod.yml restart nginx
 
 ### 3. CORS errors
 
-- Check `.env.prod` has correct `CORS_ORIGIN=https://vuaxemohinh.com`
-- Check `NEXT_PUBLIC_API_URL=https://vuaxemohinh.com/api`
+- Check `.env.prod` has correct `CORS_ORIGIN=https://khotruyen.vn`
+- Check `NEXT_PUBLIC_API_URL=https://khotruyen.vn/api`
 
 ### 4. Database connection errors
 
@@ -335,17 +335,17 @@ docker compose -f docker-compose.prod.yml logs postgres
 
 ### Production (vuaxemohinh.com)
 
-| URL                                 | Proxy To             | Description     |
-| ----------------------------------- | -------------------- | --------------- |
-| `https://vuaxemohinh.com/`          | `frontend:3000`      | Next.js website |
-| `https://vuaxemohinh.com/api/*`     | `backend:5000/api/*` | API endpoints   |
-| `https://vuaxemohinh.com/uploads/*` | `/uploads/*`         | Static files    |
+| URL                              | Proxy To             | Description     |
+| -------------------------------- | -------------------- | --------------- |
+| `https://khotruyen.vn/`          | `frontend:3000`      | Next.js website |
+| `https://khotruyen.vn/api/*`     | `backend:5000/api/*` | API endpoints   |
+| `https://khotruyen.vn/uploads/*` | `/uploads/*`         | Static files    |
 
 ### Frontend API calls:
 
 ```javascript
 // ✅ Production
-const response = await fetch("https://vuaxemohinh.com/api/stories");
+const response = await fetch("https://khotruyen.vn/api/stories");
 
 // ✅ Development (updated - via nginx)
 const response = await fetch("http://localhost/api/stories");
@@ -362,10 +362,10 @@ NEXT_PUBLIC_API_URL=http://localhost/api
 NEXT_PUBLIC_MEDIA_URL=http://localhost
 
 # Production (.env.prod)
-NEXT_PUBLIC_API_URL=https://vuaxemohinh.com/api
-NEXT_PUBLIC_MEDIA_URL=https://vuaxemohinh.com
+NEXT_PUBLIC_API_URL=https://khotruyen.vn/api
+NEXT_PUBLIC_MEDIA_URL=https://khotruyen.vn
 ```
 
 ---
 
-**🎉 HOÀN TẤT!** Website đã sẵn sàng tại https://vuaxemohinh.com
+**🎉 HOÀN TẤT!** Website đã sẵn sàng tại https://khotruyen.vn

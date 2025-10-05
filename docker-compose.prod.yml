@@ -52,9 +52,9 @@ services:
       args:
         - NODE_OPTIONS=--max-old-space-size=2048
         - NODE_ENV=production
-        - NEXT_PUBLIC_API_URL=https://vuaxemohinh.com/api
-        - NEXT_PUBLIC_BASE_URL=https://vuaxemohinh.com
-        - NEXT_PUBLIC_MEDIA_URL=https://vuaxemohinh.com
+        - NEXT_PUBLIC_API_URL=https://khotruyen.vn/api
+        - NEXT_PUBLIC_BASE_URL=https://khotruyen.vn
+        - NEXT_PUBLIC_MEDIA_URL=https://khotruyen.vn
     restart: unless-stopped
     env_file:
       - .env.prod
