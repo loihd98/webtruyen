@@ -147,8 +147,8 @@ const AdminChapterForm: React.FC<AdminChapterFormProps> = ({
       setError("Vui lòng chọn file audio");
       return;
     }
-    if (file.size > 50 * 1024 * 1024) {
-      setError("File audio không được vượt quá 50MB");
+    if (file.size > 500 * 1024 * 1024) {
+      setError("File audio không được vượt quá 500MB");
       return;
     }
     try {

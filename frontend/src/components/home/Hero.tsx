@@ -22,8 +22,8 @@ const Hero: React.FC = () => {
             📚 Khám phá truyện
           </Link>
           <Link
-            href="/stories?type=AUDIO"
-            className="bg-transparent border-2 text-gray-700 border-blue-600 sm:border-white sm:text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors"
+            href="/stories"
+            className="bg-blue-600 sm:bg-white sm:text-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-unset sm:hover:bg-gray-100 transition-colors"
           >
             🎧 Nghe truyện audio
           </Link>

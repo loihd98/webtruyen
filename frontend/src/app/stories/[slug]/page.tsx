@@ -372,7 +372,7 @@ export default function StoryPage({ params }: StoryPageProps) {
                 )}
 
                 {/* Affiliate Link Section */}
-                {currentChapter.affiliate?.isActive && (
+                {/* {currentChapter.affiliate?.isActive && (
                   <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-blue-600 dark:text-blue-400">
@@ -409,7 +409,7 @@ export default function StoryPage({ params }: StoryPageProps) {
                       </svg>
                     </a>
                   </div>
-                )}
+                )} */}
 
                 {/* Chapter Navigation Footer */}
                 {/* <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
@@ -675,7 +675,7 @@ export default function StoryPage({ params }: StoryPageProps) {
                     )}
 
                     {/* Affiliate Link Section */}
-                    {currentChapter.affiliate?.isActive && (
+                    {/* {currentChapter.affiliate?.isActive && (
                       <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                         <div className="flex items-center gap-2 mb-2">
                           <span className="text-blue-600 dark:text-blue-400">
@@ -712,7 +712,7 @@ export default function StoryPage({ params }: StoryPageProps) {
                           </svg>
                         </a>
                       </div>
-                    )}
+                    )} */}
                   </div>
                 )}
 
