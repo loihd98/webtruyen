@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import StoryCard from "../../components/stories/StoryCard";
+import Pagination from "../../components/ui/Pagination";
 import { Story } from "../../types";
 import apiClient from "@/utils/api";
 
@@ -103,16 +104,7 @@ export default function StoriesClient() {
       console.log(response.data, "Fetched stories data");
 
       setStories(response.data.data?.data || []);
-      setPagination(
-        response.data.pagination
-          ? response.data.pagination
-          : {
-              total: 0,
-              pages: 0,
-              page: 1,
-              limit: 10,
-            }
-      );
+      setPagination(response.data?.data.pagination);
     } catch (error) {
       console.error("Error fetching stories:", error);
       setStories([]);
@@ -199,48 +191,6 @@ export default function StoriesClient() {
       sort: sortBy,
       page: page.toString(),
     });
-  };
-
-  // Generate pagination numbers with ellipsis
-  const generatePaginationNumbers = () => {
-    const pages: (number | string)[] = [];
-    const totalPages = pagination.pages;
-    const current = currentPage;
-
-    if (totalPages <= 7) {
-      // Show all pages if total is 7 or less
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      // Always show first page
-      pages.push(1);
-
-      if (current <= 4) {
-        // Show 1, 2, 3, 4, 5, ..., last
-        for (let i = 2; i <= 5; i++) {
-          pages.push(i);
-        }
-        pages.push("...");
-        pages.push(totalPages);
-      } else if (current >= totalPages - 3) {
-        // Show 1, ..., last-4, last-3, last-2, last-1, last
-        pages.push("...");
-        for (let i = totalPages - 4; i <= totalPages; i++) {
-          pages.push(i);
-        }
-      } else {
-        // Show 1, ..., current-1, current, current+1, ..., last
-        pages.push("...");
-        for (let i = current - 1; i <= current + 1; i++) {
-          pages.push(i);
-        }
-        pages.push("...");
-        pages.push(totalPages);
-      }
-    }
-
-    return pages;
   };
 
   const updateURL = (params: {
@@ -432,75 +382,15 @@ export default function StoriesClient() {
               </div>
             ))}
           </div>
-
-          {/* Pagination - Ant Design Style */}
-          {pagination.pages > 1 && (
-            <div className="flex flex-col items-center space-y-4 animate-slide-up animation-delay-500">
-              {/* Pagination Controls */}
-              <div className="flex items-center justify-center space-x-1 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-2 shadow-sm">
-                {/* Previous Button */}
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className={`flex items-center justify-center w-8 h-8 rounded transition-all duration-200 ${
-                    currentPage === 1
-                      ? "text-gray-400 dark:text-gray-600 cursor-not-allowed"
-                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400"
-                  }`}
-                  title="Trang trước"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-
-                {/* Page Numbers */}
-                <div className="flex items-center space-x-1">
-                  {generatePaginationNumbers().map((page, index) => (
-                    <div key={index}>
-                      {typeof page === "string" ? (
-                        <span className="flex items-center justify-center w-8 h-8 text-gray-400 dark:text-gray-500 text-sm">
-                          {page}
-                        </span>
-                      ) : (
-                        <button
-                          onClick={() => handlePageChange(page)}
-                          className={`flex items-center justify-center w-8 h-8 rounded text-sm font-medium transition-all duration-200 ${
-                            currentPage === page
-                              ? "bg-blue-600 text-white shadow-md"
-                              : "text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400"
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Next Button */}
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === pagination.pages}
-                  className={`flex items-center justify-center w-8 h-8 rounded transition-all duration-200 ${
-                    currentPage === pagination.pages
-                      ? "text-gray-400 dark:text-gray-600 cursor-not-allowed"
-                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400"
-                  }`}
-                  title="Trang tiếp"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Pagination Info */}
-              <div className="text-sm text-gray-500 dark:text-gray-400">
-                Hiển thị <span className="font-medium text-gray-700 dark:text-gray-300">{((currentPage - 1) * pagination.limit) + 1}</span> - <span className="font-medium text-gray-700 dark:text-gray-300">{Math.min(currentPage * pagination.limit, pagination.total)}</span> trong tổng số <span className="font-medium text-gray-700 dark:text-gray-300">{pagination.total}</span> kết quả
-              </div>
-            </div>
-          )}
+          {/* Pagination Component */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={pagination.pages}
+            totalItems={pagination.total}
+            itemsPerPage={pagination.limit}
+            onPageChange={handlePageChange}
+            className="animate-slide-up animation-delay-500"
+          />
         </>
       ) : (
         <div className="text-center py-12 animate-fade-in">
