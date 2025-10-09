@@ -32,49 +32,22 @@ class StoriesController {
       }
 
       if (search) {
-        // Normalize search term: remove accents, convert to lowercase, and split into words
-        const normalizeString = (str) => {
-          return str
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "") // Remove accents
-            .replace(/[đĐ]/g, "d"); // Replace đ/Đ with d
-        };
-
-        const normalizedSearch = normalizeString(search);
-        const searchWords = normalizedSearch
-          .split(/\s+/)
-          .filter((word) => word.length > 0);
-
+        // Use exact phrase matching for better precision
         where.OR = [
-          // Search by exact match in title
+          // Search in title (exact phrase)
           {
             title: {
               contains: search,
               mode: "insensitive",
             },
           },
-          // Search by individual words in title
-          ...searchWords.map((word) => ({
-            title: {
-              contains: word,
-              mode: "insensitive",
-            },
-          })),
           // Search in slug
           {
             slug: {
-              contains: normalizedSearch.replace(/\s+/g, "-"),
+              contains: search,
               mode: "insensitive",
             },
           },
-          // Search by individual words in slug
-          ...searchWords.map((word) => ({
-            slug: {
-              contains: word,
-              mode: "insensitive",
-            },
-          })),
           // Search in description
           {
             description: {
