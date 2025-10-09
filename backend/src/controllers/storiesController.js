@@ -32,30 +32,69 @@ class StoriesController {
       }
 
       if (search) {
-        // Use exact phrase matching for better precision
+        // Normalize search term: remove accents, convert to lowercase, and split into words
+        const normalizeString = (str) => {
+          return str
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "") // Remove accents
+            .replace(/[đĐ]/g, "d"); // Replace đ/Đ with d
+        };
+
+        const normalizedSearch = normalizeString(search);
+        const searchWords = normalizedSearch
+          .split(/\s+/)
+          .filter((word) => word.length > 0);
+
         where.OR = [
-          // Search in title (exact phrase)
+          // Priority 1: Exact phrase match in title
           {
             title: {
               contains: search,
               mode: "insensitive",
             },
           },
-          // Search in slug
+          // Priority 2: All words present in title (flexible order)
+          ...(searchWords.length > 1
+            ? [
+                {
+                  AND: searchWords.map((word) => ({
+                    title: {
+                      contains: word,
+                      mode: "insensitive",
+                    },
+                  })),
+                },
+              ]
+            : []),
+          // Priority 3: Exact phrase in slug
           {
             slug: {
-              contains: search,
+              contains: normalizedSearch.replace(/\s+/g, "-"),
               mode: "insensitive",
             },
           },
-          // Search in description
+          // Priority 4: All words present in slug (for multi-word searches)
+          ...(searchWords.length > 1
+            ? [
+                {
+                  AND: searchWords.map((word) => ({
+                    slug: {
+                      contains: word,
+                      mode: "insensitive",
+                    },
+                  })),
+                },
+              ]
+            : []),
+          // Priority 5: Search in description (exact phrase)
           {
             description: {
               contains: search,
               mode: "insensitive",
             },
           },
-          // Search in author name
+          // Priority 6: Search in author name
           {
             author: {
               name: {
