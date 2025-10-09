@@ -1,60 +1,8 @@
-import React, { Suspense } from "react";
+import React from "react";
 import { Metadata } from "next";
 import Layout from "../../components/layout/Layout";
 import StoriesClient from "./StoriesClient";
 import StorySidebar from "../../components/layout/StorySidebar";
-
-// Force dynamic rendering for this page due to searchParams
-export const dynamic = "force-dynamic";
-
-// Server-side data fetching
-async function getStories(searchParams: {
-  [key: string]: string | string[] | undefined;
-}) {
-  try {
-    const baseUrl =
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-    const page = searchParams.page ? Number(searchParams.page) : 1;
-    const type = searchParams.type as string;
-    const search = searchParams.search as string;
-    const genre = searchParams.genre as string;
-    const sort = searchParams.sort as string;
-
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: "12",
-    });
-
-    if (type && (type === "TEXT" || type === "AUDIO")) {
-      params.append("type", type);
-    }
-
-    if (search) {
-      params.append("search", search);
-    }
-
-    if (genre) {
-      params.append("genre", genre);
-    }
-
-    if (sort) {
-      params.append("sort", sort);
-    }
-
-    const response = await fetch(`${baseUrl}/stories?${params}`, {
-      next: { revalidate: 300 }, // ISR: revalidate every 5 minutes
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch stories");
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching stories:", error);
-    return { data: [], pagination: { total: 0, pages: 0, page: 1, limit: 12 } };
-  }
-}
 
 // Generate metadata for SEO
 export async function generateMetadata({
@@ -140,22 +88,8 @@ const StoriesLoading = () => (
   </div>
 );
 
-// Server Component
-export default async function StoriesPage({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
-  const data = await getStories(searchParams);
-
-  const stories = data.data || [];
-  const pagination = data.pagination || {
-    total: 0,
-    pages: 0,
-    page: 1,
-    limit: 12,
-  };
-
+// Client-side page component
+export default function StoriesPage() {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
@@ -173,13 +107,7 @@ export default async function StoriesPage({
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-3">
-            <Suspense fallback={<StoriesLoading />}>
-              <StoriesClient
-                initialStories={stories}
-                initialPagination={pagination}
-                searchParams={searchParams}
-              />
-            </Suspense>
+            <StoriesClient />
           </div>
 
           {/* Sidebar */}
