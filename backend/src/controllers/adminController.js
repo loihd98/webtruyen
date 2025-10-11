@@ -516,12 +516,12 @@ class AdminController {
             select: {
               id: true,
               title: true,
-              chapterNumber: true,
+              number: true,
               isLocked: true,
               createdAt: true,
             },
             orderBy: {
-              chapterNumber: "asc",
+              number: "asc",
             },
           },
           _count: {
