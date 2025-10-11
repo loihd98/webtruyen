@@ -19,10 +19,6 @@ const Pagination: React.FC<PaginationProps> = ({
   onPageChange,
   className = "",
 }) => {
-  console.log(
-    JSON.stringify({ currentPage, totalPages, totalItems, itemsPerPage })
-  );
-
   const generatePageNumbers = () => {
     const pages: (number | string)[] = [];
     const delta = 2; // Number of pages to show around current page

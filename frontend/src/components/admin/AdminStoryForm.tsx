@@ -188,7 +188,6 @@ const AdminStoryForm: React.FC<AdminStoryFormProps> = ({
     type: "image" | "audio"
   ): Promise<string> => {
     const fileKey = type === "audio" ? "audio" : "image";
-    console.log(file, "file");
 
     const formData = new FormData();
     formData.append(fileKey, file);

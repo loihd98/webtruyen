@@ -23,7 +23,7 @@ export const getMediaUrl = (url: string): string => {
   // If it starts with /uploads/, prepend the base URL (nginx serves these directly)
   if (url.startsWith("/uploads/")) {
     const fullUrl = `${getMediaBaseUrl()}${url}`;
-    console.log("Media URL generated:", { input: url, output: fullUrl });
+    // console.log("Media URL generated:", { input: url, output: fullUrl });
     return fullUrl;
   }
 

@@ -22,8 +22,6 @@ const StoryCard: React.FC<StoryCardProps> = ({
   variant = "default",
   showBookmark = true,
 }) => {
-  console.log("story", story?.type);
-
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);

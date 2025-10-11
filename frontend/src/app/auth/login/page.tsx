@@ -56,8 +56,6 @@ const LoginPage: React.FC = () => {
 
     try {
       const result = await dispatch(loginUser(formData));
-      console.log("result", result);
-
       if (loginUser.fulfilled.match(result) && result.payload) {
         // Role-based redirect
         const user = result.payload.user;
