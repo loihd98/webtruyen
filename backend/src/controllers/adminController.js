@@ -413,17 +413,92 @@ class AdminController {
       const skip = (parseInt(page) - 1) * parseInt(limit);
 
       const where = {
-        ...(search && {
-          OR: [
-            { title: { contains: search, mode: "insensitive" } },
-            { description: { contains: search, mode: "insensitive" } },
-            { author: { name: { contains: search, mode: "insensitive" } } },
-          ],
-        }),
+        // ...(search && {
+        //   OR: [
+        //     { title: { contains: search, mode: "insensitive" } },
+        //     { description: { contains: search, mode: "insensitive" } },
+        //     { author: { name: { contains: search, mode: "insensitive" } } },
+        //   ],
+        // }),
         ...(type && { type }),
         ...(status && { status }),
         ...(authorId && { authorId }),
       };
+
+      if (search) {
+        // Normalize search term: remove accents, convert to lowercase, and split into words
+        const normalizeString = (str) => {
+          return str
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "") // Remove accents
+            .replace(/[đĐ]/g, "d"); // Replace đ/Đ with d
+        };
+
+        const normalizedSearch = normalizeString(search);
+        const searchWords = normalizedSearch
+          .split(/\s+/)
+          .filter((word) => word.length > 0);
+
+        where.OR = [
+          // Priority 1: Exact phrase match in title
+          {
+            title: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+          // Priority 2: All words present in title (flexible order)
+          ...(searchWords.length > 1
+            ? [
+                {
+                  AND: searchWords.map((word) => ({
+                    title: {
+                      contains: word,
+                      mode: "insensitive",
+                    },
+                  })),
+                },
+              ]
+            : []),
+          // Priority 3: Exact phrase in slug
+          {
+            slug: {
+              contains: normalizedSearch.replace(/\s+/g, "-"),
+              mode: "insensitive",
+            },
+          },
+          // Priority 4: All words present in slug (for multi-word searches)
+          ...(searchWords.length > 1
+            ? [
+                {
+                  AND: searchWords.map((word) => ({
+                    slug: {
+                      contains: word,
+                      mode: "insensitive",
+                    },
+                  })),
+                },
+              ]
+            : []),
+          // Priority 5: Search in description (exact phrase)
+          {
+            description: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+          // Priority 6: Search in author name
+          {
+            author: {
+              name: {
+                contains: search,
+                mode: "insensitive",
+              },
+            },
+          },
+        ];
+      }
 
       const [stories, total] = await Promise.all([
         prisma.story.findMany({

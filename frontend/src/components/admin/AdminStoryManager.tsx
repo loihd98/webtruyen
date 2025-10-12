@@ -3,60 +3,102 @@
 import React, { useState, useEffect } from "react";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { Story } from "../../types";
-import Layout from "../layout/Layout";
 import apiClient from "@/utils/api";
 import Modal from "./Modal";
 import AdminStoryForm from "./AdminStoryForm";
-import Pagination from "./Pagination";
+import Pagination from "../../components/ui/Pagination";
+
+// Loading component
+const AdminStoriesLoading = () => (
+  <div className="space-y-6">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+      <div className="animate-pulse space-y-4">
+        <div className="h-8 bg-gray-300 dark:bg-gray-600 rounded w-1/4"></div>
+        <div className="space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-16 bg-gray-300 dark:bg-gray-600 rounded"
+            ></div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+interface PaginationData {
+  total: number;
+  pages: number;
+  page: number;
+  limit: number;
+}
 
 const AdminStoryManager: React.FC = () => {
   const { t } = useLanguage();
+
+  // State management
   const [stories, setStories] = useState<Story[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [pagination, setPagination] = useState<PaginationData>({
+    page: 1,
+    pages: 1,
+    total: 0,
+    limit: 10,
+  });
+  const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
   const [editingStory, setEditingStory] = useState<Story | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterType, setFilterType] = useState<"ALL" | "TEXT" | "AUDIO">("ALL");
-  const [filterStatus, setFilterStatus] = useState<
-    "ALL" | "PUBLISHED" | "DRAFT" | "HIDDEN"
-  >("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState<
+    "PUBLISHED" | "DRAFT" | "HIDDEN" | ""
+  >("");
+  const [sortBy, setSortBy] = useState<string>("createdAt");
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
-  useEffect(() => {
-    fetchStories(currentPage, 10);
-  }, [currentPage]);
-
-  const fetchStories = async (page: number, limit: number) => {
+  // Fetch stories function
+  const fetchStories = async (page: number = currentPage) => {
     try {
-      setIsLoading(true);
-      const stories = await apiClient.get("/admin/stories", {
-        params: { limit, page },
+      setLoading(true);
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: "10",
       });
-      setStories(stories.data?.data?.stories);
-      setIsLoading(false);
+
+      if (searchQuery.trim()) {
+        params.append("search", searchQuery.trim());
+      }
+
+      if (selectedStatus) {
+        params.append("status", selectedStatus);
+      }
+
+      if (sortBy) {
+        params.append("sort", sortBy);
+      }
+
+      const response = await apiClient.get(`/admin/stories?${params}`);
+      console.log(response.data?.data, "Fetched admin stories data");
+
+      setStories(response.data.data?.stories || []);
+      setPagination(response.data?.data.pagination);
     } catch (error) {
-      console.error("Error fetching stories:", error);
-      setIsLoading(false);
+      console.error("Error fetching admin stories:", error);
+      setStories([]);
+      setPagination({
+        total: 0,
+        pages: 0,
+        page: 1,
+        limit: 10,
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const filteredStories = stories.filter((story) => {
-    const matchesSearch =
-      story.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      story.author?.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = filterType === "ALL" || story.type === filterType;
-    const matchesStatus =
-      filterStatus === "ALL" || story.status === filterStatus;
-
-    return matchesSearch && matchesType && matchesStatus;
-  });
-
-  const paginatedStories = filteredStories.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-  const totalPages = Math.ceil(filteredStories.length / itemsPerPage);
+  // Fetch stories when filters change
+  useEffect(() => {
+    fetchStories(currentPage);
+  }, [currentPage, selectedStatus, sortBy]);
 
   const handleDelete = async (storyId: string) => {
     if (window.confirm(t("admin.stories.confirm_delete"))) {
@@ -113,24 +155,38 @@ const AdminStoryManager: React.FC = () => {
     );
   };
 
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-gray-300 dark:bg-gray-600 rounded w-1/4"></div>
-            <div className="space-y-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="h-16 bg-gray-300 dark:bg-gray-600 rounded"
-                ></div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+  // Handler functions
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCurrentPage(1); // Reset to page 1 when searching
+  };
+
+  const handleStatusChange = (
+    status: "PUBLISHED" | "DRAFT" | "HIDDEN" | ""
+  ) => {
+    setSelectedStatus(status);
+    setCurrentPage(1); // Reset to page 1 when filtering
+  };
+
+  const handleSortChange = (sort: string) => {
+    setSortBy(sort);
+    setCurrentPage(1); // Reset to page 1 when sorting
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setSelectedStatus("");
+    setSortBy("createdAt");
+    setCurrentPage(1);
+    fetchStories(1);
+  };
+
+  if (loading) {
+    return <AdminStoriesLoading />;
   }
 
   return (
@@ -152,61 +208,120 @@ const AdminStoryManager: React.FC = () => {
         </div>
 
         {/* Filters */}
-        <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t("admin.stories.search")}
-              </label>
+        <div className="p-6 space-y-4">
+          {/* Search Bar */}
+          <div>
+            <form onSubmit={handleSearch} className="flex">
               <input
                 type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder={t("admin.stories.search_placeholder")}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                placeholder="🔍 Tìm kiếm truyện..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-l-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
               />
-            </div>
+              <button
+                onClick={() => fetchStories(1)}
+                type="submit"
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-r-lg font-medium transition-colors duration-200 hover:shadow-lg"
+              >
+                Tìm
+              </button>
+            </form>
+          </div>
 
+          {/* Filter Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Status Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t("common.type")}
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Trạng thái
               </label>
               <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value as any)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                value={selectedStatus}
+                onChange={(e) =>
+                  handleStatusChange(
+                    e.target.value as "PUBLISHED" | "DRAFT" | "HIDDEN" | ""
+                  )
+                }
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
               >
-                <option value="ALL">{t("stories.filter.all")}</option>
-                <option value="TEXT">{t("stories.filter.text")}</option>
-                <option value="AUDIO">{t("stories.filter.audio")}</option>
+                <option value="">Tất cả</option>
+                <option value="PUBLISHED">✅ Đã xuất bản</option>
+                <option value="DRAFT">📝 Bản nháp</option>
+                <option value="HIDDEN">🙈 Ẩn</option>
               </select>
             </div>
 
+            {/* Sort Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t("common.status")}
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Sắp xếp
               </label>
               <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value as any)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                value={sortBy}
+                onChange={(e) => handleSortChange(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
               >
-                <option value="ALL">{t("stories.filter.all")}</option>
-                <option value="PUBLISHED">{t("common.published")}</option>
-                <option value="DRAFT">{t("common.draft")}</option>
-                <option value="HIDDEN">{t("common.hidden")}</option>
+                <option value="createdAt">📅 Mới nhất</option>
+                <option value="updatedAt">🔄 Cập nhật</option>
+                <option value="title">🔤 Tên A-Z</option>
+                <option value="viewCount">👁️ Xem nhiều</option>
               </select>
             </div>
 
+            {/* Clear Filters */}
             <div className="flex items-end">
               <button
-                onClick={() => fetchStories(currentPage, itemsPerPage)}
-                className="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                onClick={clearFilters}
+                className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-500 transition-colors duration-200"
               >
-                🔄 {t("admin.stories.refresh")}
+                🗑️ Xóa bộ lọc
+              </button>
+            </div>
+
+            {/* Refresh */}
+            <div className="flex items-end">
+              <button
+                onClick={() => fetchStories(currentPage)}
+                className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200"
+              >
+                🔄 Làm mới
               </button>
             </div>
           </div>
+
+          {/* Active Filters */}
+          {(searchQuery || selectedStatus || sortBy !== "createdAt") && (
+            <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Bộ lọc đang áp dụng:
+              </span>
+              {searchQuery && (
+                <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-xs">
+                  🔍 "{searchQuery}"
+                </span>
+              )}
+              {selectedStatus && (
+                <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full text-xs">
+                  {selectedStatus === "PUBLISHED"
+                    ? "✅ Đã xuất bản"
+                    : selectedStatus === "DRAFT"
+                    ? "📝 Bản nháp"
+                    : "🙈 Ẩn"}
+                </span>
+              )}
+              {sortBy !== "createdAt" && (
+                <span className="px-2 py-1 bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 rounded-full text-xs">
+                  🔄{" "}
+                  {sortBy === "updatedAt"
+                    ? "Cập nhật"
+                    : sortBy === "title"
+                    ? "Tên A-Z"
+                    : "Xem nhiều"}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -237,7 +352,7 @@ const AdminStoryManager: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {paginatedStories.map((story) => (
+              {stories.map((story) => (
                 <tr
                   key={story.id}
                   className="hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -302,19 +417,30 @@ const AdminStoryManager: React.FC = () => {
           </table>
           <Pagination
             currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={(page) => setCurrentPage(page)}
+            totalPages={pagination.pages}
+            totalItems={pagination.total}
+            itemsPerPage={pagination.limit}
+            onPageChange={handlePageChange}
+            className="animate-slide-up animation-delay-500"
           />
         </div>
 
-        {filteredStories.length === 0 && (
+        {stories?.length === 0 && (
           <div className="text-center py-12">
             <div className="text-gray-400 text-4xl mb-4">📚</div>
             <p className="text-gray-500 dark:text-gray-400">
-              {searchTerm
-                ? t("admin.stories.no_results")
-                : t("admin.stories.no_stories")}
+              {searchQuery || selectedStatus
+                ? "Không tìm thấy truyện nào phù hợp với bộ lọc"
+                : "Chưa có truyện nào trong hệ thống"}
             </p>
+            {(searchQuery || selectedStatus) && (
+              <button
+                onClick={clearFilters}
+                className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:shadow-lg hover:scale-105"
+              >
+                Xóa bộ lọc
+              </button>
+            )}
           </div>
         )}
 
@@ -338,7 +464,7 @@ const AdminStoryManager: React.FC = () => {
               onCloseModal={() => setEditingStory(null)}
               onSuccess={() => {
                 setEditingStory(null);
-                fetchStories(currentPage, 10);
+                fetchStories(currentPage);
               }}
             />
           )}

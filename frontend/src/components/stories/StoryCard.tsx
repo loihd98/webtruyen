@@ -317,7 +317,7 @@ const StoryCard: React.FC<StoryCardProps> = ({
             onClick={handleCardClick}
           >
             {/* Compact thumbnail with title overlay */}
-            <div className="relative aspect-[3/4] overflow-hidden">
+            <div className="relative aspect-[4/4] overflow-hidden">
               {story?.thumbnailUrl ? (
                 <img
                   src={getMediaUrl(story.thumbnailUrl)}
@@ -341,14 +341,11 @@ const StoryCard: React.FC<StoryCardProps> = ({
               </div>
 
               {/* Title overlay at bottom */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-2">
-                <h3 className="text-white font-medium text-sm leading-tight line-clamp-2 group-hover:text-blue-200 transition-colors">
-                  {story?.title}
-                </h3>
+              {/* <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-2">
                 <p className="text-white/80 text-xs mt-1">
                   👤 {story?.author?.name || "Unknown"}
                 </p>
-              </div>
+              </div> */}
 
               {/* Type Badge */}
               <div className="absolute top-2 left-2">
@@ -393,6 +390,7 @@ const StoryCard: React.FC<StoryCardProps> = ({
 
             {/* Minimal bottom content */}
             <div className="p-2">
+              <h3 className="text-black pb-2 font-bold">{story?.title}</h3>
               {/* Genres */}
               <div className="flex flex-wrap gap-1 mb-2">
                 {story?.genres?.slice(0, 2).map((genre) => (
