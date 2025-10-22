@@ -389,7 +389,7 @@ export default function StoryPage({ params }: StoryPageProps) {
                     <a
                       href={currentChapter.affiliate.targetUrl}
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel="noopener "
                       className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
                     >
                       <span>📥</span>
@@ -486,7 +486,6 @@ export default function StoryPage({ params }: StoryPageProps) {
                       <a
                         href={story.affiliate.targetUrl}
                         target="_blank"
-                        rel="noopener noreferrer"
                         className="w-full py-2 px-4 bg-green-100 text-green-700 hover:bg-green-200 rounded-lg font-medium transition-colors text-center block"
                       >
                         📥{" "}
@@ -692,7 +691,7 @@ export default function StoryPage({ params }: StoryPageProps) {
                         <a
                           href={currentChapter.affiliate.targetUrl}
                           target="_blank"
-                          rel="noopener noreferrer"
+                          rel="noopener "
                           className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
                         >
                           <span>📥</span>

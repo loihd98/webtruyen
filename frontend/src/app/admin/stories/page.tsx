@@ -51,7 +51,6 @@ interface SearchFilters {
 }
 
 const AdminStoriesPage: React.FC = () => {
-  const router = useRouter();
   const accessToken = useAccessToken();
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);

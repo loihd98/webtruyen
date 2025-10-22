@@ -348,7 +348,7 @@ const AdminAffiliateLinkManager: React.FC = () => {
                         <a
                           href={link.targetUrl}
                           target="_blank"
-                          rel="noopener noreferrer"
+                          rel="noopener "
                           className="hover:text-blue-600 dark:hover:text-blue-400"
                         >
                           {link.targetUrl}

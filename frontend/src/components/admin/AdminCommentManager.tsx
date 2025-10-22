@@ -495,7 +495,7 @@ const AdminCommentManager: React.FC<AdminCommentManagerProps> = ({
                           href={`/stories/${comment.chapter?.story?.slug}`}
                           className="text-blue-600 dark:text-blue-400 hover:underline"
                           target="_blank"
-                          rel="noopener noreferrer"
+                          rel="noopener "
                         >
                           {comment.chapter?.story?.title}
                         </a>

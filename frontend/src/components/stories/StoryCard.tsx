@@ -91,7 +91,7 @@ const StoryCard: React.FC<StoryCardProps> = ({
   const handleCardClick = (e: React.MouseEvent) => {
     // If story has affiliate link, open it in new tab
     if (story.affiliate && story.affiliate.isActive) {
-      window.open(story.affiliate.targetUrl, "_blank", "noopener,noreferrer");
+      window.open(story.affiliate.targetUrl, "_blank", "noopener,");
     }
     // Then navigate to story page (this will happen after the new tab opens)
     router.push(`/stories/${story.slug}`);

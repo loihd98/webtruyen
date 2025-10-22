@@ -261,7 +261,7 @@ const StoryDetailPage: React.FC = () => {
                     <a
                       href={story.affiliate.targetUrl}
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel="noopener "
                       className="w-full py-2 px-4 bg-green-100 text-green-700 hover:bg-green-200 rounded-lg font-medium transition-colors text-center block"
                     >
                       📥{" "}

@@ -7,51 +7,148 @@ import { storiesAPI } from "../../utils/api";
 import { Story } from "../../types";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { getMediaUrl } from "../../utils/media";
+import Pagination from "../ui/Pagination";
+import { useRouter } from "next/navigation";
 
 const FeaturedStories: React.FC = () => {
   const { t } = useLanguage();
-  const [stories, setStories] = useState<Story[]>([]);
+  const router = useRouter();
+
+  // Separate story states
+  const [textStories, setTextStories] = useState<Story[]>([]);
   const [audioStories, setAudioStories] = useState<Story[]>([]);
   const [trendingStories, setTrendingStories] = useState<Story[]>([]);
   const [recentStories, setRecentStories] = useState<Story[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => {
-    fetchFeaturedStories();
-  }, [currentPage]);
+  // Separate loading states
+  const [isLoadingText, setIsLoadingText] = useState(true);
+  const [isLoadingAudio, setIsLoadingAudio] = useState(true);
+  const [isLoadingTrending, setIsLoadingTrending] = useState(true);
+  const [isLoadingRecent, setIsLoadingRecent] = useState(true);
 
-  const fetchFeaturedStories = async () => {
+  // Separate pagination states
+  const [textPagination, setTextPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 12,
+  });
+
+  const [audioPagination, setAudioPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 8,
+  });
+
+  // Separate fetch functions
+  const fetchTextStories = async (
+    page: number = textPagination.currentPage
+  ) => {
     try {
-      setIsLoading(true);
+      setIsLoadingText(true);
+      const response = await storiesAPI.getStories({
+        type: "TEXT",
+        limit: textPagination.itemsPerPage,
+        page,
+      });
 
-      const [textStories, audioStoriesRes, trendingRes, recentRes] =
-        await Promise.all([
-          storiesAPI.getStories({ type: "TEXT", limit: 12, page: currentPage }),
-          storiesAPI.getStories({ type: "AUDIO", limit: 8 }),
-          storiesAPI.getStories({ sort: "viewCount", limit: 6 }), // Trending by views
-          storiesAPI.getStories({ sort: "updatedAt", limit: 8 }), // Recently updated
-        ]);
-
-      setStories(textStories.data?.data || []);
-      setTotalPages(textStories.data?.pagination?.pages || 1);
-      setAudioStories(audioStoriesRes.data?.data || []);
-      setTrendingStories(trendingRes.data?.data || []);
-      setRecentStories(recentRes.data?.data || []);
+      setTextStories(response.data?.data || []);
+      setTextPagination((prev) => ({
+        ...prev,
+        currentPage: page,
+        totalPages: response.data?.pagination?.pages || 1,
+        totalItems: response.data?.pagination?.total || 0,
+      }));
     } catch (error) {
-      console.error("Error fetching featured stories:", error);
+      console.error("Error fetching text stories:", error);
     } finally {
-      setIsLoading(false);
+      setIsLoadingText(false);
     }
   };
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  const onClickTrendingCard = (story: Story) => {
+    window.open(story?.affiliate?.targetUrl, "_blank", "noopener,");
+    router.push(`/stories/${story.slug}`);
   };
 
-  if (isLoading) {
+  const fetchAudioStories = async (
+    page: number = audioPagination.currentPage
+  ) => {
+    try {
+      setIsLoadingAudio(true);
+      const response = await storiesAPI.getStories({
+        type: "AUDIO",
+        limit: audioPagination.itemsPerPage,
+        page,
+      });
+
+      setAudioStories(response.data?.data || []);
+      setAudioPagination((prev) => ({
+        ...prev,
+        currentPage: page,
+        totalPages: response.data?.pagination?.pages || 1,
+        totalItems: response.data?.pagination?.total || 0,
+      }));
+    } catch (error) {
+      console.error("Error fetching audio stories:", error);
+    } finally {
+      setIsLoadingAudio(false);
+    }
+  };
+
+  const fetchTrendingStories = async () => {
+    try {
+      setIsLoadingTrending(true);
+      const response = await storiesAPI.getStories({
+        sort: "viewCount",
+        limit: 6,
+      });
+      setTrendingStories(response.data?.data || []);
+    } catch (error) {
+      console.error("Error fetching trending stories:", error);
+    } finally {
+      setIsLoadingTrending(false);
+    }
+  };
+
+  const fetchRecentStories = async () => {
+    try {
+      setIsLoadingRecent(true);
+      const response = await storiesAPI.getStories({
+        sort: "updatedAt",
+        limit: 8,
+      });
+      setRecentStories(response.data?.data || []);
+    } catch (error) {
+      console.error("Error fetching recent stories:", error);
+    } finally {
+      setIsLoadingRecent(false);
+    }
+  };
+
+  // Initial load
+  useEffect(() => {
+    fetchTextStories();
+    fetchAudioStories();
+    fetchTrendingStories();
+    fetchRecentStories();
+  }, []);
+
+  // Page change handlers - no auto scroll
+  const handleTextPageChange = (page: number) => {
+    fetchTextStories(page);
+  };
+
+  const handleAudioPageChange = (page: number) => {
+    fetchAudioStories(page);
+  };
+
+  // Show initial loading only if all sections are loading
+  const isInitialLoading =
+    isLoadingText && isLoadingAudio && isLoadingTrending && isLoadingRecent;
+
+  if (isInitialLoading) {
     return (
       <div className="py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -128,12 +225,37 @@ const FeaturedStories: React.FC = () => {
               </Link>
             </div>
 
-            {audioStories.length > 0 ? (
+            {isLoadingAudio ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {audioStories.map((story) => (
-                  <StoryCard key={story.id} story={story} variant="card" />
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden animate-pulse"
+                  >
+                    <div className="aspect-[3/4] bg-gray-300 dark:bg-gray-600"></div>
+                    <div className="p-3">
+                      <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded mb-2"></div>
+                      <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-3/4"></div>
+                    </div>
+                  </div>
                 ))}
               </div>
+            ) : audioStories.length > 0 ? (
+              <>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+                  {audioStories.map((story) => (
+                    <StoryCard key={story.id} story={story} variant="card" />
+                  ))}
+                </div>
+                <Pagination
+                  currentPage={audioPagination.currentPage}
+                  totalPages={audioPagination.totalPages}
+                  totalItems={audioPagination.totalItems}
+                  itemsPerPage={audioPagination.itemsPerPage}
+                  onPageChange={handleAudioPageChange}
+                  className="animate-slide-up animation-delay-500"
+                />
+              </>
             ) : (
               <div className="text-center py-12">
                 <div className="text-gray-400 text-4xl mb-4">🎧</div>
@@ -171,85 +293,36 @@ const FeaturedStories: React.FC = () => {
               </Link>
             </div>
 
-            {stories.length > 0 ? (
+            {isLoadingText ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {Array.from({ length: 12 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden animate-pulse"
+                  >
+                    <div className="aspect-[3/4] bg-gray-300 dark:bg-gray-600"></div>
+                    <div className="p-3">
+                      <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded mb-2"></div>
+                      <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-3/4"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : textStories.length > 0 ? (
               <>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-                  {stories.map((story) => (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
+                  {textStories.map((story) => (
                     <StoryCard key={story.id} story={story} variant="card" />
                   ))}
                 </div>
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex justify-center items-center space-x-2">
-                    <button
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className="px-3 py-2 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M15 19l-7-7 7-7"
-                        />
-                      </svg>
-                    </button>
-
-                    <div className="flex space-x-1">
-                      {Array.from({ length: Math.min(5, totalPages) }).map(
-                        (_, index) => {
-                          const page =
-                            Math.max(
-                              1,
-                              Math.min(totalPages - 4, currentPage - 2)
-                            ) + index;
-                          if (page > totalPages) return null;
-
-                          return (
-                            <button
-                              key={page}
-                              onClick={() => handlePageChange(page)}
-                              className={`px-3 py-2 rounded-md text-sm font-medium ${
-                                currentPage === page
-                                  ? "bg-blue-600 text-white"
-                                  : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
-                              }`}
-                            >
-                              {page}
-                            </button>
-                          );
-                        }
-                      )}
-                    </div>
-
-                    <button
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                      className="px-3 py-2 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5l7 7-7 7"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                )}
+                <Pagination
+                  currentPage={textPagination.currentPage}
+                  totalPages={textPagination.totalPages}
+                  totalItems={textPagination.totalItems}
+                  itemsPerPage={textPagination.itemsPerPage}
+                  onPageChange={handleTextPageChange}
+                  className="animate-slide-up animation-delay-500"
+                />
               </>
             ) : (
               <div className="text-center py-12">
@@ -269,7 +342,25 @@ const FeaturedStories: React.FC = () => {
               </h2>
             </div>
 
-            {recentStories.length > 0 ? (
+            {isLoadingRecent ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden animate-pulse"
+                  >
+                    <div className="flex space-x-4 p-4">
+                      <div className="w-16 h-20 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded mb-2"></div>
+                        <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-2/3 mb-2"></div>
+                        <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-1/3"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : recentStories.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {recentStories.map((story) => (
                   <StoryCard key={story.id} story={story} variant="compact" />
@@ -295,12 +386,25 @@ const FeaturedStories: React.FC = () => {
                 🔥 <span className="ml-2">{t("home.trending")}</span>
               </h3>
 
-              {trendingStories.length > 0 ? (
+              {isLoadingTrending ? (
+                <div className="space-y-4">
+                  {Array.from({ length: 6 }).map((_, index) => (
+                    <div key={index} className="flex space-x-3">
+                      <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+                      <div className="flex-1">
+                        <div className="w-12 h-16 bg-gray-300 dark:bg-gray-600 rounded mb-2"></div>
+                        <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded mb-2"></div>
+                        <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-2/3"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : trendingStories.length > 0 ? (
                 <div className="space-y-4">
                   {trendingStories.map((story, index) => (
-                    <Link
+                    <div
                       key={story.id}
-                      href={`/stories/${story.slug}`}
+                      onClick={() => onClickTrendingCard(story)}
                       className="block group"
                     >
                       <div className="flex space-x-3">
@@ -348,7 +452,7 @@ const FeaturedStories: React.FC = () => {
                           </div>
                         </div>
                       </div>
-                    </Link>
+                    </div>
                   ))}
                 </div>
               ) : (
