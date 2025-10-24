@@ -92,10 +92,10 @@ export default function StoryPage({ params }: StoryPageProps) {
   }, [slug]);
 
   useEffect(() => {
-    if (!from || from === null || from === undefined) {
-      window.open(story?.affiliate?.targetUrl, "_blank", "noopener");
+    if (!from && story?.affiliate?.targetUrl) {
+      window.open(story.affiliate.targetUrl, "_blank", "noopener");
     }
-  }, [from, story]);
+  }, [from, story?.affiliate?.targetUrl]);
 
   useEffect(() => {
     const chapterFromUrl = Number(searchParams.get("chapter"));
