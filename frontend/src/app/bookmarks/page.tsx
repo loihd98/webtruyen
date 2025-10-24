@@ -261,7 +261,9 @@ export default function BookmarksPage() {
                         <h3
                           className="font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
                           onClick={() =>
-                            router.push(`/stories/${bookmark?.story?.slug}`)
+                            router.push(
+                              `/stories/${bookmark?.story?.slug}?from=bookmarks`
+                            )
                           }
                         >
                           {bookmark?.story?.title}

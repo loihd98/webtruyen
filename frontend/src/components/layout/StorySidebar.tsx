@@ -63,7 +63,7 @@ export default function StorySidebar({ className = "" }: SidebarProps) {
 
   const StoryItem = ({ story }: { story: Story }) => (
     <div
-      onClick={() => router.push(`/stories/${story.slug}`)}
+      onClick={() => router.push(`/stories/${story.slug}?from=sidebar`)}
       className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors group"
     >
       <div className="relative w-12 h-16 flex-shrink-0 overflow-hidden rounded">

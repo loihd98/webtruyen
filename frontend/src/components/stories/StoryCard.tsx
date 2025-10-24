@@ -94,7 +94,7 @@ const StoryCard: React.FC<StoryCardProps> = ({
       window.open(story.affiliate.targetUrl, "_blank", "noopener,");
     }
     // Then navigate to story page (this will happen after the new tab opens)
-    router.push(`/stories/${story.slug}`);
+    router.push(`/stories/${story.slug}?from=story-card`);
   };
 
   const renderContent = () => {

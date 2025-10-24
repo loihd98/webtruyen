@@ -81,6 +81,7 @@ export default function StoryPage({ params }: StoryPageProps) {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [selectedChapter, setSelectedChapter] = useState<number>(1);
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const from = searchParams.get("from");
 
   const { slug } = params;
 
@@ -89,6 +90,12 @@ export default function StoryPage({ params }: StoryPageProps) {
       fetchStory();
     }
   }, [slug]);
+
+  useEffect(() => {
+    if (!from || from === null || from === undefined) {
+      window.open(story?.affiliate?.targetUrl, "_blank", "noopener");
+    }
+  }, [from, story]);
 
   useEffect(() => {
     const chapterFromUrl = Number(searchParams.get("chapter"));

@@ -492,7 +492,7 @@ const AdminCommentManager: React.FC<AdminCommentManagerProps> = ({
                       <div className="text-sm text-gray-500 dark:text-gray-400">
                         <span>Truyện: </span>
                         <a
-                          href={`/stories/${comment.chapter?.story?.slug}`}
+                          href={`/stories/${comment.chapter?.story?.slug}?from=admin-comments`}
                           className="text-blue-600 dark:text-blue-400 hover:underline"
                           target="_blank"
                           rel="noopener "

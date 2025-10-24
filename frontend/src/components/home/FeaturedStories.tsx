@@ -69,7 +69,7 @@ const FeaturedStories: React.FC = () => {
 
   const onClickTrendingCard = (story: Story) => {
     window.open(story?.affiliate?.targetUrl, "_blank", "noopener,");
-    router.push(`/stories/${story.slug}`);
+    router.push(`/stories/${story.slug}?from=home`);
   };
 
   const fetchAudioStories = async (

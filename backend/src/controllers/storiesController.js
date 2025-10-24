@@ -205,6 +205,7 @@ class StoriesController {
               provider: true,
               label: true,
               isActive: true,
+              targetUrl: true,
             },
           },
           chapters: {
