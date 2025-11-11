@@ -1,0 +1,11 @@
+/* TEAM */
+Founder & Developer: Evanloi9x
+Site: https://khotruyen.vn
+Contact: admin@khotruyen.vn
+Location: Vietnam
+
+/* SITE */
+Standards: HTML5, CSS3, JavaScript, TypeScript
+Components: Next.js, React, Redux, Tailwind CSS
+Backend: Node.js, Express, Prisma
+Database: PostgreSQL
