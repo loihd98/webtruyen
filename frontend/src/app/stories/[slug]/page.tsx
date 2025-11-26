@@ -200,15 +200,13 @@ export default function StoryPage({ params }: StoryPageProps) {
   };
 
   const onSelectChapter = (chapterNumber: number) => {
-    if (story && chapterNumber < story.chapters.length) {
-      const nextChapter = story.chapters.find(
-        (c) => c.number === chapterNumber
-      );
+    const nextChapter = story?.chapters.find(
+      (c) => c.number === chapterNumber
+    );
 
-      // If next chapter has an active affiliate link, open it in new tab
-      if (nextChapter?.affiliate?.isActive && nextChapter.affiliate.targetUrl) {
-        window.open(nextChapter.affiliate.targetUrl, "_blank");
-      }
+    // If next chapter has an active affiliate link, open it in new tab
+    if (nextChapter?.affiliate?.isActive && nextChapter.affiliate.targetUrl) {
+      window.open(nextChapter.affiliate.targetUrl, "_blank");
     }
     handleChapterChange(chapterNumber);
   }
