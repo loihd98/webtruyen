@@ -199,6 +199,20 @@ export default function StoryPage({ params }: StoryPageProps) {
     router.push(`${pathname}?${params.toString()}`);
   };
 
+  const onSelectChapter = (chapterNumber: number) => {
+    if (story && chapterNumber < story.chapters.length) {
+      const nextChapter = story.chapters.find(
+        (c) => c.number === chapterNumber
+      );
+
+      // If next chapter has an active affiliate link, open it in new tab
+      if (nextChapter?.affiliate?.isActive && nextChapter.affiliate.targetUrl) {
+        window.open(nextChapter.affiliate.targetUrl, "_blank");
+      }
+    }
+    handleChapterChange(chapterNumber);
+  }
+
   const handleNextChapter = () => {
     if (story && selectedChapter < story.chapters.length) {
       const nextChapterNumber = selectedChapter + 1;
@@ -344,7 +358,7 @@ export default function StoryPage({ params }: StoryPageProps) {
                         <select
                           value={selectedChapter}
                           onChange={(e) =>
-                            handleChapterChange(Number(e.target.value))
+                            onSelectChapter(Number(e.target.value))
                           }
                           className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
                         >
@@ -480,11 +494,10 @@ export default function StoryPage({ params }: StoryPageProps) {
                   <div className="mt-4 space-y-2">
                     <button
                       onClick={toggleBookmark}
-                      className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
-                        isBookmarked
-                          ? "bg-red-100 text-red-700 hover:bg-red-200"
-                          : "bg-blue-100 text-blue-700 hover:bg-blue-200"
-                      }`}
+                      className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${isBookmarked
+                        ? "bg-red-100 text-red-700 hover:bg-red-200"
+                        : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                        }`}
                     >
                       {isBookmarked ? "❤️ Đã yêu thích" : "🤍 Yêu thích"}
                     </button>
@@ -514,11 +527,10 @@ export default function StoryPage({ params }: StoryPageProps) {
                         <span>👤 {story.author.name}</span>
                         <span>👁️ {story.viewCount.toLocaleString()}</span>
                         <span
-                          className={`px-2 py-1 rounded-full text-xs ${
-                            story.type === "AUDIO"
-                              ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
-                              : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-                          }`}
+                          className={`px-2 py-1 rounded-full text-xs ${story.type === "AUDIO"
+                            ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                            : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                            }`}
                         >
                           {story.type === "AUDIO" ? "🎧 Audio" : "📖 Text"}
                         </span>
@@ -542,9 +554,8 @@ export default function StoryPage({ params }: StoryPageProps) {
                   <div className="text-gray-700 dark:text-gray-300">
                     <h3 className="text-lg font-semibold mb-2">Mô tả</h3>
                     <div
-                      className={`${
-                        !showFullDescription ? "line-clamp-4" : ""
-                      }`}
+                      className={`${!showFullDescription ? "line-clamp-4" : ""
+                        }`}
                     >
                       {story.description || "Chưa có mô tả"}
                     </div>
