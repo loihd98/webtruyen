@@ -814,7 +814,7 @@ export default function StoryPage({ params }: StoryPageProps) {
                 </div>
               ) : trendingStories.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {trendingStories.map((trendingStory, index) => (
+                  {trendingStories.map((trendingStory: Story, index: number) => (
                     <div
                       key={trendingStory.id}
                       onClick={() => onClickTrendingCard(trendingStory)}
