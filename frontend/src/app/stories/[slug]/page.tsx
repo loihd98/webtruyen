@@ -8,13 +8,15 @@ import {
   useSearchParams,
 } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import SimpleAudioPlayer from "../../../components/audio/SimpleAudioPlayer";
 import { getMediaUrl } from "../../../utils/media";
 import Layout from "@/components/layout/Layout";
-import apiClient from "@/utils/api";
+import apiClient, { storiesAPI } from "@/utils/api";
 import CommentSection from "@/components/comments/CommentSection";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Story {
   id: string;
@@ -74,6 +76,7 @@ export default function StoryPage({ params }: StoryPageProps) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { user } = useSelector((state: RootState) => state.auth);
+  const { t } = useLanguage();
 
   const [story, setStory] = useState<Story | null>(null);
   const [loading, setLoading] = useState(true);
@@ -81,6 +84,8 @@ export default function StoryPage({ params }: StoryPageProps) {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [selectedChapter, setSelectedChapter] = useState<number>(1);
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [trendingStories, setTrendingStories] = useState<Story[] | any>([]);
+  const [isLoadingTrending, setIsLoadingTrending] = useState(true);
   const from = searchParams.get("from");
 
   const { slug } = params;
@@ -88,6 +93,7 @@ export default function StoryPage({ params }: StoryPageProps) {
   useEffect(() => {
     if (slug) {
       fetchStory();
+      fetchTrendingStories();
     }
   }, [slug]);
 
@@ -158,6 +164,26 @@ export default function StoryPage({ params }: StoryPageProps) {
     } catch (error) {
       console.error("Error checking bookmark status:", error);
     }
+  };
+
+  const fetchTrendingStories = async () => {
+    try {
+      setIsLoadingTrending(true);
+      const response = await storiesAPI.getStories({
+        sort: "viewCount",
+        limit: 8,
+      });
+      setTrendingStories(response.data?.data || []);
+    } catch (error) {
+      console.error("Error fetching trending stories:", error);
+    } finally {
+      setIsLoadingTrending(false);
+    }
+  };
+
+  const onClickTrendingCard = (story: Story) => {
+    // Navigate to story detail without opening affiliate link
+    router.push(`/stories/${story.slug}?from=trending`);
   };
 
   const toggleBookmark = async () => {
@@ -769,6 +795,91 @@ export default function StoryPage({ params }: StoryPageProps) {
                 </div>
               </div>
             )}
+
+            {/* Trending Stories Section */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mt-6">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                🔥 <span className="ml-2">{t("home.trending")}</span>
+              </h3>
+
+              {isLoadingTrending ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {Array.from({ length: 8 }).map((_, index) => (
+                    <div key={index} className="flex flex-col space-y-2">
+                      <div className="w-full h-48 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                      <div className="h-4 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                      <div className="h-3 bg-gray-300 dark:bg-gray-600 rounded w-2/3"></div>
+                    </div>
+                  ))}
+                </div>
+              ) : trendingStories.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {trendingStories.map((trendingStory, index) => (
+                    <div
+                      key={trendingStory.id}
+                      onClick={() => onClickTrendingCard(trendingStory)}
+                      className="group cursor-pointer"
+                    >
+                      <div className="relative">
+                        {/* Ranking Badge */}
+                        <div className="absolute top-2 left-2 z-10">
+                          <div className="w-8 h-8 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-lg">
+                            {index + 1}
+                          </div>
+                        </div>
+
+                        {/* Thumbnail */}
+                        {trendingStory.thumbnailUrl ? (
+                          <img
+                            src={getMediaUrl(trendingStory.thumbnailUrl)}
+                            alt={trendingStory.title}
+                            className="w-full h-48 object-cover rounded-lg mb-3 group-hover:opacity-90 transition-opacity"
+                          />
+                        ) : (
+                          <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-lg mb-3 flex items-center justify-center">
+                            <span className="text-4xl">📚</span>
+                          </div>
+                        )}
+
+                        {/* Story Info */}
+                        <h4 className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 line-clamp-2 mb-1">
+                          {trendingStory.title}
+                        </h4>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                          {trendingStory.author?.name || "Tác giả không xác định"}
+                        </p>
+                        <div className="flex items-center text-xs text-gray-400">
+                          <svg
+                            className="w-3 h-3 mr-1"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                            />
+                          </svg>
+                          {trendingStory.viewCount?.toLocaleString() || 0}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 dark:text-gray-400 text-center py-8">
+                  Chưa có truyện trending.
+                </p>
+              )}
+            </div>
 
             {/* Comments Section */}
             {currentChapter && (
