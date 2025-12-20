@@ -32,20 +32,24 @@ export default function DailyPopup() {
                 }
 
                 // Fetch latest affiliate link
-                const response = await apiClient.get('/admin/affiliate-links');
-                const affiliateLinks = response.data;
-                
-                // Get the first active link (newest)
-                const latestLink = affiliateLinks?.find((link: any) => link.isActive);
-                if (latestLink?.targetUrl) {
-                    setPopupLink(latestLink.targetUrl);
-                    
-                    // Check if popup should be shown
-                    const lastShown = localStorage.getItem(STORAGE_KEY);
-                    const today = new Date().toDateString();
+                const response = await apiClient.get('/admin/affiliate-links?limit=100');
 
-                    if (!lastShown || lastShown !== today) {
-                        setIsVisible(true);
+                if (response.data.success && response.data.data?.affiliateLinks) {
+                    const affiliateLinks = response.data.data.affiliateLinks;
+
+                    // Get the first active link (newest)
+                    const latestLink = affiliateLinks.find((link: any) => link.isActive);
+
+                    if (latestLink?.targetUrl) {
+                        setPopupLink(latestLink.targetUrl);
+
+                        // Check if popup should be shown
+                        const lastShown = localStorage.getItem(STORAGE_KEY);
+                        const today = new Date().toDateString();
+
+                        if (!lastShown || lastShown !== today) {
+                            setIsVisible(true);
+                        }
                     }
                 }
             } catch (error) {
@@ -87,12 +91,6 @@ export default function DailyPopup() {
 
                 {/* Content */}
                 <div className="relative z-10">
-                    {/* Icon/Emoji */}
-                    <div className="text-center mb-6">
-                        <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full shadow-lg mb-4">
-                            <span className="text-4xl">👆</span>
-                        </div>
-                    </div>
 
                     {/* Title */}
                     <h2 className="text-2xl md:text-3xl font-bold text-center mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
