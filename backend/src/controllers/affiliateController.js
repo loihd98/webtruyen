@@ -109,6 +109,37 @@ class AffiliateController {
     }
   }
 
+  // GET /api/affiliate/public/active - Get active affiliate links (public endpoint)
+  async getPublicAffiliateLinks(req, res) {
+    try {
+      const { limit = 10 } = req.query;
+
+      const affiliateLinks = await prisma.affiliateLink.findMany({
+        where: { isActive: true },
+        take: parseInt(limit),
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          provider: true,
+          targetUrl: true,
+          label: true,
+          isActive: true,
+        },
+      });
+
+      res.json({
+        success: true,
+        data: affiliateLinks,
+      });
+    } catch (error) {
+      console.error("Error fetching public affiliate links:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch affiliate links",
+      });
+    }
+  }
+
   // POST /api/affiliate - Create new affiliate link
   async createAffiliateLink(req, res) {
     try {

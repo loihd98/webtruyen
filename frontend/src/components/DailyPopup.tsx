@@ -32,13 +32,13 @@ export default function DailyPopup() {
                 }
 
                 // Fetch latest affiliate link
-                const response = await apiClient.get('/admin/affiliate-links?limit=100');
+                const response = await apiClient.get('/affiliate/public/active?limit=10');
 
-                if (response.data.success && response.data.data?.affiliateLinks) {
-                    const affiliateLinks = response.data.data.affiliateLinks;
+                if (response.data.success && response.data.data) {
+                    const affiliateLinks = response.data.data;
 
                     // Get the first active link (newest)
-                    const latestLink = affiliateLinks.find((link: any) => link.isActive);
+                    const latestLink = affiliateLinks[0];
 
                     if (latestLink?.targetUrl) {
                         setPopupLink(latestLink.targetUrl);

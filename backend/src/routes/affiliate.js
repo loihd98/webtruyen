@@ -7,6 +7,9 @@ const router = express.Router();
 // Public routes
 router.get("/redirect/:affiliateId", affiliateController.redirectAffiliate);
 
+// Public endpoint to get active affiliate links (for popup)
+router.get("/public/active", affiliateController.getPublicAffiliateLinks);
+
 // Admin CRUD routes
 router.get(
   "/",
