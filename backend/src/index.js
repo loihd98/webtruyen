@@ -57,8 +57,9 @@ app.use("/api/bookmarks", require("./routes/bookmarks"));
 app.use("/api/admin", require("./routes/admin"));
 app.use("/api/media", require("./routes/media"));
 app.use("/api/contact", require("./routes/contact"));
+app.use("/api/affiliate", require("./routes/affiliate"));
 
-// Affiliate redirect
+// Affiliate redirect (short URL)
 app.use("/r", require("./routes/affiliate"));
 
 // 404 handler
