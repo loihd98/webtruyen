@@ -17,6 +17,7 @@ import Layout from "@/components/layout/Layout";
 import apiClient, { storiesAPI } from "@/utils/api";
 import CommentSection from "@/components/comments/CommentSection";
 import { useLanguage } from "@/contexts/LanguageContext";
+import DailyPopup from "@/components/DailyPopup";
 
 interface Story {
   id: string;
@@ -309,6 +310,14 @@ export default function StoryPage({ params }: StoryPageProps) {
 
   return (
     <Layout>
+      {/* Daily Popup - only show on mobile and for this story */}
+      {story && (
+        <DailyPopup
+          storyId={story.id}
+          affiliateLink={story.affiliate?.targetUrl ? story.affiliate.targetUrl : undefined}
+        />
+      )}
+
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-6xl mx-auto">

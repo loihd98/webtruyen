@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import apiClient from '@/utils/api';
 
-const STORAGE_KEY = 'dailyPopupLastShown';
+const STORAGE_KEY_PREFIX = 'dailyPopupShown_';
 
 // Check if device is mobile
 const isMobileDevice = () => {
@@ -17,7 +17,12 @@ const isMobileDevice = () => {
     );
 };
 
-export default function DailyPopup() {
+interface DailyPopupProps {
+    storyId: string;
+    affiliateLink?: string;
+}
+
+export default function DailyPopup({ storyId, affiliateLink }: DailyPopupProps) {
     const [isVisible, setIsVisible] = useState(false);
     const [popupLink, setPopupLink] = useState('');
     const [isLoading, setIsLoading] = useState(true);
@@ -31,24 +36,36 @@ export default function DailyPopup() {
                     return;
                 }
 
-                // Fetch latest affiliate link
-                const response = await apiClient.get('/affiliate/public/active?limit=10');
+                // Use affiliate link from story if provided
+                if (affiliateLink) {
+                    setPopupLink(affiliateLink);
 
-                if (response.data.success && response.data.data) {
-                    const affiliateLinks = response.data.data;
+                    // Check if popup should be shown for this story today
+                    const storageKey = `${STORAGE_KEY_PREFIX}${storyId}`;
+                    const lastShown = localStorage.getItem(storageKey);
+                    const today = new Date().toDateString();
 
-                    // Get the first active link (newest)
-                    const latestLink = affiliateLinks[0];
+                    if (!lastShown || lastShown !== today) {
+                        setIsVisible(true);
+                    }
+                } else {
+                    // Fallback: fetch latest affiliate link from API
+                    const response = await apiClient.get('/affiliate/public/active?limit=10');
 
-                    if (latestLink?.targetUrl) {
-                        setPopupLink(latestLink.targetUrl);
+                    if (response.data.success && response.data.data) {
+                        const affiliateLinks = response.data.data;
+                        const latestLink = affiliateLinks[0];
 
-                        // Check if popup should be shown
-                        const lastShown = localStorage.getItem(STORAGE_KEY);
-                        const today = new Date().toDateString();
+                        if (latestLink?.targetUrl) {
+                            setPopupLink(latestLink.targetUrl);
 
-                        if (!lastShown || lastShown !== today) {
-                            setIsVisible(true);
+                            const storageKey = `${STORAGE_KEY_PREFIX}${storyId}`;
+                            const lastShown = localStorage.getItem(storageKey);
+                            const today = new Date().toDateString();
+
+                            if (!lastShown || lastShown !== today) {
+                                setIsVisible(true);
+                            }
                         }
                     }
                 }
@@ -60,12 +77,13 @@ export default function DailyPopup() {
         };
 
         checkAndShowPopup();
-    }, []);
+    }, [storyId, affiliateLink]);
 
     const handleClose = () => {
-        // Save today's date to localStorage
+        // Save today's date to localStorage for this story
         const today = new Date().toDateString();
-        localStorage.setItem(STORAGE_KEY, today);
+        const storageKey = `${STORAGE_KEY_PREFIX}${storyId}`;
+        localStorage.setItem(storageKey, today);
 
         // Redirect to link if available
         if (popupLink) {
@@ -93,13 +111,13 @@ export default function DailyPopup() {
                 <div className="relative z-10">
 
                     {/* Title */}
-                    <h2 className="text-2xl md:text-3xl font-bold text-center mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    <h2 className="text-xl md:text-2xl font-bold text-center mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                         Một click ngàn lời cảm ơn
                     </h2>
 
                     {/* Description */}
                     <p className="text-gray-700 text-center mb-8 leading-relaxed">
-                        Cảm ơn bạn đã ghé thăm nhà của Mê Truyện Hay. Mỗi click sang Shopee của bạn đều là một lời cổ vũ,
+                        Cảm ơn bạn đã ghé thăm nhà của khotruyen.vn Mỗi click sang Shopee, Tiktok của bạn đều là một lời cổ vũ,
                         tiếp thêm năng lượng để chúng mình mang đến nhiều câu chuyện hấp dẫn hơn nữa
                     </p>
 
