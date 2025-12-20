@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import "../../styles/globals.css";
 import ClientProvider from "./providers";
 import ThemeProvider from "@/components/layout/ThemeProvider";
+import DailyPopup from "@/components/DailyPopup";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -124,7 +125,10 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         <ClientProvider>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+            {children}
+            <DailyPopup />
+          </ThemeProvider>
         </ClientProvider>
       </body>
     </html>
