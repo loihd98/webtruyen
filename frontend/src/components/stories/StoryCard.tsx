@@ -15,12 +15,14 @@ interface StoryCardProps {
   story: Story;
   variant?: "default" | "compact" | "featured" | "card";
   showBookmark?: boolean;
+  disableNavigation?: boolean; // Add prop to control navigation
 }
 
 const StoryCard: React.FC<StoryCardProps> = ({
   story,
   variant = "default",
   showBookmark = true,
+  disableNavigation = false,
 }) => {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
@@ -89,12 +91,11 @@ const StoryCard: React.FC<StoryCardProps> = ({
   };
 
   const handleCardClick = (e: React.MouseEvent) => {
-    // If story has affiliate link, open it in new tab
-    if (story.affiliate && story.affiliate.isActive) {
-      window.open(story.affiliate.targetUrl, "_blank", "noopener,noreferrer");
+    // Navigate to story page (unless disabled - e.g., already on detail page)
+    // Popup will be shown on story detail page
+    if (!disableNavigation) {
+      router.push(`/stories/${story.slug}?from=story-card`);
     }
-    // Navigate to story page is commented - only open affiliate link
-    // router.push(`/stories/${story.slug}?from=story-card`);
   };
 
   const renderContent = () => {
@@ -120,9 +121,8 @@ const StoryCard: React.FC<StoryCardProps> = ({
                   />
                 ) : null}
                 <div
-                  className={`absolute inset-0 bg-gray-200 dark:bg-gray-700 flex items-center justify-center rounded ${
-                    story.thumbnailUrl ? "hidden" : ""
-                  }`}
+                  className={`absolute inset-0 bg-gray-200 dark:bg-gray-700 flex items-center justify-center rounded ${story.thumbnailUrl ? "hidden" : ""
+                    }`}
                 >
                   <div className="text-xl text-gray-400">
                     {story.type === "AUDIO" ? "🎧" : "📖"}
@@ -142,11 +142,10 @@ const StoryCard: React.FC<StoryCardProps> = ({
                 <div className="flex items-center justify-between mt-2">
                   <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
                     <span
-                      className={`px-2 py-1 rounded text-xs ${
-                        story.type === "AUDIO"
-                          ? "bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400"
-                          : "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400"
-                      }`}
+                      className={`px-2 py-1 rounded text-xs ${story.type === "AUDIO"
+                        ? "bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400"
+                        : "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400"
+                        }`}
                     >
                       {story.type === "AUDIO" ? "🎧 Audio" : "📖 Text"}
                     </span>
@@ -154,11 +153,10 @@ const StoryCard: React.FC<StoryCardProps> = ({
                   {showBookmark && (
                     <button
                       onClick={handleBookmark}
-                      className={`p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                        isBookmarked
-                          ? "text-yellow-500"
-                          : "text-gray-400 hover:text-yellow-500"
-                      }`}
+                      className={`p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 ${isBookmarked
+                        ? "text-yellow-500"
+                        : "text-gray-400 hover:text-yellow-500"
+                        }`}
                     >
                       <svg
                         className="w-4 h-4"
@@ -201,9 +199,8 @@ const StoryCard: React.FC<StoryCardProps> = ({
                 />
               ) : null}
               <div
-                className={`absolute inset-0 bg-gray-200 dark:bg-gray-700 flex items-center justify-center ${
-                  story.thumbnailUrl ? "hidden" : ""
-                }`}
+                className={`absolute inset-0 bg-gray-200 dark:bg-gray-700 flex items-center justify-center ${story.thumbnailUrl ? "hidden" : ""
+                  }`}
               >
                 <div className="text-4xl text-gray-400">
                   {story.type === "AUDIO" ? "🎧" : "📖"}
@@ -234,11 +231,10 @@ const StoryCard: React.FC<StoryCardProps> = ({
                 {showBookmark && (
                   <button
                     onClick={handleBookmark}
-                    className={`p-1 rounded-full transition-all duration-200 ${
-                      isBookmarked
-                        ? "text-yellow-500 bg-yellow-50 dark:bg-yellow-900/30 hover:bg-yellow-100 dark:hover:bg-yellow-900/50"
-                        : "text-gray-400 hover:text-yellow-500 hover:bg-gray-100 dark:hover:bg-gray-700"
-                    }`}
+                    className={`p-1 rounded-full transition-all duration-200 ${isBookmarked
+                      ? "text-yellow-500 bg-yellow-50 dark:bg-yellow-900/30 hover:bg-yellow-100 dark:hover:bg-yellow-900/50"
+                      : "text-gray-400 hover:text-yellow-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      }`}
                   >
                     <svg
                       className="w-5 h-5"
@@ -268,11 +264,10 @@ const StoryCard: React.FC<StoryCardProps> = ({
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <span
-                    className={`px-2 py-1 rounded text-xs ${
-                      story.type === "AUDIO"
-                        ? "bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400"
-                        : "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400"
-                    }`}
+                    className={`px-2 py-1 rounded text-xs ${story.type === "AUDIO"
+                      ? "bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400"
+                      : "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400"
+                      }`}
                   >
                     {story.type === "AUDIO" ? "🎧 Audio" : "📖 Text"}
                   </span>
@@ -331,9 +326,8 @@ const StoryCard: React.FC<StoryCardProps> = ({
                 />
               ) : null}
               <div
-                className={`absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 dark:from-blue-600 dark:to-purple-700 flex items-center justify-center ${
-                  story?.thumbnailUrl ? "hidden" : ""
-                }`}
+                className={`absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-500 dark:from-blue-600 dark:to-purple-700 flex items-center justify-center ${story?.thumbnailUrl ? "hidden" : ""
+                  }`}
               >
                 <div className="text-3xl text-white opacity-80">
                   {story?.type === "AUDIO" ? "🎧" : "📖"}
@@ -350,11 +344,10 @@ const StoryCard: React.FC<StoryCardProps> = ({
               {/* Type Badge */}
               <div className="absolute top-2 left-2">
                 <span
-                  className={`px-1.5 py-0.5 rounded text-xs font-medium shadow-sm ${
-                    story?.type === "AUDIO"
-                      ? "bg-purple-500 text-white"
-                      : "bg-blue-500 text-white"
-                  }`}
+                  className={`px-1.5 py-0.5 rounded text-xs font-medium shadow-sm ${story?.type === "AUDIO"
+                    ? "bg-purple-500 text-white"
+                    : "bg-blue-500 text-white"
+                    }`}
                 >
                   {story?.type === "AUDIO" ? "🎧" : "📖"}
                 </span>
@@ -364,11 +357,10 @@ const StoryCard: React.FC<StoryCardProps> = ({
               {showBookmark && (
                 <button
                   onClick={handleBookmark}
-                  className={`absolute top-2 right-2 p-1.5 rounded-full transition-all duration-200 shadow-sm ${
-                    isBookmarked
-                      ? "bg-yellow-400 text-yellow-900 hover:bg-yellow-300"
-                      : "bg-white/90 text-gray-600 hover:bg-white hover:text-yellow-500"
-                  }`}
+                  className={`absolute top-2 right-2 p-1.5 rounded-full transition-all duration-200 shadow-sm ${isBookmarked
+                    ? "bg-yellow-400 text-yellow-900 hover:bg-yellow-300"
+                    : "bg-white/90 text-gray-600 hover:bg-white hover:text-yellow-500"
+                    }`}
                 >
                   <svg
                     className="w-3 h-3"
@@ -441,9 +433,8 @@ const StoryCard: React.FC<StoryCardProps> = ({
                 />
               ) : null}
               <div
-                className={`absolute inset-0 bg-gray-200 dark:bg-gray-700 flex items-center justify-center ${
-                  story.thumbnailUrl ? "hidden" : ""
-                }`}
+                className={`absolute inset-0 bg-gray-200 dark:bg-gray-700 flex items-center justify-center ${story.thumbnailUrl ? "hidden" : ""
+                  }`}
               >
                 <div className="text-4xl text-gray-400">
                   {story.type === "AUDIO" ? "🎧" : "📖"}
@@ -460,11 +451,10 @@ const StoryCard: React.FC<StoryCardProps> = ({
               {showBookmark && (
                 <button
                   onClick={handleBookmark}
-                  className={`absolute bottom-2 right-2 p-2 rounded-full transition-all duration-200 ${
-                    isBookmarked
-                      ? "text-yellow-500 bg-yellow-100 dark:bg-yellow-900/50 hover:bg-yellow-200 dark:hover:bg-yellow-900/70"
-                      : "text-gray-600 bg-white bg-opacity-90 hover:bg-opacity-100 hover:text-yellow-500"
-                  }`}
+                  className={`absolute bottom-2 right-2 p-2 rounded-full transition-all duration-200 ${isBookmarked
+                    ? "text-yellow-500 bg-yellow-100 dark:bg-yellow-900/50 hover:bg-yellow-200 dark:hover:bg-yellow-900/70"
+                    : "text-gray-600 bg-white bg-opacity-90 hover:bg-opacity-100 hover:text-yellow-500"
+                    }`}
                 >
                   <svg
                     className="w-4 h-4"

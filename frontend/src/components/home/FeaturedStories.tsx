@@ -68,7 +68,7 @@ const FeaturedStories: React.FC = () => {
   };
 
   const onClickTrendingCard = (story: Story) => {
-    window.open(story?.affiliate?.targetUrl, "_blank", "noopener,");
+    // Navigate to story detail page - popup will show there
     router.push(`/stories/${story.slug}?from=home`);
   };
 
