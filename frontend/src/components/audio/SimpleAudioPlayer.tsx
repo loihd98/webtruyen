@@ -200,25 +200,9 @@ const SimpleAudioPlayer: React.FC<SimpleAudioPlayerProps> = ({
       {/* Title */}
       <div className="mb-3">
         <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate flex items-center gap-2">
-          <span className="text-blue-500">🎧</span>
-          <span className="flex-1">{title}</span>
-          {isPlaying && (
-            <div className="flex space-x-1">
-              <div className="w-1 h-3 bg-blue-500 rounded-full animate-pulse"></div>
-              <div
-                className="w-1 h-2 bg-blue-400 rounded-full animate-bounce"
-                style={{ animationDelay: "0.1s" }}
-              ></div>
-              <div
-                className="w-1 h-4 bg-blue-500 rounded-full animate-pulse"
-                style={{ animationDelay: "0.2s" }}
-              ></div>
-              <div
-                className="w-1 h-2 bg-blue-400 rounded-full animate-bounce"
-                style={{ animationDelay: "0.3s" }}
-              ></div>
-            </div>
-          )}
+          {/* <span className="text-blue-500">🎧</span>
+          <span className="flex-1">{title}</span> */}
+
         </h4>
       </div>
 
@@ -338,9 +322,8 @@ const SimpleAudioPlayer: React.FC<SimpleAudioPlayerProps> = ({
             onChange={handleVolumeChange}
             className="w-16 sm:w-20 h-2 bg-gray-300 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
             style={{
-              background: `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${
-                volume * 100
-              }%, #D1D5DB ${volume * 100}%, #D1D5DB 100%)`,
+              background: `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${volume * 100
+                }%, #D1D5DB ${volume * 100}%, #D1D5DB 100%)`,
             }}
           />
         </div>
@@ -348,11 +331,10 @@ const SimpleAudioPlayer: React.FC<SimpleAudioPlayerProps> = ({
         {/* Loop button */}
         <button
           onClick={toggleLoop}
-          className={`flex-shrink-0 w-9 h-9 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-colors ${
-            isLoop
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500"
-          }`}
+          className={`flex-shrink-0 w-9 h-9 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-colors ${isLoop
+            ? "bg-blue-600 text-white"
+            : "bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-500"
+            }`}
           title="Lặp lại"
         >
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -381,11 +363,10 @@ const SimpleAudioPlayer: React.FC<SimpleAudioPlayerProps> = ({
                 <button
                   key={speed}
                   onClick={() => handleSpeedChange(speed)}
-                  className={`block w-full px-3 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-                    speed === playbackRate
-                      ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400"
-                      : "text-gray-700 dark:text-gray-300"
-                  }`}
+                  className={`block w-full px-3 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${speed === playbackRate
+                    ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400"
+                    : "text-gray-700 dark:text-gray-300"
+                    }`}
                 >
                   {speed}x
                 </button>
@@ -396,15 +377,32 @@ const SimpleAudioPlayer: React.FC<SimpleAudioPlayerProps> = ({
       </div>
 
       {/* Additional info and controls */}
-      <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mt-2 pt-2 border-t border-gray-200 dark:border-gray-600">
+      <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mt-2 pt-2 ">
         <div className="flex items-center gap-4">
-          <a
+          {/* <a
             href={src}
             download
             className="text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
           >
             📥 Tải xuống
-          </a>
+          </a> */}
+          {isPlaying && (
+            <div className="flex space-x-1">
+              <div className="w-1 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+              <div
+                className="w-1 h-2 bg-blue-400 rounded-full animate-bounce"
+                style={{ animationDelay: "0.1s" }}
+              ></div>
+              <div
+                className="w-1 h-4 bg-blue-500 rounded-full animate-pulse"
+                style={{ animationDelay: "0.2s" }}
+              ></div>
+              <div
+                className="w-1 h-2 bg-blue-400 rounded-full animate-bounce"
+                style={{ animationDelay: "0.3s" }}
+              ></div>
+            </div>
+          )}
           {isLoop && (
             <span className="text-blue-600 dark:text-blue-400 flex items-center gap-1">
               🔄 Lặp lại

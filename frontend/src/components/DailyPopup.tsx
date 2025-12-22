@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import apiClient from '@/utils/api';
 
-const STORAGE_KEY_PREFIX = 'dailyPopupShown_';
+const STORAGE_KEY = 'dailyPopupData';
+const MAX_DAILY_SHOWS = 2;
 
 // Check if device is mobile
 const isMobileDevice = () => {
@@ -15,6 +16,32 @@ const isMobileDevice = () => {
     return /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|tablet/i.test(
         userAgent.toLowerCase()
     );
+};
+
+// Get daily popup data from localStorage
+const getDailyPopupData = () => {
+    try {
+        const data = localStorage.getItem(STORAGE_KEY);
+        if (!data) return { date: '', count: 0 };
+        
+        const parsed = JSON.parse(data);
+        const today = new Date().toDateString();
+        
+        // Reset count if it's a new day
+        if (parsed.date !== today) {
+            return { date: today, count: 0 };
+        }
+        
+        return parsed;
+    } catch (error) {
+        return { date: new Date().toDateString(), count: 0 };
+    }
+};
+
+// Save daily popup data to localStorage
+const saveDailyPopupData = (count: number) => {
+    const today = new Date().toDateString();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ date: today, count }));
 };
 
 interface DailyPopupProps {
@@ -36,37 +63,30 @@ export default function DailyPopup({ storyId, affiliateLink }: DailyPopupProps) 
                     return;
                 }
 
-                // Use affiliate link from story if provided
-                if (affiliateLink) {
-                    setPopupLink(affiliateLink);
+                // Check daily show count
+                const popupData = getDailyPopupData();
+                
+                // Don't show if already shown MAX_DAILY_SHOWS times today
+                if (popupData.count >= MAX_DAILY_SHOWS) {
+                    setIsLoading(false);
+                    return;
+                }
 
-                    // Check if popup should be shown for this story today
-                    const storageKey = `${STORAGE_KEY_PREFIX}${storyId}`;
-                    const lastShown = localStorage.getItem(storageKey);
-                    const today = new Date().toDateString();
+                // Fetch affiliate links from API
+                const response = await apiClient.get('/affiliate/public/active?limit=10');
 
-                    if (!lastShown || lastShown !== today) {
+                if (response.data.success && response.data.data) {
+                    const affiliateLinks = response.data.data;
+                    
+                    // Select link based on current show count
+                    // First show (count = 0): use affiliateLinks[0]
+                    // Second show (count = 1): use affiliateLinks[1]
+                    const linkIndex = popupData.count;
+                    const selectedLink = affiliateLinks[linkIndex];
+
+                    if (selectedLink?.targetUrl) {
+                        setPopupLink(selectedLink.targetUrl);
                         setIsVisible(true);
-                    }
-                } else {
-                    // Fallback: fetch latest affiliate link from API
-                    const response = await apiClient.get('/affiliate/public/active?limit=10');
-
-                    if (response.data.success && response.data.data) {
-                        const affiliateLinks = response.data.data;
-                        const latestLink = affiliateLinks[0];
-
-                        if (latestLink?.targetUrl) {
-                            setPopupLink(latestLink.targetUrl);
-
-                            const storageKey = `${STORAGE_KEY_PREFIX}${storyId}`;
-                            const lastShown = localStorage.getItem(storageKey);
-                            const today = new Date().toDateString();
-
-                            if (!lastShown || lastShown !== today) {
-                                setIsVisible(true);
-                            }
-                        }
                     }
                 }
             } catch (error) {
@@ -80,10 +100,9 @@ export default function DailyPopup({ storyId, affiliateLink }: DailyPopupProps) 
     }, [storyId, affiliateLink]);
 
     const handleClose = () => {
-        // Save today's date to localStorage for this story
-        const today = new Date().toDateString();
-        const storageKey = `${STORAGE_KEY_PREFIX}${storyId}`;
-        localStorage.setItem(storageKey, today);
+        // Increment show count
+        const popupData = getDailyPopupData();
+        saveDailyPopupData(popupData.count + 1);
 
         // Redirect to link if available
         if (popupLink) {

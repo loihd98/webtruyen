@@ -214,6 +214,8 @@ export default function StoryPage({ params }: StoryPageProps) {
     }
   };
 
+  const isAudioStory = story?.type === "AUDIO";
+
   const currentChapter = story?.chapters.find(
     (c) => c.number === selectedChapter
   );
@@ -319,24 +321,24 @@ export default function StoryPage({ params }: StoryPageProps) {
       )}
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="container mx-auto px-4 py-8">
+        <div className={`container mx-auto ${!isAudioStory ? 'px-4' : ''} py-8`}>
           <div className="max-w-6xl mx-auto">
             {/* Chapter Content */}
-            {currentChapter && story.type === "AUDIO" && (
+            {currentChapter && isAudioStory && (
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-5">
-                <div className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-6">
+                <div className={`${!isAudioStory && 'border-b pb-4'} border-gray-200 dark:border-gray-700  mb-6`}>
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    Chương {currentChapter.number}: {currentChapter.title}
+                    {!isAudioStory && `Chương ${currentChapter.number}:`} {isAudioStory ? story.title : currentChapter.title}
                   </h2>
-                  <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                  {!isAudioStory && <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">
                     📅{" "}
                     {new Date(currentChapter.createdAt).toLocaleDateString(
                       "vi-VN"
                     )}
-                  </div>
+                  </div>}
                 </div>
 
-                {currentChapter.isLocked && !user ? (
+                {currentChapter.isLocked && !user && !isAudioStory ? (
                   <div className="text-center py-12">
                     <div className="text-6xl mb-4">🔒</div>
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
@@ -354,8 +356,22 @@ export default function StoryPage({ params }: StoryPageProps) {
                   </div>
                 ) : (
                   <div>
-                    {story.type === "AUDIO" && currentChapter.audioUrl ? (
-                      <div className="mb-6">
+                    <div className="relative w-full h-80 rounded-lg overflow-hidden">
+                      {story.thumbnailUrl ? (
+                        <Image
+                          src={getMediaUrl(story.thumbnailUrl)}
+                          alt={story.title}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                          <span className="text-gray-400 text-lg">📚</span>
+                        </div>
+                      )}
+                    </div>
+                    {isAudioStory && currentChapter.audioUrl ? (
+                      <div className="mb-6 mt-4">
                         <SimpleAudioPlayer
                           src={getMediaUrl(currentChapter.audioUrl)}
                           title={`${story.title} - Chương ${currentChapter.number}`}
@@ -363,7 +379,23 @@ export default function StoryPage({ params }: StoryPageProps) {
                       </div>
                     ) : null}
 
-                    {currentChapter.content && (
+                    {/* Deal Hot Section */}
+                    {story.affiliate?.targetUrl && story.affiliate.targetUrl && (
+                      <a
+                        href={story.affiliate.targetUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block my-6 p-4 bg-gradient-to-r from-orange-50 via-red-50 to-orange-50 dark:from-orange-900/30 dark:via-red-900/30 dark:to-orange-900/30 border-2 border-orange-400 dark:border-orange-600 rounded-xl shadow-xl hover:shadow-2xl transform hover:scale-[1.02] transition-all duration-300"
+                      >
+                        <p className=" font-bold items-center flex-wrap">
+                          <span className="text-2xl animate-bounce">🔥</span>
+                          <span className="text-orange-600 dark:text-orange-400 animate-pulse"> Deal hot {story.affiliate.label}</span>
+                          <span className="underline text-blue-600">:  Nhận ngay quà tặng dành riêng cho bạn</span>
+                        </p>
+                      </a>
+                    )}
+
+                    {currentChapter.content && !isAudioStory && (
                       <div className="prose prose-lg dark:prose-invert max-w-none">
                         <div
                           className="text-gray-700 dark:text-gray-300 leading-relaxed"
@@ -379,7 +411,7 @@ export default function StoryPage({ params }: StoryPageProps) {
                   </div>
                 )}
                 {/* Chapter Navigation */}
-                {story.chapters.length > 0 && (
+                {story.chapters.length > 0 && !isAudioStory && (
                   <div className="bg-white dark:bg-gray-800 rounded-lg mt-2 mb-6">
                     {/* <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
                       Danh sách chương
@@ -504,7 +536,7 @@ export default function StoryPage({ params }: StoryPageProps) {
               </div>
             )}
             {/* Story Header */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
+            {!isAudioStory && <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
               <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 {/* Thumbnail */}
                 <div className="lg:col-span-1">
@@ -560,12 +592,12 @@ export default function StoryPage({ params }: StoryPageProps) {
                         <span>👤 {story.author.name}</span>
                         <span>👁️ {story.viewCount.toLocaleString()}</span>
                         <span
-                          className={`px-2 py-1 rounded-full text-xs ${story.type === "AUDIO"
+                          className={`px-2 py-1 rounded-full text-xs ${isAudioStory
                             ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
                             : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
                             }`}
                         >
-                          {story.type === "AUDIO" ? "🎧 Audio" : "📖 Text"}
+                          {isAudioStory ? "🎧 Audio" : "📖 Text"}
                         </span>
                       </div>
                     </div>
@@ -607,13 +639,13 @@ export default function StoryPage({ params }: StoryPageProps) {
                   {/* Chapter Statistics */}
                   <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <div className="text-sm text-gray-600 dark:text-gray-400">
-                      📚 {story.chapters.length} chương • 📅 Cập nhật:{" "}
+                      {!isAudioStory && `📚 ${story.chapters.length} chương •`}  📅 Cập nhật:{" "}
                       {new Date(story.updatedAt).toLocaleDateString("vi-VN")}
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </div>}
             {/* Chapter Navigation */}
             {story.chapters.length > 0 && story.type === "TEXT" && (
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
@@ -902,6 +934,6 @@ export default function StoryPage({ params }: StoryPageProps) {
           </div>
         </div>
       </div>
-    </Layout>
+    </Layout >
   );
 }
