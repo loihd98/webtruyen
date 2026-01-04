@@ -78,12 +78,12 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/temp-http.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/prod.conf:/etc/nginx/conf.d/default.conf
       - ./uploads:/uploads:ro
       - ./logs/nginx:/var/log/nginx
-      - certbot-web:/var/www/certbot:ro
-      - certbot-certs:/etc/letsencrypt:ro
+      - certbot-web:/var/www/certbot:rw
+      - certbot-certs:/etc/letsencrypt:rw
     depends_on:
       frontend:
         condition: service_started
